@@ -21,7 +21,7 @@ class ModelManager:
                 logger.error(f"CSV file not found: {self.csv_path}")
                 raise FileNotFoundError(f"CSV file not found: {self.csv_path}")
 
-            self.df = pd.read_csv(self.csv_path, on_bad_lines='warn')
+            self.df = pd.read_csv(self.csv_path, on_bad_lines='skip')
             logger.info(f"Loaded {len(self.df)} models from {self.csv_path}")
 
             # Convert numeric columns, handling errors gracefully

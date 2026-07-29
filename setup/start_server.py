@@ -20,6 +20,7 @@ def start_wsl_server():
     print(f"Starting AI server in WSL ({wsl_distro})...")
     print(f"Working directory: {wsl_workdir}")
     print(f"Conda environment: {conda_env}")
+    print("Access the server in your browser at: http://localhost:8000 or http://127.0.0.1:8000")
 
     try:
         subprocess.run(command, check=True)
