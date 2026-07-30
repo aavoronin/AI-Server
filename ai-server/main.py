@@ -154,7 +154,7 @@ async def filter_models(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.get("/models/{model_id}")
+@app.get("/models/{model_id:path}")
 async def get_model_by_id(model_id: str):
     """Get a specific model by ID"""
     if model_manager is None:
