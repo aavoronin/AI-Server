@@ -55,10 +55,19 @@ class ModelManager:
         available_columns = [col for col in columns_to_select if col in self.df.columns]
         result_df = self.df[available_columns].copy()
 
-        # Convert NaN to None for JSON serialization
-        result_df = result_df.where(pd.notna(result_df), None)
+        records = result_df.to_dict(orient='records')
+        for record in records:
+            for key, value in record.items():
+                if pd.isna(value):
+                    record[key] = None
+                else:
+                    try:
+                        if float(value) in (float('inf'), float('-inf')):
+                            record[key] = None
+                    except (ValueError, TypeError):
+                        pass
 
-        return result_df.to_dict(orient='records')
+        return records
 
     def filter_models(
             self,
@@ -143,12 +152,21 @@ class ModelManager:
         available_columns = [col for col in columns_to_select if col in filtered_df.columns]
         result_df = filtered_df[available_columns].copy()
 
-        # Convert NaN to None
-        result_df = result_df.where(pd.notna(result_df), None)
+        records = result_df.to_dict(orient='records')
+        for record in records:
+            for key, value in record.items():
+                if pd.isna(value):
+                    record[key] = None
+                else:
+                    try:
+                        if float(value) in (float('inf'), float('-inf')):
+                            record[key] = None
+                    except (ValueError, TypeError):
+                        pass
 
-        logger.info(f"Filtered to {len(result_df)} models")
+        logger.info(f"Filtered to {len(records)} models")
 
-        return result_df.to_dict(orient='records')
+        return records
 
     def _check_modalities(self, modalities_str: str, required: List[str]) -> bool:
         """
