@@ -1,0 +1,40 @@
+Title: What is Job Title/Role for this vacancy? Such as "Data Engineer", "DWH Developer", "Software Engineer"
+Level: What is Seniority/Experience Level for this vacancy? (Junior, Middle, Middle+, Senior, Architect)
+SalaryMin: What is Salary/Compensation minimum range for this vacancy? 50000 for "50k-75k USD per year", 30 for "30-40 Euro per hour"
+SalaryMax: What is Salary/Compensation maximum range for this vacancy? 75000 for "50k-75k USD per year", 40 for "30-40 Euro per hour"
+SalaryCurrency: What is Salary/Compensation currency for this vacancy? USD for "50k-75k USD per year", EURO for "30-40 Euro per hour"
+SalaryPeriod: What is Salary/Compensation period for this vacancy? year for "50k-75k USD per year", hour for "30-40 Euro per hour", month for "5000-6000 Euro per month"
+EmploymentType: What is Employment Type for this vacancy? remote, hybrid, office
+FullTime: Is this vacancy full time? yes or no
+EmployerCountry: What country employer is located in? ["USA"]
+CandidateCountry: What countries candidate must be located in? ["USA", "Canada"]
+CandidateNoCountry: What countries candidate must not be located in? For example ["Russia", "Iran"]
+Python: What level of Python proficiency is required for this vacancy? expert, required, nice-to-have, no
+C#: What level of C# proficiency is required for this vacancy? expert, required, nice-to-have, no
+SQL: What level of SQL proficiency is required for this vacancy? expert, required, nice-to-have, no
+T-SQL: What level of T-SQL proficiency is required for this vacancy? expert, required, nice-to-have, no
+PlSql: What level of PlSql proficiency is required for this vacancy? expert, required, nice-to-have, no
+ETL: What level of ETL proficiency is required for this vacancy? expert, required, nice-to-have, no
+
+
+The answer should contain only json and no other characters, comments, explanations or anything else:
+{
+    "Title": "Data Engineer",
+    "Level": "Senior",
+    "SalaryMin": "50000",
+    "SalaryMax": "75000",
+    "SalaryCurrency": "USD",
+    "SalaryPeriod": "year",
+    "EmploymentType": "remote",
+    "FullTime": "yes",
+    "EmployerCountry: ["USA"],
+    "CandidateCountry: ["USA", "Canada"],
+    "CandidateNoCountry: ["Russia", "Iran"],
+    "Python": "expert",
+    "C#": "nice-to-have",
+    "SQL": "expert",
+    "T-SQL": "required",
+    "PlSql": "no",
+    "ETL": "expert",
+}
+
