@@ -1,145 +1,416 @@
-Vacancy URL: https://hirify.me/jobs/121200-senior-data-engineer-pipeline
-
-Senior Data Engineer | Hirify
-Jobs
-Guides
-How to configure filters
-How to recognize scams
-For employers
-CV roasting
-Matches
-Applications
-Plus
-Enable Plus
-AV
-Alexey Voronin
-aavoronin@gmail.com
-Settings
-Upgrade to Hirify Plus
-Profiles
-Show all
-Unnamed
-Dashboard
-Favorites
-Hidden vacancies
-Saved filters
-Sign Out
-Feed
-Jobs
-Filters
-Services
-Menu
-85
-Good job
-expand
-The role is well-defined with a strong focus on modern data engineering practices and a supportive remote culture, but the extensive technical requirements may limit the candidate pool.
-Click for details
-Extensive requirements
-Cutting-edge projects
-Remote flexibility
-Strong company culture
-Score by Hirify AI
-Back
-Save application
-Company hidden
-updated
-3 days ago
-Senior Data Engineer
-Show contacts
-Work format
-remote (Global)
-Work type
-fulltime
-Grade
-senior
-English
-b2
-Country
-US
-python
-sql
-pandas
-mysql
-mongodb
-azure
-etl
-aws
-gcp
-ci cd
-spark
-dynamodb
-opensearch
-Vacancy from Hirify Global, list of international tech companies
-Plus is required to make matches and apply
-Report
-Salary & Market
-No salary
-Similar roles on the market
-$68k
-$102k
-median
-$187k
-20 in sample
-On CIS market:
-$4.7k/mo
-($3.5k - $6.2k)
-85
-Good job
-expand
-The role is well-defined with a strong focus on modern data engineering practices and a supportive remote culture, but the extensive technical requirements may limit the candidate pool.
-Click for details
-Extensive requirements
-Cutting-edge projects
-Remote flexibility
-Strong company culture
-Score by Hirify AI
-Match & Cover letter
-Plus required for matching with this vacancy
-Get Plus
-Job description
-Text:
-Hirify AI
-/
-Original
-TL;DR
-Senior Data Engineer (Data Pipeline): Design, implement, and scale data solutions from batch to streaming for low-latency requirements. Focus on building scalable production-grade data pipelines, real-time data streams, and collaborating with various teams to triage data or ETL issues.
-Location: Remote
-Company
-hirify.global
-is a globally distributed tech consultancy based in Silicon Valley.
-What you will do
-Build scalable production-grade data pipelines and real-time data streams.
-Write and design scalable, cloud-ready applications.
-Lead technical projects through architecture, design, and implementation phases.
-Collaborate with Machine Learning, Data Science, Design, Software Engineering and Business teams to triage data or ETL issues.
-Build tests and health checks to maintain code and data quality.
-Monitor and analyze data flowing through various systems by adding appropriate visualizations and dashboards.
-Requirements
-Advanced Python and SQL
-Experience in ETL design, implementation, and maintenance.
-Experience in AWS, GCP or Azure delivering data-centric product experiences
-5+ years experience in related role
-Experience with in-memory and disk-based databases, relational and non-relational databases, full-text search engines, database design, development, and maintenance.
-Working knowledge in Data Lake, Data warehouse and massive parallel processing
-Nice to have
-Working knowledge in IAM, Federated Authentication, SSO, SAML, Encryption, Security, APIs, Disaster Recovery or Backup
-Strong ability in distributed systems for large-scale data processing
-Experience with Spark and Pandas
-Experience with Open Tables (Hudi, Delta Lake, DataBricks, Iceberg as related to Data Lakehouse)
-Experience with Infrastructure as Code and CI/CD Pipelines
-Culture & Benefits
-Every other Friday off (26 extra days off a year)
-Remote-first and flexible schedule
-Explorer and Relocate programs (three months abroad or full relocation)
-Paid sick days and local holidays
-Business English classes
-Continuous learning support
-Be careful: if the employer asks you to log into their system using iCloud/Google, send codes/passwords, or run code/software, don't do it - these are scammers. Always click "Report" or contact support.
-More in guide →
-Categories
-Data Scientist / ML Engineer jobs
-Senior Data Scientist / ML Engineer jobs
-Jobs in the USA
-Python jobs
-SQL jobs
-MySQL jobs
+{
+    "Title": "Senior Data Engineer",
+    "Level": "Senior",
+    "SalaryMin": null,
+    "SalaryMax": null,
+    "SalaryCurrency": null,
+    "SalaryPeriod": null,
+    "EmploymentType": "remote",
+    "FullTime": "yes",
+    "EmployerCountry": ["USA"],
+    "EmployerCity": "Silicon Valley",
+    "EmployerState": "CA",
+    "EmployerTimezone": null,
+    "CandidateCountry": [],
+    "CandidateNoCountry": [],
+    "CandidateTimezone": null,
+    "RelocationOffered": "yes",
+    "RelocationBudget": null,
+    "VisaSponsorship": null,
+    "OfficeAddress": null,
+    "ContractType": "permanent",
+    "ContractDurationMonths": null,
+    "ProbationPeriodMonths": null,
+    "NoticePeriodWeeks": null,
+    "WorkingHoursPerWeek": null,
+    "ShiftType": "flexible",
+    "OnCallRequired": "no",
+    "OvertimeExpected": "no",
+    "TravelPercentage": null,
+    "CompanyName": "Hirify",
+    "CompanyIndustry": "Information Technology",
+    "CompanySize": null,
+    "Department": null,
+    "TeamSize": null,
+    "ReportingTo": null,
+    "NumberOfOpenPositions": null,
+    "CompanyStage": "scale-up",
+    "MinYearsExperience": 5,
+    "MaxYearsExperience": null,
+    "EducationLevel": null,
+    "FieldOfStudy": null,
+    "CertificationsRequired": [],
+    "SecurityClearance": "none",
+    "PortfolioRequired": "no",
+    "GitHubRequired": "no",
+    "HealthInsurance": null,
+    "RetirementPlan": null,
+    "StockOptions": null,
+    "BonusStructure": null,
+    "PaidTimeOffDays": 26,
+    "ParentalLeaveWeeks": null,
+    "LearningBudget": "yes",
+    "EquipmentProvided": null,
+    "WellnessProgram": null,
+    "MealAllowance": null,
+    "GymMembership": null,
+    "ChildcareSupport": null,
+    "InterviewRounds": null,
+    "TechnicalAssessment": "no",
+    "CodingChallenge": "no",
+    "StartDate": null,
+    "ApplicationDeadline": null,
+    "Urgency": null,
+    "HiringManagerName": null,
+    "RequiredLanguages": ["English"],
+    "PhysicalRequirements": null,
+    "BackgroundCheck": null,
+    "DrugScreening": null,
+    "NonCompeteRequired": null,
+    "NDARequired": null,
+    "JobId": "121200",
+    "VacancySite": "Hirify",
+    "VacancyURL": "https://hirify.me/jobs/121200-senior-data-engineer-pipeline",
+    "ApplyURL": null,
+    "PublicationDate": "3 days ago",
+    "ApplicantsCount": null,
+    "Python": "required",
+    "SQL": "required",
+    "Java": "no",
+    "JavaScript": "no",
+    "C++": "no",
+    "Bash": "no",
+    "C#": "no",
+    "TypeScript": "no",
+    "R": "no",
+    "Go": "no",
+    "PHP": "no",
+    "Kotlin": "no",
+    "Swift": "no",
+    "Ruby": "no",
+    "Rust": "no",
+    "Scala": "no",
+    "Dart": "no",
+    "MATLAB": "no",
+    "Perl": "no",
+    "Objective-C": "no",
+    "Julia": "no",
+    "Lua": "no",
+    "PowerShell": "no",
+    "Solidity": "no",
+    "Elixir": "no",
+    "F#": "no",
+    "C": "no",
+    "GDScript": "no",
+    "Ada": "no",
+    "Haskell": "no",
+    "PostgreSQL": "no",
+    "MySQL": "no",
+    "T-SQL": "no",
+    "PL/SQL": "no",
+    "Snowflake SQL": "no",
+    "BigQuery SQL": "no",
+    "PL/pgSQL": "no",
+    "Redshift SQL": "no",
+    "SQLite": "no",
+    "Spark SQL": "no",
+    "MariaDB": "no",
+    "HiveQL": "no",
+    "Teradata SQL": "no",
+    "DB2 SQL": "no",
+    "Trino SQL": "no",
+    "Power BI": "no",
+    "Tableau": "no",
+    "Looker": "no",
+    "Qlik": "no",
+    "Amazon QuickSight": "no",
+    "MicroStrategy": "no",
+    "SAP Analytics Cloud": "no",
+    "IBM Cognos": "no",
+    "TIBCO Spotfire": "no",
+    "Domo": "no",
+    "Sisense": "no",
+    "ThoughtSpot": "no",
+    "Oracle Analytics": "no",
+    "Metabase": "no",
+    "Apache Superset": "no",
+    "Apache Airflow": "no",
+    "dbt": "no",
+    "Informatica": "no",
+    "Apache Spark": "nice-to-have",
+    "AWS Glue": "no",
+    "Azure Data Factory": "no",
+    "Talend": "no",
+    "IBM DataStage": "no",
+    "SSIS": "no",
+    "Fivetran": "no",
+    "Matillion": "no",
+    "Apache NiFi": "no",
+    "Dagster": "no",
+    "Airbyte": "no",
+    "Alteryx": "no",
+    "Apache Beam": "no",
+    "Google Cloud Dataflow": "no",
+    "Prefect": "no",
+    "Pentaho": "no",
+    "Dell Boomi": "no",
+    "SAP BODS": "no",
+    "Oracle Data Integrator": "no",
+    "Apache Flink": "no",
+    "Luigi": "no",
+    "SnapLogic": "no",
+    "Stitch": "no",
+    "Mage": "no",
+    "HVR": "no",
+    "Qlik Replicate": "no",
+    "Kafka Connect": "no",
+    "Star Schema": "no",
+    "Snowflake Schema": "no",
+    "3NF": "no",
+    "Anchor Modeling": "no",
+    "Data Vault": "no",
+    "Columnstore": "no",
+    "Query Plan": "no",
+    "SCD": "no",
+    "Fact Table": "no",
+    "Dimension Table": "no",
+    "Surrogate Key": "no",
+    "Conformed Dimension": "no",
+    "Data Mart": "no",
+    "Data Lakehouse": "nice-to-have",
+    "OLAP": "no",
+    "OLTP": "no",
+    "ELT": "no",
+    "ETL": "required",
+    "CDC": "no",
+    "Table Partitioning": "no",
+    "Sharding": "no",
+    "Materialized View": "no",
+    "Degenerate Dimension": "no",
+    "Junk Dimension": "no",
+    "Bridge Table": "no",
+    "Role-Playing Dimension": "no",
+    "Data Lineage": "no",
+    "Data Governance": "no",
+    "MDM": "no",
+    "Kimball Methodology": "no",
+    "Inmon Methodology": "no",
+    "Medallion Architecture": "no",
+    "Data Mesh": "no",
+    "Denormalization": "no",
+    "Upsert": "no",
+    "Bitmap Index": "no",
+    "Data Quality": "no",
+    "Aggregation Table": "no",
+    "Natural Key": "no",
+    "Data Fabric": "no",
+    "Tables": "no",
+    "Views": "no",
+    "Indexes": "no",
+    "Triggers": "no",
+    "Stored Procedures": "no",
+    "Primary Key": "no",
+    "Foreign Key": "no",
+    "Normalization": "no",
+    "ACID": "no",
+    "Transactions": "no",
+    "Isolation Levels": "no",
+    "Locking": "no",
+    "Deadlocks": "no",
+    "MVCC": "no",
+    "Execution Plan": "no",
+    "Query Optimization": "no",
+    "Partitioning": "no",
+    "Connection Pooling": "no",
+    "Referential Integrity": "no",
+    "Constraints": "no",
+    "Unique Constraint": "no",
+    "Check Constraint": "no",
+    "Composite Key": "no",
+    "ER Diagram": "no",
+    "Cardinality": "no",
+    "CTEs": "no",
+    "Window Functions": "no",
+    "Materialized Views": "no",
+    "B-Tree Index": "no",
+    "Full-Text Search": "no",
+    "Row-Level Security": "no",
+    "Optimistic Locking": "no",
+    "Pessimistic Locking": "no",
+    "Temp Tables": "no",
+    "Sequences": "no",
+    "UDFs": "no",
+    "Wireframing": "no",
+    "Prototyping": "no",
+    "User Research": "no",
+    "Usability Testing": "no",
+    "Information Architecture": "no",
+    "Interaction Design": "no",
+    "Visual Design": "no",
+    "Typography": "no",
+    "Color Theory": "no",
+    "Responsive Design": "no",
+    "Accessibility": "no",
+    "User Personas": "no",
+    "User Journeys": "no",
+    "Empathy Mapping": "no",
+    "Card Sorting": "no",
+    "Heuristic Evaluation": "no",
+    "Cognitive Load": "no",
+    "Affordance": "no",
+    "Signifiers": "no",
+    "Feedback Loops": "no",
+    "Micro-interactions": "no",
+    "Design Systems": "no",
+    "Figma": "no",
+    "Sketch": "no",
+    "Adobe XD": "no",
+    "InVision": "no",
+    "A/B Testing": "no",
+    "CRO": "no",
+    "Mobile-First Design": "no",
+    "Dark Mode UI": "no",
+    "Communication": "no",
+    "Teamwork": "no",
+    "Problem Solving": "no",
+    "Adaptability": "no",
+    "Time Management": "no",
+    "Critical Thinking": "no",
+    "Leadership": "no",
+    "Emotional Intelligence": "no",
+    "Conflict Resolution": "no",
+    "Active Listening": "no",
+    "Creativity": "no",
+    "Collaboration": "no",
+    "Work Ethic": "no",
+    "Attention to Detail": "no",
+    "Flexibility": "no",
+    "Patience": "no",
+    "Empathy": "no",
+    "Decision Making": "no",
+    "Stress Management": "no",
+    "Negotiation": "no",
+    "Persuasion": "no",
+    "Networking": "no",
+    "Mentoring": "no",
+    "Coaching": "no",
+    "Accountability": "no",
+    "Initiative": "no",
+    "Self-Motivation": "no",
+    "Positive Attitude": "no",
+    "Open-Mindedness": "no",
+    "Cultural Awareness": "no",
+    "Presentation Skills": "no",
+    "Public Speaking": "no",
+    "Written Communication": "no",
+    "Verbal Communication": "no",
+    "Conflict Management": "no",
+    "Delegation": "no",
+    "Strategic Thinking": "no",
+    "Innovation": "no",
+    "Resourcefulness": "no",
+    "Resilience": "no",
+    "Machine Learning": "no",
+    "Deep Learning": "no",
+    "Neural Networks": "no",
+    "NLP": "no",
+    "Computer Vision": "no",
+    "Reinforcement Learning": "no",
+    "Supervised Learning": "no",
+    "Unsupervised Learning": "no",
+    "Semi-Supervised Learning": "no",
+    "Transfer Learning": "no",
+    "Generative AI": "no",
+    "LLMs": "no",
+    "Prompt Engineering": "no",
+    "RAG": "no",
+    "Fine-Tuning": "no",
+    "Regression": "no",
+    "Classification": "no",
+    "Clustering": "no",
+    "Dimensionality Reduction": "no",
+    "Random Forest": "no",
+    "SVM": "no",
+    "Gradient Boosting": "no",
+    "K-Means": "no",
+    "DBSCAN": "no",
+    "CNN": "no",
+    "RNN": "no",
+    "Transformers": "no",
+    "Attention Mechanism": "no",
+    "GANs": "no",
+    "Autoencoders": "no",
+    "Tokenization": "no",
+    "Embeddings": "no",
+    "Word2Vec": "no",
+    "BERT": "no",
+    "GPT": "no",
+    "Model Evaluation": "no",
+    "Cross-Validation": "no",
+    "Overfitting": "no",
+    "Underfitting": "no",
+    "Hyperparameter Tuning": "no",
+    "Feature Engineering": "no",
+    "Feature Selection": "no",
+    "Data Preprocessing": "no",
+    "EDA": "no",
+    "Time Series Analysis": "no",
+    "Anomaly Detection": "no",
+    "Recommender Systems": "no",
+    "Bias and Fairness": "no",
+    "Explainable AI": "no",
+    "MLOps": "no",
+    "Data Versioning": "no",
+    "Model Deployment": "no",
+    "Edge AI": "no",
+    "Federated Learning": "no",
+    "Quantum Machine Learning": "no",
+    "Synthetic Data": "no",
+    "Data Augmentation": "no",
+    "Loss Functions": "no",
+    "Optimization Algorithms": "no",
+    "Gradient Descent": "no",
+    "AWS": "nice-to-have",
+    "Azure": "nice-to-have",
+    "GCP": "nice-to-have",
+    "IBM Cloud": "no",
+    "Oracle Cloud": "no",
+    "Alibaba Cloud": "no",
+    "Salesforce": "no",
+    "DigitalOcean": "no",
+    "VMware": "no",
+    "Rackspace": "no",
+    "Terraform": "nice-to-have",
+    "Ansible": "no",
+    "Docker": "no",
+    "Kubernetes": "no",
+    "Jenkins": "no",
+    "GitHub Actions": "nice-to-have",
+    "GitLab CI": "no",
+    "ArgoCD": "no",
+    "Prometheus": "no",
+    "Grafana": "no",
+    "Kafka": "no",
+    "RabbitMQ": "no",
+    "Redis": "no",
+    "Apache Pulsar": "no",
+    "NATS": "no",
+    "Redis Streams": "no",
+    "PyTest": "no",
+    "Jest": "no",
+    "Mocha": "no",
+    "Cypress": "no",
+    "Selenium": "no",
+    "JUnit": "no",
+    "Playwright": "no",
+    "Postman": "no",
+    "Jira": "no",
+    "Confluence": "no",
+    "Notion": "no",
+    "Slack": "no",
+    "Microsoft Teams": "no",
+    "Asana": "no",
+    "Linux": "no",
+    "Windows": "no",
+    "macOS": "no"
+}
