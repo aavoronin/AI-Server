@@ -1,5 +1,5 @@
 # load_token.py
-def load_hf_token(file_path=r"D:\AIs\token.txt"):
+def load_hf_token(file_path=r"/mnt/d/AIs/token.txt"):
     """Read HuggingFace token from a file"""
     try:
         with open(file_path, "r") as f:

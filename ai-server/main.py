@@ -13,7 +13,8 @@ from pathlib import Path
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent))
 
-from config import ServerConfig, ModelFilter
+from config import ServerConfig
+from model_filter import ModelFilter
 from models import ModelManager
 
 # Configure logging
@@ -197,13 +198,9 @@ async def cache_model(model_id: str):
 
     if not usage_data.get("is_cached"):
         token = None
-        token_file = Path(__file__).parent / "config" / "my_token.py"
+        token_file = Path(config.hf_token_path)
         if token_file.exists():
-            import importlib.util
-            spec = importlib.util.spec_from_file_location("my_token", token_file)
-            my_token = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(my_token)
-            token = getattr(my_token, "HF_TOKEN", None)
+            token = token_file.read_text().strip()
 
         env = os.environ.copy()
         if token:
@@ -220,6 +217,7 @@ async def cache_model(model_id: str):
             usage_data["is_cached"] = True
             usage_data["last_cached"] = datetime.now().isoformat()
         except subprocess.CalledProcessError as e:
+            usage_data["is_cached"] = False
             usage_data["num_fails"] = usage_data.get("num_fails", 0) + 1
             with open(usage_file, 'w') as f:
                 json.dump(usage_data, f, indent=2)

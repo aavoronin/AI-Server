@@ -20,16 +20,24 @@ if __name__ == '__main__':
     tester.run_all()
 
     client = ModelClientBase()
-    test_model_id = "Qwen/Qwen2.5-0.5B-Instruct"
-    print(f"\nTesting cache for {test_model_id}...")
-    try:
-        cache_result = client.cache_model(test_model_id)
-        print("Cache result:", cache_result)
+    test_models = [
+        "Qwen/Qwen3-0.6B-GGUF",
+        "Qwen/Qwen2.5-0.5B-Instruct",
+        "LiquidAI/LFM2-1.2B",
+        "Qwen/Qwen3-Embedding-0.6B",
+        "unsloth/Qwen3-0.6B",
+        "Qwen/Qwen3-1.7B-GGUF",
+    ]
+    for test_model_id in test_models:
+        print(f"\nTesting cache for {test_model_id}...")
+        try:
+            cache_result = client.cache_model(test_model_id)
+            print("Cache result:", cache_result)
 
-        print(f"\nTesting uncache for {test_model_id}...")
-        uncache_result = client.uncache_model(test_model_id)
-        print("Uncache result:", uncache_result)
-    except Exception as e:
-        print(f"Cache/Uncache test failed: {e}")
+            #print(f"\nTesting uncache for {test_model_id}...")
+            #uncache_result = client.uncache_model(test_model_id)
+            #print("Uncache result:", uncache_result)
+        except Exception as e:
+            print(f"Cache/Uncache test failed: {e}")
 
     stop_wsl_server()
