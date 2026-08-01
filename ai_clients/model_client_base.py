@@ -36,3 +36,7 @@ class ModelClientBase:
         """Request the server to uncache a specific model."""
         encoded_id = urllib.parse.quote(model_id, safe='')
         return self._request("POST", f"/models/{encoded_id}/uncache")
+
+    def list_cached_models(self):
+        """Request the server to list all cached models."""
+        return self._request("GET", "/models/cached")

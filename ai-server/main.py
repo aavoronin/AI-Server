@@ -270,6 +270,27 @@ async def uncache_model(model_id: str):
     return usage_data
 
 
+@app.get("/models/cached")
+async def list_cached_models():
+    """List all cached models and their status."""
+    cache_dir = Path(config.cache_folder_path)
+    cached_models = []
+
+    if cache_dir.exists():
+        for item in cache_dir.iterdir():
+            if item.is_dir():
+                usage_file = item / "model_usage.json"
+                if usage_file.exists():
+                    with open(usage_file, 'r') as f:
+                        usage_data = json.load(f)
+                        cached_models.append(usage_data)
+
+    return {
+        "count": len(cached_models),
+        "cached_models": cached_models
+    }
+
+
 if __name__ == "__main__":
     import uvicorn
 
