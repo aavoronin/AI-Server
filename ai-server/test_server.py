@@ -230,7 +230,8 @@ class ServerTester:
             all_models = self._get("/models")
             if all_models["count"] > 0:
                 model_id = all_models["models"][0]["model_id"]
-                data = self._get(f"/models/{model_id}")
+                encoded_id = urllib.parse.quote(model_id, safe='')
+                data = self._get(f"/models/{encoded_id}")
                 self._assert(data["model_id"] == model_id, "Returned model ID matches")
             else:
                 self._assert(False, "No models available to test")

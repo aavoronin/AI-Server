@@ -1,6 +1,11 @@
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 import logging
+import os
+import json
+import shutil
+import subprocess
+from datetime import datetime
 from typing import List, Optional
 import sys
 from pathlib import Path
@@ -166,6 +171,105 @@ async def get_model_by_id(model_id: str):
             return model
 
     raise HTTPException(status_code=404, detail=f"Model {model_id} not found")
+
+
+@app.post("/models/{model_id:path}/cache")
+async def cache_model(model_id: str):
+    """Cache a model by downloading it to the cache folder."""
+    model_folder_name = model_id.replace("/", "_")
+    model_dir = Path(config.cache_folder_path) / model_folder_name
+    model_dir.mkdir(parents=True, exist_ok=True)
+
+    usage_file = model_dir / "model_usage.json"
+    if not usage_file.exists():
+        usage_data = {
+            "model_id": model_id,
+            "is_cached": False,
+            "last_used": None,
+            "last_cached": None,
+            "last_uncached": None,
+            "num_used": 0,
+            "num_fails": 0
+        }
+    else:
+        with open(usage_file, 'r') as f:
+            usage_data = json.load(f)
+
+    if not usage_data.get("is_cached"):
+        token = None
+        token_file = Path(__file__).parent / "config" / "my_token.py"
+        if token_file.exists():
+            import importlib.util
+            spec = importlib.util.spec_from_file_location("my_token", token_file)
+            my_token = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(my_token)
+            token = getattr(my_token, "HF_TOKEN", None)
+
+        env = os.environ.copy()
+        if token:
+            env["HF_TOKEN"] = token
+
+        try:
+            subprocess.run(
+                ["huggingface-cli", "download", model_id, "--local-dir", str(model_dir)],
+                env=env,
+                check=True,
+                capture_output=True,
+                text=True
+            )
+            usage_data["is_cached"] = True
+            usage_data["last_cached"] = datetime.now().isoformat()
+        except subprocess.CalledProcessError as e:
+            usage_data["num_fails"] = usage_data.get("num_fails", 0) + 1
+            with open(usage_file, 'w') as f:
+                json.dump(usage_data, f, indent=2)
+            raise HTTPException(status_code=500, detail=f"Failed to download model: {e.stderr}")
+
+    with open(usage_file, 'w') as f:
+        json.dump(usage_data, f, indent=2)
+
+    return usage_data
+
+
+@app.post("/models/{model_id:path}/uncache")
+async def uncache_model(model_id: str):
+    """Uncache a model by removing its files but keeping usage tracking."""
+    model_folder_name = model_id.replace("/", "_")
+    model_dir = Path(config.cache_folder_path) / model_folder_name
+
+    if not model_dir.exists():
+        raise HTTPException(status_code=404, detail="Model folder not found")
+
+    usage_file = model_dir / "model_usage.json"
+    if usage_file.exists():
+        with open(usage_file, 'r') as f:
+            usage_data = json.load(f)
+    else:
+        usage_data = {
+            "model_id": model_id,
+            "is_cached": False,
+            "last_used": None,
+            "last_cached": None,
+            "last_uncached": None,
+            "num_used": 0,
+            "num_fails": 0
+        }
+
+    # Remove all files and directories except model_usage.json
+    for item in model_dir.iterdir():
+        if item.name != "model_usage.json":
+            if item.is_file():
+                item.unlink()
+            elif item.is_dir():
+                shutil.rmtree(item)
+
+    usage_data["is_cached"] = False
+    usage_data["last_uncached"] = datetime.now().isoformat()
+
+    with open(usage_file, 'w') as f:
+        json.dump(usage_data, f, indent=2)
+
+    return usage_data
 
 
 if __name__ == "__main__":
