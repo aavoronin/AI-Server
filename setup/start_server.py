@@ -53,6 +53,24 @@ def run_model_benchmark():
 
     test_models = [
         "Qwen/Qwen3-0.6B-GGUF",
+        "Qwen/Qwen3-1.7B-GGUF",
+        "QuantFactory/SmolLM-135M-GGUF",
+        "QuantFactory/SmolLM-135M-Instruct-GGUF",
+        "unsloth/bge-small-en-v1.5-GGUF",
+        "Alibaba-NLP/gte-Qwen2-1.5B-instruct",
+        "apple/CLaRa-7B-Instruct",
+        "deepseek-ai/deepseek-coder-1.3b-instruct",
+        "microsoft/Phi-4-mini-instruct",
+        "Qwen/Qwen2.5-1.5B-Instruct",
+        "Qwen/Qwen2.5-3B-Instruct",
+        "Qwen/Qwen2.5-Coder-3B-Instruct",
+        "unsloth/Llama-3.2-1B-Instruct",
+        "unsloth/Llama-3.2-3B-Instruct",
+        "unsloth/Phi-3-mini-4k-instruct",
+        "unsloth/SmolLM-1.7B-Instruct",
+        "unsloth/SmolLM2-360M-Instruct",
+
+        "Qwen/Qwen3-0.6B-GGUF",
         "Qwen/Qwen2.5-0.5B-Instruct",
         "LiquidAI/LFM2-1.2B",
         "Qwen/Qwen3-Embedding-0.6B",
@@ -89,7 +107,7 @@ def run_model_benchmark():
 
     results = []
 
-    for model_id in test_models[:3]:
+    for model_id in test_models[:20]:
         print(f"\nBenchmarking {model_id}...")
         model_results = {"model_id": model_id, "scores": [], "times": [], "total_time": 0.0}
 
@@ -106,13 +124,15 @@ def run_model_benchmark():
                 model_results["total_time"] += duration
 
                 print(f"  Q: {q['question'][:40]}... -> {'ok' if is_correct else 'fail'} ({duration:.2f}s)")
+                print(response.strip().lower())
             except Exception as e:
+                print(e)
                 end_time = time.time()
                 duration = end_time - start_time
                 model_results["scores"].append("fail")
                 model_results["times"].append(duration)
                 model_results["total_time"] += duration
-                print(f"  Q: {q['question'][:40]}... -> fail (Error)")
+                print(f"  Q: {q['question'][:70]}... -> fail (Error)")
 
         results.append(model_results)
 

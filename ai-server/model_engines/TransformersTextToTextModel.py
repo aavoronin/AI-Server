@@ -14,24 +14,22 @@ class TransformersTextToTextModel(TextToTextModel):
     def load(self):
         try:
             from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
-            import torch
 
             logger.info(f"Loading Transformers model: {self.model_id}")
-            self.tokenizer = AutoTokenizer.from_pretrained(self.model_path)
-
-            device = "cuda" if torch.cuda.is_available() else "cpu"
+            self.tokenizer = AutoTokenizer.from_pretrained(self.model_path, trust_remote_code=True)
 
             self.model = AutoModelForCausalLM.from_pretrained(
                 self.model_path,
-                torch_dtype=torch.float16 if device == "cuda" else torch.float32,
-                device_map="auto" if device == "cuda" else None
+                torch_dtype="auto",
+                device_map="auto",
+                trust_remote_code=True
             )
 
+            # Do not pass device=device when device_map="auto" is used
             self.pipeline = pipeline(
                 "text-generation",
                 model=self.model,
-                tokenizer=self.tokenizer,
-                device=device
+                tokenizer=self.tokenizer
             )
             self.is_loaded = True
             logger.info(f"Successfully loaded {self.model_id}")
