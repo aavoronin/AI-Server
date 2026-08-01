@@ -16,6 +16,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from config import ServerConfig
 from model_filter import ModelFilter
 from models import ModelManager
+from models.ModelFactory import ModelFactory
 
 # Configure logging
 logging.basicConfig(
@@ -53,6 +54,50 @@ try:
 except Exception as e:
     logger.error(f"Failed to initialize model manager: {e}")
     model_manager = None
+
+
+def ensure_model_cached(model_id: str, cache_folder: str, hf_token_path: str) -> bool:
+    """Ensure the model is cached, downloading it if necessary."""
+    model_folder_name = model_id.replace("/", "_")
+    model_dir = Path(cache_folder) / model_folder_name
+    model_dir.mkdir(parents=True, exist_ok=True)
+
+    usage_file = model_dir / "model_usage.json"
+    is_cached = False
+    if usage_file.exists():
+        with open(usage_file, 'r') as f:
+            usage_data = json.load(f)
+            is_cached = usage_data.get("is_cached", False)
+
+    if not is_cached:
+        token = None
+        token_file = Path(hf_token_path)
+        if token_file.exists():
+            token = token_file.read_text().strip()
+
+        env = os.environ.copy()
+        if token:
+            env["HF_TOKEN"] = token
+
+        try:
+            subprocess.run(
+                ["huggingface-cli", "download", model_id, "--local-dir", str(model_dir)],
+                env=env,
+                check=True,
+                capture_output=True,
+                text=True
+            )
+            usage_data["is_cached"] = True
+            usage_data["last_cached"] = datetime.now().isoformat()
+            with open(usage_file, 'w') as f:
+                json.dump(usage_data, f, indent=2)
+            return True
+        except subprocess.CalledProcessError as e:
+            usage_data["num_fails"] = usage_data.get("num_fails", 0) + 1
+            with open(usage_file, 'w') as f:
+                json.dump(usage_data, f, indent=2)
+            return False
+    return True
 
 
 @app.get("/")
@@ -117,11 +162,6 @@ async def filter_models(
     Filter models based on modalities and numeric ranges
 
     All parameters are optional. No parameters returns all models.
-
-    Examples:
-    - /models/filter?input_modalities=Text&output_modalities=Text
-    - /models/filter?input_modalities=Text,Image&output_modalities=Image&downloads_from=1000&downloads_to=100000
-    - /models/filter?model_size_from=100000&model_size_to=10000000
     """
     if model_manager is None:
         raise HTTPException(status_code=500, detail="Model manager not initialized")
@@ -177,56 +217,11 @@ async def get_model_by_id(model_id: str):
 @app.post("/models/{model_id:path}/cache")
 async def cache_model(model_id: str):
     """Cache a model by downloading it to the cache folder."""
-    model_folder_name = model_id.replace("/", "_")
-    model_dir = Path(config.cache_folder_path) / model_folder_name
-    model_dir.mkdir(parents=True, exist_ok=True)
-
-    usage_file = model_dir / "model_usage.json"
-    if not usage_file.exists():
-        usage_data = {
-            "model_id": model_id,
-            "is_cached": False,
-            "last_used": None,
-            "last_cached": None,
-            "last_uncached": None,
-            "num_used": 0,
-            "num_fails": 0
-        }
-    else:
-        with open(usage_file, 'r') as f:
-            usage_data = json.load(f)
-
-    if not usage_data.get("is_cached"):
-        token = None
-        token_file = Path(config.hf_token_path)
-        if token_file.exists():
-            token = token_file.read_text().strip()
-
-        env = os.environ.copy()
-        if token:
-            env["HF_TOKEN"] = token
-
-        try:
-            subprocess.run(
-                ["huggingface-cli", "download", model_id, "--local-dir", str(model_dir)],
-                env=env,
-                check=True,
-                capture_output=True,
-                text=True
-            )
-            usage_data["is_cached"] = True
-            usage_data["last_cached"] = datetime.now().isoformat()
-        except subprocess.CalledProcessError as e:
-            usage_data["is_cached"] = False
-            usage_data["num_fails"] = usage_data.get("num_fails", 0) + 1
-            with open(usage_file, 'w') as f:
-                json.dump(usage_data, f, indent=2)
-            raise HTTPException(status_code=500, detail=f"Failed to download model: {e.stderr}")
-
-    with open(usage_file, 'w') as f:
-        json.dump(usage_data, f, indent=2)
-
-    return usage_data
+    if ensure_model_cached(model_id, config.cache_folder_path, config.hf_token_path):
+        model_dir = Path(config.cache_folder_path) / model_id.replace("/", "_")
+        with open(model_dir / "model_usage.json", 'r') as f:
+            return json.load(f)
+    raise HTTPException(status_code=500, detail="Failed to download model")
 
 
 @app.post("/models/{model_id:path}/uncache")
@@ -253,7 +248,6 @@ async def uncache_model(model_id: str):
             "num_fails": 0
         }
 
-    # Remove all files and directories except model_usage.json
     for item in model_dir.iterdir():
         if item.name != "model_usage.json":
             if item.is_file():
@@ -289,6 +283,34 @@ async def list_cached_models():
         "count": len(cached_models),
         "cached_models": cached_models
     }
+
+
+@app.post("/models/{model_id:path}/generate")
+async def generate_text(model_id: str, request: dict):
+    """Process a text-to-text generation request."""
+    if model_manager is None:
+        raise HTTPException(status_code=500, detail="Model manager not initialized")
+
+    if not ensure_model_cached(model_id, config.cache_folder_path, config.hf_token_path):
+        raise HTTPException(status_code=500, detail="Failed to cache model")
+
+    try:
+        model = ModelFactory.get_model(model_id, config.cache_folder_path)
+        prompt = request.get("prompt", "")
+        max_new_tokens = request.get("max_new_tokens")
+        temperature = request.get("temperature", 0.7)
+
+        kwargs = {}
+        if max_new_tokens is not None:
+            kwargs["max_new_tokens"] = max_new_tokens
+        if temperature is not None:
+            kwargs["temperature"] = temperature
+
+        result = model.generate(prompt, **kwargs)
+        return {"model_id": model_id, "generated_text": result}
+    except Exception as e:
+        logger.error(f"Generation failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 if __name__ == "__main__":

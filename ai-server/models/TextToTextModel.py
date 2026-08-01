@@ -1,11 +1,8 @@
-from ModelBase import ModelBase, Modality
+from .ModelBase import ModelBase
 
 
 class TextToTextModel(ModelBase):
-    pass
+    """Base class for Text-to-Text models."""
 
-    def imput_modalities(self):
-        return [Modality.TEXT]
-
-    def output_modalities(self):
-        return [Modality.TEXT]
+    def get_modality(self):
+        return "Text", "Text"

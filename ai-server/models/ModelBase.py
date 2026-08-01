@@ -1,27 +1,46 @@
-from enum import Enum
+import json
+from pathlib import Path
+from abc import ABC, abstractmethod
+import logging
 
-class Modality(str, Enum):
-    """Standard AI model modalities."""
-    TEXT = "Text"
-    IMAGE = "Image"
-    AUDIO = "Audio"
-    VIDEO = "Video"
-    THREE_D = "3D"
-    CODE = "Code"
-    METADATA = "Metadata"
+logger = logging.getLogger(__name__)
 
-class ModelBase:
-    def __init__(self):
+
+class ModelBase(ABC):
+    """Base class for all AI models."""
+
+    def __init__(self, model_id: str, cache_dir: str):
+        self.model_id = model_id
+        self.cache_dir = Path(cache_dir)
+        self.model_folder_name = model_id.replace("/", "_")
+        self.model_path = self.cache_dir / self.model_folder_name
+        self.usage_file = self.model_path / "model_usage.json"
+        self.is_loaded = False
+
+    @abstractmethod
+    def load(self):
         pass
 
-    def process_text_to_text(self):
+    @abstractmethod
+    def unload(self):
         pass
 
-    def imput_modalities(self):
-        return []
+    @abstractmethod
+    def generate(self, prompt: str, **kwargs) -> str:
+        pass
 
-    def output_modalities(self):
-        return []
+    def increment_fails(self):
+        """Increment num_fails in model_usage.json if initialization fails."""
+        try:
+            if self.usage_file.exists():
+                with open(self.usage_file, 'r') as f:
+                    data = json.load(f)
+            else:
+                data = {"num_fails": 0}
 
-    def process_modalities(self):
-        return
+            data["num_fails"] = data.get("num_fails", 0) + 1
+
+            with open(self.usage_file, 'w') as f:
+                json.dump(data, f, indent=2)
+        except Exception as e:
+            logger.error(f"Failed to increment fails: {e}")
