@@ -306,7 +306,7 @@ async def generate_text(model_id: str, request: dict):
         if temperature is not None:
             kwargs["temperature"] = temperature
 
-        result = model.generate(prompt, **kwargs)
+        result = model.safe_generate(prompt, **kwargs)
         return {"model_id": model_id, "generated_text": result}
     except Exception as e:
         logger.error(f"Generation failed: {e}")
