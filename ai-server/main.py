@@ -16,7 +16,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from config import ServerConfig
 from model_filter import ModelFilter
 from model_manager import ModelManager
-from model_engines import ModelFactory
+from model_engines.ModelFactory import ModelFactory
 
 # Configure logging
 logging.basicConfig(
