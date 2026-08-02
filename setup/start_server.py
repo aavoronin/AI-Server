@@ -57,7 +57,7 @@ def run_model_benchmark():
         "QuantFactory/SmolLM-135M-GGUF",
         "QuantFactory/SmolLM-135M-Instruct-GGUF",
         "unsloth/bge-small-en-v1.5-GGUF",
-        "Alibaba-NLP/gte-Qwen2-1.5B-instruct",
+        #"Alibaba-NLP/gte-Qwen2-1.5B-instruct", # slow
         "apple/CLaRa-7B-Instruct",
         "deepseek-ai/deepseek-coder-1.3b-instruct",
         "microsoft/Phi-4-mini-instruct",
@@ -122,6 +122,8 @@ def run_model_benchmark():
                 generated_text = response.get("generated_text", "")
                 if not isinstance(generated_text, str):
                     generated_text = str(generated_text)
+
+                print(f"  A: =={generated_text}==")
 
                 is_correct = q["answer"].strip().lower() in generated_text.strip().lower()
                 model_results["scores"].append("ok" if is_correct else "fail")
