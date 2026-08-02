@@ -12,9 +12,11 @@ def run_model_benchmark():
         {"question": "What is the capital city of Japan? Answer with only the city name.", "answer": "Tokyo"},
         {"question": "What is the next number in this sequence: 2, 4, 6, 8? Answer with only the number.",
          "answer": "10"},
-        #{"question": "Translate the English word 'apple' to Spanish. Answer with only the translated word.",
+        # {"question": "Translate the English word 'apple' to Spanish. Answer with only the translated word.",
         # "answer": "manzana"},
-        {"question": "Which of the following is programming language Mozilla, Terminator, Python, Outlook, Snake, Cloud? Answer with only one word.", "answer": "Python"},
+        {
+            "question": "Which of the following is programming language Mozilla, Terminator, Python, Outlook, Snake, Cloud? Answer with only one word.",
+            "answer": "Python"},
         {"question": "Is the Earth flat or round? Answer with only one word: 'flat' or 'round'.", "answer": "round"}
     ]
 
@@ -76,6 +78,21 @@ def run_model_benchmark():
     for model_id in test_models:
         print(f"\nBenchmarking {model_id}...")
         model_results = {"model_id": model_id, "scores": [], "times": [], "total_time": 0.0}
+
+        # Cache model before running the first question
+        try:
+            print(f"  Caching model {model_id}...")
+            client.cache_model(model_id)
+            print(f"  Model {model_id} cached successfully.")
+        except Exception as e:
+            print(f"  Failed to cache model {model_id}: {e}")
+            # Mark as failed for all questions and do not proceed
+            for _ in range(len(questions)):
+                model_results["scores"].append("fail")
+                model_results["times"].append(0.0)
+            results.append(model_results)
+            continue
+
         for i, q in enumerate(questions):
             start_time = time.time()
             start_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
