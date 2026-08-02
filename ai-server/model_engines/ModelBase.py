@@ -78,3 +78,19 @@ class ModelBase(ABC):
                 json.dump(data, f, indent=2)
         except Exception as e:
             logger.error(f"Failed to increment fails: {e}")
+
+    def increment_init_success(self):
+        """Increment num_init_successes in model_usage.json if initialization succeeds."""
+        try:
+            if self.usage_file.exists():
+                with open(self.usage_file, 'r') as f:
+                    data = json.load(f)
+            else:
+                data = {}
+
+            data["num_init_successes"] = data.get("num_init_successes", 0) + 1
+
+            with open(self.usage_file, 'w') as f:
+                json.dump(data, f, indent=2)
+        except Exception as e:
+            logger.error(f"Failed to increment init successes: {e}")

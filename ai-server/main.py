@@ -65,7 +65,6 @@ def ensure_model_cached(model_id: str, cache_folder: str, hf_token_path: str) ->
 
     usage_file = model_dir / "model_usage.json"
     is_cached = False
-
     usage_data = {
         "model_id": model_id,
         "is_cached": False,
@@ -75,7 +74,6 @@ def ensure_model_cached(model_id: str, cache_folder: str, hf_token_path: str) ->
         "num_used": 0,
         "num_fails": 0
     }
-
     if usage_file.exists():
         with open(usage_file, 'r') as f:
             usage_data = json.load(f)
@@ -172,7 +170,6 @@ async def filter_models(
 ):
     """
     Filter models based on modalities and numeric ranges
-
     All parameters are optional. No parameters returns all models.
     """
     if model_manager is None:
@@ -294,6 +291,27 @@ async def list_cached_models():
     return {
         "count": len(cached_models),
         "cached_models": cached_models
+    }
+
+
+@app.get("/models/{model_id:path}/stats")
+async def get_model_stats(model_id: str):
+    """Get model statistics (failures and successful initializations)."""
+    model_folder_name = model_id.replace("/", "_")
+    model_dir = Path(config.cache_folder_path) / model_folder_name
+    usage_file = model_dir / "model_usage.json"
+    if usage_file.exists():
+        with open(usage_file, 'r') as f:
+            data = json.load(f)
+        return {
+            "model_id": model_id,
+            "num_fails": data.get("num_fails", 0),
+            "num_init_successes": data.get("num_init_successes", 0)
+        }
+    return {
+        "model_id": model_id,
+        "num_fails": 0,
+        "num_init_successes": 0
     }
 
 

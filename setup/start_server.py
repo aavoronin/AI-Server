@@ -8,9 +8,7 @@ def print_model_debug_info(model_id: str):
     windows_cache_dir = Path(r"D:\AIs\Cache")
     model_folder_name = model_id.replace("/", "_")
     model_dir = windows_cache_dir / model_folder_name
-
     print(f"\n--- DEBUG INFO FOR {model_id} (Client Side) ---")
-
     readme_path = model_dir / "README.md"
     if readme_path.exists():
         print("\n[README.md]")
@@ -19,7 +17,6 @@ def print_model_debug_info(model_id: str):
             print(content[:4000])
         except Exception as e:
             print(f"Error reading README.md: {e}")
-
     for json_file in model_dir.glob("*.json"):
         if json_file.name == "model_usage.json":
             continue
@@ -29,7 +26,6 @@ def print_model_debug_info(model_id: str):
                 print(json_file.read_text(encoding='utf-8'))
         except Exception as e:
             print(f"Error reading {json_file.name}: {e}")
-
     print("--- END DEBUG INFO ---\n")
 
 

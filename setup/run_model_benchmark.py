@@ -1,6 +1,5 @@
 import time
 from datetime import datetime
-
 from ai_clients.model_client_base import TextToTextClient
 from setup.start_server import print_model_debug_info
 
@@ -19,7 +18,7 @@ def run_model_benchmark():
         {"question": "Is the Earth flat or round? Answer with only one word: 'flat' or 'round'.", "answer": "round"}
     ]
 
-    test_models = [
+    test_models_raw = [
         "Qwen/Qwen3-0.6B-GGUF",
         "Qwen/Qwen3-1.7B-GGUF",
         "QuantFactory/SmolLM-135M-GGUF",
@@ -36,7 +35,6 @@ def run_model_benchmark():
         "unsloth/Phi-3-mini-4k-instruct",
         "unsloth/SmolLM-1.7B-Instruct",
         "unsloth/SmolLM2-360M-Instruct",
-
         "Qwen/Qwen3-0.6B-GGUF",
         "Qwen/Qwen2.5-0.5B-Instruct",
         "LiquidAI/LFM2-1.2B",
@@ -71,54 +69,44 @@ def run_model_benchmark():
         "nm-testing/SmolLM-1.7B-Instruct-quantized.w4a16",
         "Qwen/Qwen3-0.6B-FP8",
     ]
+    # Make list distinct and remove [:20]
+    test_models = list(dict.fromkeys(test_models_raw))
 
     results = []
-
-    for model_id in test_models[:20]:
+    for model_id in test_models:
         print(f"\nBenchmarking {model_id}...")
         model_results = {"model_id": model_id, "scores": [], "times": [], "total_time": 0.0}
-
         for i, q in enumerate(questions):
             start_time = time.time()
             start_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             print(f"  [{start_timestamp}] Sending request {i + 1}/{len(questions)}...")
-
             try:
-                response = client.generate(model_id, q["question"], model_limit_seconds=300)
+                response = client.generate(model_id, q["question"], model_limit_seconds=60)
                 end_time = time.time()
                 duration = end_time - start_time
                 end_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
                 generated_text = response.get("generated_text", "")
                 if not isinstance(generated_text, str):
                     generated_text = str(generated_text)
-
                 print(f"  [{end_timestamp}] Received response in {duration:.2f}s")
-
                 is_correct = (q["answer"].strip().lower() in generated_text.strip().lower())
                 model_results["scores"].append("ok" if is_correct else "fail")
                 model_results["times"].append(duration)
                 model_results["total_time"] += duration
-
                 print(f"  Q: {q['question'][:70]}... -> {'ok' if is_correct else 'fail'} ({duration:.2f}s)")
-
             except Exception as e:
                 end_time = time.time()
                 duration = end_time - start_time
                 end_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 error_msg = str(e)
-
                 print(f"  [{end_timestamp}] Request failed after {duration:.2f}s: {error_msg}")
-
                 # Print debug info on client side when error occurs
                 print_model_debug_info(model_id)
-
                 if i == 0 and "500" in error_msg:
                     print(f"  Q: {q['question'][:70]}... -> fail (500 Error on 1st question, aborting model)")
                     model_results["scores"].append("fail")
                     model_results["times"].append(duration)
                     model_results["total_time"] += duration
-
                     # Mark remaining questions as fail with 0 time
                     for _ in range(len(questions) - 1):
                         model_results["scores"].append("fail")
@@ -129,16 +117,27 @@ def run_model_benchmark():
                     model_results["times"].append(duration)
                     model_results["total_time"] += duration
                     print(f"  Q: {q['question'][:70]}... -> fail (Error)")
-
         results.append(model_results)
 
-    print("\n" + "=" * 90)
-    print(f"{'Model ID':<35} | {'Results':<20} | {'Accuracy':<10} | {'Total Time':<10}")
-    print("-" * 90)
+    print("\n" + "=" * 110)
+    print(
+        f"{'Model ID':<35} | {'Init OK':<8} {'Init Fail':<10} | {'Results':<20} | {'Accuracy':<10} | {'Total Time':<10}")
+    print("-" * 110)
     for res in results:
         scores_str = " ".join(res["scores"])
-        accuracy = sum(1 for s in res["scores"] if s == "ok") / len(res["scores"]) * 100
+        accuracy = sum(1 for s in res["scores"] if s == "ok") / len(res["scores"]) * 100 if res["scores"] else 0
         m, s = divmod(int(res["total_time"]), 60)
         total_time_str = f"{m}:{s:02d}"
-        print(f"{res['model_id']:<35} | {scores_str:<20} | {accuracy:>5.1f}%    | {total_time_str:<10}")
-    print("=" * 90)
+
+        # Fetch stats
+        try:
+            stats = client.get_model_stats(res["model_id"])
+            init_ok = stats.get("num_init_successes", 0)
+            init_fail = stats.get("num_fails", 0)
+        except Exception:
+            init_ok = 0
+            init_fail = 0
+
+        print(
+            f"{res['model_id']:<35} | {init_ok:<8} {init_fail:<10} | {scores_str:<20} | {accuracy:>5.1f}%    | {total_time_str:<10}")
+    print("=" * 110)
