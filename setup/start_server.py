@@ -111,28 +111,46 @@ def run_model_benchmark():
         print(f"\nBenchmarking {model_id}...")
         model_results = {"model_id": model_id, "scores": [], "times": [], "total_time": 0.0}
 
-        for q in questions:
+        for i, q in enumerate(questions):
             start_time = time.time()
             try:
                 response = client.generate(model_id, q["question"])
                 end_time = time.time()
                 duration = end_time - start_time
 
-                is_correct = q["answer"].strip().lower() in response.strip().lower()
+                # The response is a dictionary, extract the generated text
+                generated_text = response.get("generated_text", "")
+                if not isinstance(generated_text, str):
+                    generated_text = str(generated_text)
+
+                is_correct = q["answer"].strip().lower() in generated_text.strip().lower()
                 model_results["scores"].append("ok" if is_correct else "fail")
                 model_results["times"].append(duration)
                 model_results["total_time"] += duration
 
-                print(f"  Q: {q['question'][:40]}... -> {'ok' if is_correct else 'fail'} ({duration:.2f}s)")
-                print(response.strip().lower())
+                print(f"  Q: {q['question'][:70]}... -> {'ok' if is_correct else 'fail'} ({duration:.2f}s)")
             except Exception as e:
                 print(e)
                 end_time = time.time()
                 duration = end_time - start_time
-                model_results["scores"].append("fail")
-                model_results["times"].append(duration)
-                model_results["total_time"] += duration
-                print(f"  Q: {q['question'][:70]}... -> fail (Error)")
+                error_msg = str(e)
+
+                if i == 0 and "500" in error_msg:
+                    print(f"  Q: {q['question'][:70]}... -> fail (500 Error on 1st question, aborting model)")
+                    model_results["scores"].append("fail")
+                    model_results["times"].append(duration)
+                    model_results["total_time"] += duration
+
+                    # Mark remaining questions as fail with 0 time
+                    for _ in range(len(questions) - 1):
+                        model_results["scores"].append("fail")
+                        model_results["times"].append(0.0)
+                    break
+                else:
+                    model_results["scores"].append("fail")
+                    model_results["times"].append(duration)
+                    model_results["total_time"] += duration
+                    print(f"  Q: {q['question'][:70]}... -> fail (Error)")
 
         results.append(model_results)
 

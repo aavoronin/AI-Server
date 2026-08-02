@@ -64,6 +64,18 @@ def ensure_model_cached(model_id: str, cache_folder: str, hf_token_path: str) ->
 
     usage_file = model_dir / "model_usage.json"
     is_cached = False
+
+    # Initialize usage_data with defaults to prevent UnboundLocalError
+    usage_data = {
+        "model_id": model_id,
+        "is_cached": False,
+        "last_used": None,
+        "last_cached": None,
+        "last_uncached": None,
+        "num_used": 0,
+        "num_fails": 0
+    }
+
     if usage_file.exists():
         with open(usage_file, 'r') as f:
             usage_data = json.load(f)
