@@ -1,5 +1,6 @@
 from .TextToTextModel import TextToTextModel
 import logging
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
@@ -7,33 +8,41 @@ logger = logging.getLogger(__name__)
 class GGUFTextToTextModel(TextToTextModel):
     def __init__(self, model_id: str, cache_dir: str):
         super().__init__(model_id, cache_dir)
-        self.model = None
-        self.tokenizer = None
+        self.llm = None
 
     def load(self):
         try:
-            from transformers import AutoTokenizer, AutoModelForCausalLM
+            from llama_cpp import Llama
 
-            logger.info(f"Loading GGUF model with Transformers: {self.model_id}")
-            self.tokenizer = AutoTokenizer.from_pretrained(self.model_path, trust_remote_code=True)
+            logger.info(f"Loading GGUF model with llama-cpp-python: {self.model_id}")
+            gguf_files = list(self.model_path.glob("*.gguf"))
+            if not gguf_files:
+                raise FileNotFoundError(f"No .gguf file found in {self.model_path}")
 
-            self.model = AutoModelForCausalLM.from_pretrained(
-                self.model_path,
-                torch_dtype="auto",
-                device_map="auto",
-                trust_remote_code=True
+            gguf_path = str(gguf_files[0])
+            logger.info(f"Found GGUF file: {gguf_path}")
+
+            # Determine GPU layers: -1 for all on GPU if CUDA available, 0 for CPU
+            n_gpu_layers = -1
+
+            self.llm = Llama(
+                model_path=gguf_path,
+                n_ctx=32768,
+                n_gpu_layers=n_gpu_layers,
+                verbose=False
             )
             self.is_loaded = True
             logger.info(f"Successfully loaded GGUF {self.model_id}")
+        except ImportError:
+            logger.error("llama-cpp-python is required for GGUF models. Install with: pip install llama-cpp-python")
+            raise
         except Exception as e:
             logger.error(f"Failed to load GGUF model {self.model_id}: {e}")
             raise
 
     def unload(self):
-        if self.model is not None:
-            del self.model
-        if self.tokenizer is not None:
-            del self.tokenizer
+        if self.llm is not None:
+            del self.llm
         import gc
         gc.collect()
         self.is_loaded = False
@@ -43,36 +52,19 @@ class GGUFTextToTextModel(TextToTextModel):
         if not self.is_loaded:
             raise RuntimeError("Model is not loaded")
 
-        max_new_tokens = kwargs.get("max_new_tokens", 32768)
-        messages = [{"role": "user", "content": prompt}]
+        max_tokens = kwargs.get("max_new_tokens", 2048)
+        temperature = kwargs.get("temperature", 0.7)
 
         try:
-            text = self.tokenizer.apply_chat_template(
-                messages,
-                tokenize=False,
-                add_generation_prompt=True,
-                enable_thinking=True
+            out = self.llm(
+                prompt,
+                max_tokens=max_tokens,
+                temperature=temperature,
+                top_p=0.9,
+                echo=False
             )
-            model_inputs = self.tokenizer([text], return_tensors="pt").to(self.model.device)
-
-            generated_ids = self.model.generate(
-                **model_inputs,
-                max_new_tokens=max_new_tokens
-            )
-            output_ids = generated_ids[0][len(model_inputs.input_ids[0]):].tolist()
-
-            try:
-                # rindex finding 151668 (</think>)
-                index = len(output_ids) - output_ids[::-1].index(151668)
-            except ValueError:
-                index = 0
-
-            thinking_content = self.tokenizer.decode(output_ids[:index], skip_special_tokens=True).strip("\n")
-            content = self.tokenizer.decode(output_ids[index:], skip_special_tokens=True).strip("\n")
-
-            if thinking_content:
-                return f"Thinking: {thinking_content}\n\nContent: {content}"
-            return content
+            generated_text = out["choices"][0]["text"]
+            return generated_text.strip()
         except Exception as e:
             logger.error(f"Generation failed for GGUF {self.model_id}: {e}")
             raise

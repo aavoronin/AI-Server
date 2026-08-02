@@ -5,6 +5,7 @@ import os
 import json
 import shutil
 import subprocess
+import asyncio
 from datetime import datetime
 from typing import List, Optional
 import sys
@@ -65,7 +66,6 @@ def ensure_model_cached(model_id: str, cache_folder: str, hf_token_path: str) ->
     usage_file = model_dir / "model_usage.json"
     is_cached = False
 
-    # Initialize usage_data with defaults to prevent UnboundLocalError
     usage_data = {
         "model_id": model_id,
         "is_cached": False,
@@ -311,6 +311,7 @@ async def generate_text(model_id: str, request: dict):
         prompt = request.get("prompt", "")
         max_new_tokens = request.get("max_new_tokens")
         temperature = request.get("temperature", 0.7)
+        model_limit_seconds = request.get("model_limit_seconds", 300)
 
         kwargs = {}
         if max_new_tokens is not None:
@@ -318,8 +319,18 @@ async def generate_text(model_id: str, request: dict):
         if temperature is not None:
             kwargs["temperature"] = temperature
 
-        result = model.safe_generate(prompt, **kwargs)
+        def generate_sync():
+            return model.safe_generate(prompt, **kwargs)
+
+        result = await asyncio.wait_for(
+            asyncio.to_thread(generate_sync),
+            timeout=model_limit_seconds
+        )
         return {"model_id": model_id, "generated_text": result}
+    except asyncio.TimeoutError:
+        logger.error(f"Generation timed out after {model_limit_seconds} seconds for {model_id}")
+        ModelFactory.unload_current_model()
+        raise HTTPException(status_code=408, detail=f"Request timed out after {model_limit_seconds} seconds")
     except Exception as e:
         logger.error(f"Generation failed: {e}")
         raise HTTPException(status_code=500, detail=str(e))

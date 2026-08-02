@@ -2,8 +2,39 @@ import json
 import subprocess
 import sys
 import time
-
+from datetime import datetime
+from pathlib import Path
 from ai_clients.model_client_base import TextToTextClient
+
+
+def print_model_debug_info(model_id: str):
+    """Print README and JSON files from the Windows cache folder when an error occurs."""
+    windows_cache_dir = Path(r"D:\AIs\Cache")
+    model_folder_name = model_id.replace("/", "_")
+    model_dir = windows_cache_dir / model_folder_name
+
+    print(f"\n--- DEBUG INFO FOR {model_id} (Client Side) ---")
+
+    readme_path = model_dir / "README.md"
+    if readme_path.exists():
+        print("\n[README.md]")
+        try:
+            content = readme_path.read_text(encoding='utf-8')
+            print(content[:4000])
+        except Exception as e:
+            print(f"Error reading README.md: {e}")
+
+    for json_file in model_dir.glob("*.json"):
+        if json_file.name == "model_usage.json":
+            continue
+        try:
+            if json_file.stat().st_size <= 5120:
+                print(f"\n[{json_file.name}]")
+                print(json_file.read_text(encoding='utf-8'))
+        except Exception as e:
+            print(f"Error reading {json_file.name}: {e}")
+
+    print("--- END DEBUG INFO ---\n")
 
 
 def start_wsl_server():
@@ -57,7 +88,6 @@ def run_model_benchmark():
         "QuantFactory/SmolLM-135M-GGUF",
         "QuantFactory/SmolLM-135M-Instruct-GGUF",
         "unsloth/bge-small-en-v1.5-GGUF",
-        #"Alibaba-NLP/gte-Qwen2-1.5B-instruct", # slow
         "apple/CLaRa-7B-Instruct",
         "deepseek-ai/deepseek-coder-1.3b-instruct",
         "microsoft/Phi-4-mini-instruct",
@@ -113,29 +143,38 @@ def run_model_benchmark():
 
         for i, q in enumerate(questions):
             start_time = time.time()
+            start_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            print(f"  [{start_timestamp}] Sending request {i + 1}/{len(questions)}...")
+
             try:
-                response = client.generate(model_id, q["question"])
+                response = client.generate(model_id, q["question"], model_limit_seconds=300)
                 end_time = time.time()
                 duration = end_time - start_time
+                end_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-                # The response is a dictionary, extract the generated text
                 generated_text = response.get("generated_text", "")
                 if not isinstance(generated_text, str):
                     generated_text = str(generated_text)
 
-                print(f"  A: =={generated_text[:len(q["answer"]) * 2 + 10]}==")
+                print(f"  [{end_timestamp}] Received response in {duration:.2f}s")
 
-                is_correct = (q["answer"].strip().lower() == generated_text.strip().lower())
+                is_correct = (q["answer"].strip().lower() in generated_text.strip().lower())
                 model_results["scores"].append("ok" if is_correct else "fail")
                 model_results["times"].append(duration)
                 model_results["total_time"] += duration
 
                 print(f"  Q: {q['question'][:70]}... -> {'ok' if is_correct else 'fail'} ({duration:.2f}s)")
+
             except Exception as e:
-                print(e)
                 end_time = time.time()
                 duration = end_time - start_time
+                end_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 error_msg = str(e)
+
+                print(f"  [{end_timestamp}] Request failed after {duration:.2f}s: {error_msg}")
+
+                # Print debug info on client side when error occurs
+                print_model_debug_info(model_id)
 
                 if i == 0 and "500" in error_msg:
                     print(f"  Q: {q['question'][:70]}... -> fail (500 Error on 1st question, aborting model)")

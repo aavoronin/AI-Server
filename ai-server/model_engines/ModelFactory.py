@@ -35,6 +35,15 @@ class ModelFactory:
         return cls._current_model
 
     @classmethod
+    def unload_current_model(cls):
+        """Force unload the current model to free resources (e.g., on timeout)."""
+        if cls._current_model is not None:
+            logger.info(f"Unloading current model: {cls._current_model_id}")
+            cls._current_model.unload()
+            cls._current_model = None
+            cls._current_model_id = None
+
+    @classmethod
     def _determine_model_class(cls, model_id: str):
         model_id_lower = model_id.lower()
         if "gguf" in model_id_lower or "ggml" in model_id_lower:
