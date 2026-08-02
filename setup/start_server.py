@@ -123,9 +123,9 @@ def run_model_benchmark():
                 if not isinstance(generated_text, str):
                     generated_text = str(generated_text)
 
-                print(f"  A: =={generated_text}==")
+                print(f"  A: =={generated_text[:len(q["answer"]) * 2 + 10]}==")
 
-                is_correct = q["answer"].strip().lower() in generated_text.strip().lower()
+                is_correct = (q["answer"].strip().lower() == generated_text.strip().lower())
                 model_results["scores"].append("ok" if is_correct else "fail")
                 model_results["times"].append(duration)
                 model_results["total_time"] += duration
