@@ -29,7 +29,7 @@ class ModelClientBase:
     def cache_model(self, model_id: str):
         """Request the server to cache a specific model."""
         encoded_id = urllib.parse.quote(model_id, safe='')
-        return self._request("POST", f"/models/{encoded_id}/cache")
+        return self._request("POST", f"/models/{encoded_id}/cache", timeout=3600 * 8)
 
     def uncache_model(self, model_id: str):
         """Request the server to uncache a specific model."""

@@ -187,9 +187,12 @@ def run_benchmark(
         print(f"\nBenchmarking {model_id}...")
         model_results = {"model_id": model_id, "scores": [], "times": [], "total_time": 0.0}
         for i, q in enumerate(questions):
+            start_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            print(f"{start_timestamp} caching model")
+            client.cache_model(model_id)
             start_time = time.time()
             start_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            print(f"  [{start_timestamp}] Sending request {i + 1}/{len(questions)}...")
+            print(f"{start_timestamp} Sending request {i + 1}/{len(questions)}...")
             try:
                 final_prompt = prompt_template.format(question=q["question"])
                 response = client.generate(model_id, final_prompt, model_limit_seconds=60)
@@ -199,7 +202,7 @@ def run_benchmark(
                 generated_text = response.get("generated_text", "")
                 if not isinstance(generated_text, str):
                     generated_text = str(generated_text)
-                print(f"  [{end_timestamp}] Received response in {duration:.2f}s")
+                print(f"{end_timestamp} Received response in {duration:.2f}s")
                 is_correct = (q["answer"].strip().lower() == generated_text.strip().lower())
                 model_results["scores"].append("ok" if is_correct else "fail")
                 model_results["times"].append(duration)
