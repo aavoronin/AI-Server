@@ -5,7 +5,6 @@ import urllib.request
 
 BASE_URL = "http://127.0.0.1:8000"
 
-
 class ModelClientBase:
     """Base client for interacting with the AI Model Server API."""
 
@@ -60,5 +59,4 @@ class TextToTextClient(ModelClientBase):
         }
         if max_new_tokens is not None:
             data["max_new_tokens"] = max_new_tokens
-
-        return self._request("POST", f"/models/{encoded_id}/generate", data=data, timeout=model_limit_seconds + 60)
+        return self._request("POST", f"/models/{encoded_id}/generate", data=data, timeout=60)
