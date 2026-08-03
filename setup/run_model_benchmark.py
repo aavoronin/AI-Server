@@ -170,6 +170,8 @@ Output:"""
         # "Qwen/Qwen3-0.6B-FP8",
     ]
     print("=== RUNNING FIRST BENCHMARK (Questions 1) ===")
+    results1 = run_benchmark(client, questions1, prompt_template, test_models[:2], 99999999)
+
     results1 = run_benchmark(client, questions1, prompt_template, test_models, 99999999)
 
     qualified_models = [
@@ -207,81 +209,78 @@ def run_benchmark(
     for model_id in test_models[:limit]:
         print(f"\nBenchmarking {model_id}...")
         model_results = {"model_id": model_id, "scores": [], "times": [], "total_time": 0.0}
+
+        start_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        print(f"{start_timestamp} caching model {model_id}")
+        client.cache_model(model_id)
+        end_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        print(f"{end_timestamp} model cached {model_id}")
+
         for i, q in enumerate(questions):
-            start_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            print(f"{start_timestamp} caching model")
-            client.cache_model(model_id)
-            start_time = time.time()
-            start_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            print(f"{start_timestamp} Sending request {i + 1}/{len(questions)}...")
-            try:
-                final_prompt = prompt_template.format(question=q["question"])
-                response = client.generate(model_id, final_prompt, model_limit_seconds=60)
-                end_time = time.time()
-                duration = end_time - start_time
-                end_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                generated_text = response.get("generated_text", "")
-                if not isinstance(generated_text, str):
-                    generated_text = str(generated_text)
-                print(f"{end_timestamp} Received response in {duration:.2f}s")
-                is_correct = (q["answer"].strip().lower() == generated_text.strip().lower())
-                model_results["scores"].append("ok" if is_correct else "fail")
-                model_results["times"].append(duration)
-                model_results["total_time"] += duration
-                print(f"  Q: {q['question'][:70]}... -> {'ok' if is_correct else 'fail'}")
-                print(f"  A: {generated_text[:len(q['answer']) * 5]} ({duration:.2f}s)")
-
-                # Save tuple for the new table
-                answers_list.append((q["question"], model_id, generated_text.strip()))
-            except Exception as e:
-                end_time = time.time()
-                duration = end_time - start_time
-                end_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                error_msg = str(e)
-                print(f"  [{end_timestamp}] Request failed after {duration:.2f}s: {error_msg}")
-                # Print debug info on client side when error occurs
-                print_model_debug_info(model_id)
-
-                # Save '-' for the new table
-                answers_list.append((q["question"], model_id, "-"))
-
-                if i == 0 and "500" in error_msg:
-                    print(f"  Q: {q['question'][:70]}... -> fail (500 Error on 1st question, aborting model)")
-                    model_results["scores"].append("fail")
+            for j in range(2 if i == 0 else 1):
+                start_time = time.time()
+                start_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                print(f"{start_timestamp} Sending request {i + 1}/{len(questions)}...")
+                try:
+                    final_prompt = prompt_template.format(question=q["question"])
+                    response = client.generate(model_id, final_prompt, model_limit_seconds=60)
+                    end_time = time.time()
+                    duration = end_time - start_time
+                    if j == 0 and i == 0:
+                        print(f"{end_timestamp} Test run duration {duration:.2f}s")
+                        continue
+                    #answers_list.append(q["answer"])
+                    end_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    generated_text = response.get("generated_text", "")
+                    if not isinstance(generated_text, str):
+                        generated_text = str(generated_text)
+                    print(f"{end_timestamp} Received response in {duration:.2f}s")
+                    is_correct = (q["answer"].strip().lower() == generated_text.strip().lower())
+                    model_results["scores"].append("ok" if is_correct else "fail")
                     model_results["times"].append(duration)
                     model_results["total_time"] += duration
-                    # Mark remaining questions as fail with 0 time
-                    for j in range(i + 1, len(questions)):
+                    print(f"  Q: {q['question'][:70]}... -> {'ok' if is_correct else 'fail'}")
+                    print(f"  A: {generated_text[:len(q['answer']) * 5]} ({duration:.2f}s)")
+
+                    # Save tuple for the new table
+                    answers_list.append((q["question"], model_id, generated_text.strip()))
+                except Exception as e:
+                    end_time = time.time()
+                    duration = end_time - start_time
+                    end_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    error_msg = str(e)
+                    print(f"  [{end_timestamp}] Request failed after {duration:.2f}s: {error_msg}")
+                    # Print debug info on client side when error occurs
+                    print_model_debug_info(model_id)
+
+                    # Save '-' for the new table
+                    answers_list.append((q["question"], model_id, "-"))
+
+                    if i == 0 and "500" in error_msg:
+                        print(f"  Q: {q['question'][:70]}... -> fail (500 Error on 1st question, aborting model)")
                         model_results["scores"].append("fail")
-                        model_results["times"].append(0.0)
-                        answers_list.append((questions[j]["question"], model_id, "-"))
-                    break
-                else:
-                    model_results["scores"].append("fail")
-                    model_results["times"].append(duration)
-                    model_results["total_time"] += duration
-                    print(f"  Q: {q['question'][:70]}... -> fail (Error)")
+                        model_results["times"].append(duration)
+                        model_results["total_time"] += duration
+                        # Mark remaining questions as fail with 0 time
+                        for j in range(i + 1, len(questions)):
+                            model_results["scores"].append("fail")
+                            model_results["times"].append(0.0)
+                            answers_list.append((questions[j]["question"], model_id, "-"))
+                        break
+                    else:
+                        model_results["scores"].append("fail")
+                        model_results["times"].append(duration)
+                        model_results["total_time"] += duration
+                        print(f"  Q: {q['question'][:70]}... -> fail (Error)")
         results.append(model_results)
+        if i % 5 == 0 and i > 0:
+            print_answers(answers_list)
 
     total_elapsed = time.time() - total_start_time
     m, s = divmod(int(total_elapsed), 60)
     total_time_str = f"{m}:{s:02d}"
 
-    # Print the new table format before the final result
-    print("\n" + "=" * 110)
-    print("ANSWERS BY QUESTION")
-    print("=" * 110)
-
-    # Group by question
-    answers_by_question = defaultdict(list)
-    for q_text, model_id, answer in answers_list:
-        answers_by_question[q_text].append((model_id, answer))
-
-    for q_text, model_answers in answers_by_question.items():
-        print(f"\n{q_text}")
-        for model_id, answer in model_answers:
-            print(f"  {model_id}: {answer}")
-    print("\n" + "=" * 110)
+    print_answers(answers_list)
 
     # First loop: collect all final values into prepared_results
     prepared_results = []
@@ -322,3 +321,22 @@ def run_benchmark(
     print(f"Total Benchmark Time: {total_time_str}")
 
     return results
+
+
+def print_answers(answers_list: list[Any]):
+    # Print the new table format before the final result
+    print("\n" + "=" * 110)
+    print("ANSWERS BY QUESTION")
+    print("=" * 110)
+
+    # Group by question
+    answers_by_question = defaultdict(list)
+    for q_text, model_id, answer in answers_list:
+        answers_by_question[q_text].append((model_id, answer))
+
+    for q_text, model_answers in answers_by_question.items():
+        print(f"\n{q_text}")
+        for model_id, answer in model_answers:
+            clean_answer = "".join(c for c in answer[:800] if c.isprintable())
+            print(f"  {model_id}: {clean_answer[:80]}")
+    print("\n" + "=" * 110)
