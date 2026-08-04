@@ -52,6 +52,9 @@ Output:"""
 
 
     test_models = [
+        "Bhuvneesh/gemma-4-E4B-it-Q8_0-GGUF",
+        "Bhuvneesh/gemma-4-E4B-it-Q5_K_M-GGUF",
+
         # 🥇 Top Picks: Coder Models (Absolute best for strict JSON, zero fluff, highly literal)
         "Qwen/Qwen2.5-Coder-0.5B-Instruct",
         "deepseek-ai/deepseek-coder-1.3b-instruct",
@@ -94,8 +97,6 @@ Output:"""
         "unsloth/SmolLM2-1.7B-Instruct-bnb-4bit",
         "nakue/SmolLM2-1.7B-W4A16-instruct",
         "nm-testing/SmolLM-1.7B-Instruct-quantized.w4a16",
-        "Bhuvneesh/gemma-4-E4B-it-Q8_0-GGUF",
-        "Bhuvneesh/gemma-4-E4B-it-Q5_K_M-GGUF",
         "Bhuvneesh/gemma-3-4b-it-Q8_0-GGUF",
         "Bhuvneesh/gemma-3-12b-it-Q5_K_M-GGUF"  # Note: 12B Q5 is ~10-11GB, fits tightly in 12GB VRAM
     ]
@@ -143,7 +144,7 @@ def run_benchmark(
     # Save tuples of (question, model, answer)
     answers_list = []
 
-    for model_id in test_models[:limit]:
+    for model_seq, model_id in enumerate(test_models[:limit]):
         print(f"\nBenchmarking {model_id}...")
         model_results = {"model_id": model_id, "scores": [], "times": [], "total_time": 0.0}
         debug_printed = False
@@ -170,7 +171,7 @@ def run_benchmark(
                 break
 
         results.append(model_results)
-        if i % 5 == 0 and i > 0:
+        if model_seq % 5 == 0 and model_seq > 0:
             print_answers(answers_list)
 
     total_elapsed = time.time() - total_start_time
