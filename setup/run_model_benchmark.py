@@ -22,15 +22,49 @@ def run_model_benchmark():
     ]
 
     questions2 = [
-        {"question": "Calculate: 123 * 45. Answer with only the number.", "answer": "5535"},
-        {"question": "What is the capital city of Australia? Answer with only the city name.", "answer": "Canberra"},
-        {"question": "What is the next number in this sequence: 1, 1, 2, 3, 5? Answer with only the number.",
-         "answer": "8"},
         {
-            "question": "Which of the following is a database system: Mozilla, PostgreSQL, Terminator, Outlook? Answer with only one word.",
-            "answer": "PostgreSQL"},
-        {"question": "Is water a solid, liquid, or gas at room temperature? Answer with only one word.",
-         "answer": "liquid"}
+            "question": "What is the name of the variable in this code: 'for i in range(10):\n    print(i)'? Answer with only the variable name.",
+            "answer": "i"},
+        {
+            "question": "What is the table name without schema mentioned in this Query: 'SELECT A, B, C FROM dbo.employees'? Answer with only the table name.",
+            "answer": "employees"},
+        {
+            "question": "What is the schema name for the table mentioned in this Query: 'SELECT A, B, C FROM hr.employees'? Answer with only the schema name.",
+            "answer": "hr"},
+        {
+            "question": "How many loops are in this code: 'while True:\n    for i in range(10):\n        for j in range(i): \n            print(i, j)'? Answer with only the number.",
+            "answer": "3"},
+        {"question": "Is the Earth flat or round? Answer with only one word: 'flat' or 'round'.", "answer": "round"},
+        {
+            "question": "What is the length of the list in this code: 'my_list = [1, 2, 3, 4, 5]'? Answer with only the number.",
+            "answer": "5"},
+        {
+            "question": "What is the key associated with the value 'apple' in this dictionary: \"{'fruit': 'apple', 'color': 'red'}\"? Answer with only the key name.",
+            "answer": "fruit"},
+        {
+            "question": "How many columns are being selected in this query: 'SELECT id, name, age, email FROM users'? Answer with only the number.",
+            "answer": "4"},
+        {
+            "question": "What is the name of the function defined in this code: 'def calculate_sum(a, b): return a + b'? Answer with only the function name.",
+            "answer": "calculate_sum"},
+        {
+            "question": "What is the column name used in the WHERE clause of this query: 'SELECT * FROM orders WHERE status = \"shipped\"'? Answer with only the column name.",
+            "answer": "status"},
+        {
+            "question": "What is the boolean value of the expression '5 > 10' in Python? Answer with only 'True' or 'False'.",
+            "answer": "False"},
+        {
+            "question": "What is the key for the age value in this JSON: '{\"name\": \"John\", \"age\": 30}'? Answer with only the key name.",
+            "answer": "age"},
+        {"question": "What is the result of '10 % 3' in Python? Answer with only the number.", "answer": "1"},
+        {
+            "question": "What aggregate function is used in this query: 'SELECT COUNT(*) FROM employees'? Answer with only the function name.",
+            "answer": "COUNT"},
+        {"question": "What is the index of the first element in a Python list? Answer with only the number.",
+         "answer": "0"},
+        {
+            "question": "What is the attribute used to specify the link destination in this code: '<a href=\"https://example.com\">Link</a>'? Answer with only the attribute name.",
+            "answer": "href"}
     ]
 
     prompt_template = """You are a strict data-extraction engine. You must output EXACTLY ONE WORD OR NUMBER.
@@ -54,6 +88,8 @@ Output:"""
     test_models = [
         "Bhuvneesh/gemma-4-E4B-it-Q8_0-GGUF",
         "Bhuvneesh/gemma-4-E4B-it-Q5_K_M-GGUF",
+        "Bhuvneesh/gemma-3-4b-it-Q8_0-GGUF",
+        "Bhuvneesh/gemma-3-12b-it-Q5_K_M-GGUF",  # Note: 12B Q5 is ~10-11GB, fits tightly in 12GB VRAM
 
         # 🥇 Top Picks: Coder Models (Absolute best for strict JSON, zero fluff, highly literal)
         "Qwen/Qwen2.5-Coder-0.5B-Instruct",
@@ -97,16 +133,19 @@ Output:"""
         "unsloth/SmolLM2-1.7B-Instruct-bnb-4bit",
         "nakue/SmolLM2-1.7B-W4A16-instruct",
         "nm-testing/SmolLM-1.7B-Instruct-quantized.w4a16",
-        "Bhuvneesh/gemma-3-4b-it-Q8_0-GGUF",
-        "Bhuvneesh/gemma-3-12b-it-Q5_K_M-GGUF"  # Note: 12B Q5 is ~10-11GB, fits tightly in 12GB VRAM
-    ]
-    print("=== RUNNING FIRST BENCHMARK (Questions 1) ===")
-    #results1 = run_benchmark(client, questions1, prompt_template, test_models[:2], 99999999)
 
-    #results1 = run_benchmark(client, questions1, prompt_template,
-    #                         test_models, 99999999, cache_models_only=True)
-    results1 = run_benchmark(client, questions1, prompt_template,
+        #"Bhuvneesh/gemma-3-27b-it-Q5_K_M-GGUF",
+    ]
+
+    print("=== CACHING MODELS ===")
+    run_benchmark(client, questions1, prompt_template,
                              test_models, 99999999,
+                             cache_models_only=True,
+                             request_timeout=3600 * 4)
+
+    print("=== RUNNING FIRST BENCHMARK (Questions 1) ===")
+    results1 = run_benchmark(client, questions1, prompt_template,
+                             test_models[:4], 99999999,
                              cache_models_only=False,
                              request_timeout=60 * 10)
 
@@ -124,7 +163,13 @@ Output:"""
         results2 = run_benchmark(client, questions2, prompt_template, qualified_models, 99999999)
         return results1, results2
 
-    return results1
+    results3 = run_benchmark(client, questions1, prompt_template,
+                             test_models, 99999999,
+                             cache_models_only=False,
+                             request_timeout=60 * 10)
+
+
+    return results3
 
 
 def run_benchmark(
@@ -313,5 +358,5 @@ def print_answers(answers_list: list[Any]):
         print(f"\n{q_text}")
         for model_id, answer in model_answers:
             clean_answer = "".join(c for c in answer[:800] if c.isprintable())
-            print(f"  {model_id}: {clean_answer[:80]}")
+            print(f"  {model_id}: {clean_answer[:200]}")
     print("\n" + "=" * 110)
