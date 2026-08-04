@@ -24,47 +24,124 @@ def run_model_benchmark():
     questions2 = [
         {
             "question": "What is the name of the variable in this code: 'for i in range(10):\n    print(i)'? Answer with only the variable name.",
-            "answer": "i"},
+            "answer": "i"
+        },
         {
             "question": "What is the table name without schema mentioned in this Query: 'SELECT A, B, C FROM dbo.employees'? Answer with only the table name.",
-            "answer": "employees"},
+            "answer": "employees"
+        },
         {
             "question": "What is the schema name for the table mentioned in this Query: 'SELECT A, B, C FROM hr.employees'? Answer with only the schema name.",
-            "answer": "hr"},
+            "answer": "hr"
+        },
         {
             "question": "How many loops are in this code: 'while True:\n    for i in range(10):\n        for j in range(i): \n            print(i, j)'? Answer with only the number.",
-            "answer": "3"},
-        {"question": "Is the Earth flat or round? Answer with only one word: 'flat' or 'round'.", "answer": "round"},
+            "answer": "3"
+        },
+        {
+            "question": "Is the Earth flat or round? Answer with only one word: 'flat' or 'round'.",
+            "answer": "round"
+        },
         {
             "question": "What is the length of the list in this code: 'my_list = [1, 2, 3, 4, 5]'? Answer with only the number.",
-            "answer": "5"},
+            "answer": "5"
+        },
         {
             "question": "What is the key associated with the value 'apple' in this dictionary: \"{'fruit': 'apple', 'color': 'red'}\"? Answer with only the key name.",
-            "answer": "fruit"},
+            "answer": "fruit"
+        },
         {
             "question": "How many columns are being selected in this query: 'SELECT id, name, age, email FROM users'? Answer with only the number.",
-            "answer": "4"},
+            "answer": "4"
+        },
         {
             "question": "What is the name of the function defined in this code: 'def calculate_sum(a, b): return a + b'? Answer with only the function name.",
-            "answer": "calculate_sum"},
+            "answer": "calculate_sum"
+        },
         {
             "question": "What is the column name used in the WHERE clause of this query: 'SELECT * FROM orders WHERE status = \"shipped\"'? Answer with only the column name.",
-            "answer": "status"},
+            "answer": "status"
+        },
         {
             "question": "What is the boolean value of the expression '5 > 10' in Python? Answer with only 'True' or 'False'.",
-            "answer": "False"},
+            "answer": "False"
+        },
         {
             "question": "What is the key for the age value in this JSON: '{\"name\": \"John\", \"age\": 30}'? Answer with only the key name.",
-            "answer": "age"},
-        {"question": "What is the result of '10 % 3' in Python? Answer with only the number.", "answer": "1"},
+            "answer": "age"
+        },
+        {
+            "question": "What is the result of '10 % 3' in Python? Answer with only the number.",
+            "answer": "1"
+        },
         {
             "question": "What aggregate function is used in this query: 'SELECT COUNT(*) FROM employees'? Answer with only the function name.",
-            "answer": "COUNT"},
-        {"question": "What is the index of the first element in a Python list? Answer with only the number.",
-         "answer": "0"},
+            "answer": "COUNT"
+        },
+        {
+            "question": "What is the index of the first element in a Python list? Answer with only the number.",
+            "answer": "0"
+        },
         {
             "question": "What is the attribute used to specify the link destination in this code: '<a href=\"https://example.com\">Link</a>'? Answer with only the attribute name.",
-            "answer": "href"}
+            "answer": "href"
+        },
+        {
+            "question": "What is the output of `len('hello')` in Python? Answer with only the number.",
+            "answer": "5"
+        },
+        {
+            "question": "What SQL keyword is used to filter records? Answer with only the keyword.",
+            "answer": "WHERE"
+        },
+        {
+            "question": "What is the value of `x` after this code: 'x = 10; x += 5'? Answer with only the number.",
+            "answer": "15"
+        },
+        {
+            "question": "What HTML tag is used to create a paragraph? Answer with only the tag name without brackets.",
+            "answer": "p"
+        },
+        {
+            "question": "What is the result of `2 ** 3` in Python? Answer with only the number.",
+            "answer": "8"
+        },
+        {
+            "question": "What SQL clause is used to sort the result-set? Answer with only the clause name.",
+            "answer": "ORDER BY"
+        },
+        {
+            "question": "What is the value associated with the key 'city' in this JSON: '{\"city\": \"Paris\", \"country\": \"France\"}'? Answer with only the value.",
+            "answer": "Paris"
+        },
+        {
+            "question": "What method is used to add an element to the end of a list in Python? Answer with only the method name.",
+            "answer": "append"
+        },
+        {
+            "question": "What is the result of `17 // 5` in Python? Answer with only the number.",
+            "answer": "3"
+        },
+        {
+            "question": "What SQL command is used to remove a table entirely? Answer with only the command.",
+            "answer": "DROP"
+        },
+        {
+            "question": "What is the data type of `[1, 2, 3]` in Python? Answer with only the type name.",
+            "answer": "list"
+        },
+        {
+            "question": "What attribute is used to specify an image source in HTML? Answer with only the attribute name.",
+            "answer": "src"
+        },
+        {
+            "question": "What is the result of `bool(0)` in Python? Answer with only 'True' or 'False'.",
+            "answer": "False"
+        },
+        {
+            "question": "What keyword is used to define a function in Python? Answer with only the keyword.",
+            "answer": "def"
+        }
     ]
 
     prompt_template = """You are a strict data-extraction engine. You must output EXACTLY ONE WORD OR NUMBER.
@@ -186,7 +263,7 @@ def run_benchmark(
     results = []
     total_start_time = time.time()
 
-    # Save tuples of (question, model, answer)
+    # Save tuples of (question, model, answer, time_taken)
     answers_list = []
 
     for model_seq, model_id in enumerate(test_models[:limit]):
@@ -254,11 +331,11 @@ def run_benchmark(
     # Second loop: print table using prepared values
     print("\n" + "=" * 110)
     print(
-        f"{'Model ID':<35} | {'Successes':<10} | {'Failures':<10} | {'Results':<20} | {'Accuracy':<10} | {'Total Time':<10}")
+        f"{'Model ID':<50} | {'Successes':<10} | {'Failures':<10} | {'Results':<20} | {'Accuracy':<10} | {'Total Time':<10}")
     print("-" * 110)
     for prep in prepared_results:
         print(
-            f"{prep['model_id']:<35} | {prep['init_ok']:<10} | {prep['init_fail']:<10} | "
+            f"{prep['model_id']:<50} | {prep['init_ok']:<10} | {prep['init_fail']:<10} | "
             f"{prep['scores_str']:<20} | {prep['accuracy']:>5.1f}%    | {prep['total_time_str_res']:<10}")
     print("=" * 110)
     print(f"Total Benchmark Time: {total_time_str}")
@@ -309,7 +386,7 @@ def make_one_request(
             print(f"  A: {generated_text[:len(q['answer']) * 5]} ({duration:.2f}s)")
 
             # Save tuple for the new table
-            answers_list.append((q["question"], model_id, generated_text.strip()))
+            answers_list.append((q["question"], model_id, generated_text.strip(), duration))
     except Exception as e:
         end_time = time.time()
         duration = end_time - start_time
@@ -322,7 +399,7 @@ def make_one_request(
             debug_printed = True
 
         # Save '-' for the new table
-        answers_list.append((q["question"], model_id, "-"))
+        answers_list.append((q["question"], model_id, "-", duration))
 
         if i == 0 and "500" in error_msg:
             print(f"  Q: {q['question'][:70]}... -> fail (500 Error on 1st question, aborting model)")
@@ -333,7 +410,7 @@ def make_one_request(
             for j in range(i + 1, len(questions)):
                 model_results["scores"].append("fail")
                 model_results["times"].append(0.0)
-                answers_list.append((questions[j]["question"], model_id, "-"))
+                answers_list.append((questions[j]["question"], model_id, "-", 0.0))
             abort = True
         else:
             model_results["scores"].append("fail")
@@ -351,12 +428,12 @@ def print_answers(answers_list: list[Any]):
 
     # Group by question
     answers_by_question = defaultdict(list)
-    for q_text, model_id, answer in answers_list:
-        answers_by_question[q_text].append((model_id, answer))
+    for q_text, model_id, answer, time_taken in answers_list:
+        answers_by_question[q_text].append((model_id, answer, time_taken))
 
     for q_text, model_answers in answers_by_question.items():
         print(f"\n{q_text}")
-        for model_id, answer in model_answers:
+        for model_id, answer, time_taken in model_answers:
             clean_answer = "".join(c for c in answer[:800] if c.isprintable())
-            print(f"  {model_id}: {clean_answer[:200]}")
+            print(f"  {model_id} ({time_taken:.2f}s): {clean_answer[:200]}")
     print("\n" + "=" * 110)
