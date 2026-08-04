@@ -416,20 +416,21 @@ def propose_prompt(model_id: str, q: dict[str, str]) -> str:
     question = q["question"]
 
     if "gemma" in model_id_lower:
-        # Gemma models respond well to the /no_think suffix to prevent reasoning loops
+        # Gemma models respond exceptionally well to the /no_think suffix
         prompt_template = "{question} /no_think"
     elif "qwen" in model_id_lower:
-        # Qwen models benefit from explicit strictness to avoid repeating the prompt or adding fluff
-        prompt_template = "{question}\n\nAnswer strictly with the requested value and nothing else."
+        # Qwen models tend to repeat the prompt and explain. Need strong negative constraints.
+        prompt_template = "{question}\n\nOutput ONLY the exact answer requested. Do not repeat the question, do not add punctuation, and do not provide any explanations."
     elif "deepseek" in model_id_lower:
-        # DeepSeek Coder is highly instruction-following but benefits from explicit constraints
-        prompt_template = "{question}\n\nProvide ONLY the exact answer, no explanations."
-    elif any(x in model_id_lower for x in ["smollm", "tinyllama", "luciole", "hunyuan", "phi", "llama", "mixtral"]):
-        # General strict prompt for other instruct models to prevent rambling
-        prompt_template = "{question}\n\nIMPORTANT: Reply with ONLY the answer. Do not add any other words, punctuation, or explanations."
+        # DeepSeek Coder tends to output "Answer: " or repeat the prompt.
+        prompt_template = "{question}\n\nRespond with EXACTLY the requested value and nothing else. Do not output 'Answer:', do not repeat the question, and do not explain."
+    elif any(x in model_id_lower for x in
+             ["smollm", "tinyllama", "luciole", "hunyuan", "phi", "llama", "mixtral", "olmo", "lfm"]):
+        # General small instruct models respond better to positive constraints.
+        prompt_template = "{question}\n\nRespond with EXACTLY the requested value (e.g., a single word or number) and absolutely nothing else."
     else:
-        # Fallback for unspecified models
-        prompt_template = "{question}\n\nOutput ONLY the exact answer requested, with no additional text."
+        # Fallback for unspecified models: strong, clear, positive constraint.
+        prompt_template = "{question}\n\nOutput ONLY the exact answer requested, with no additional text, explanations, or punctuation."
 
     return prompt_template.format(question=question)
 
