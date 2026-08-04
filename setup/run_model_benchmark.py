@@ -1,6 +1,6 @@
 import time
 from datetime import datetime
-from typing import Any
+from typing import Any, Literal
 from collections import defaultdict
 
 from ai_clients.model_client_base import TextToTextClient
@@ -47,132 +47,67 @@ Question: {question}
 Output:"""
 
     prompt_template = """You are a strict data-extraction engine. You must output EXACTLY ONE WORD OR NUMBER."""
-    prompt_template = ""
+    prompt_template = "{question} /no_think "
+
+
 
     test_models = [
-        # 🥈 Excellent Small Instruct Models (Tiny, robotic, very direct)
-        "Qwen/Qwen2-0.5B-Instruct",  # Instruct
-        "Qwen/Qwen2-1.5B-Instruct",  # Instruct
-        "HuggingFaceTB/SmolLM2-135M-Instruct",  # Instruct
-        "unsloth/SmolLM2-135M-Instruct",  # Instruct
-        "unsloth/SmolLM-135M-Instruct",  # Instruct
-        "unsloth/SmolLM-360M-Instruct",  # Instruct
-        "unsloth/SmolLM2-1.7B-Instruct",  # Instruct
-        "LiquidAI/LFM2.5-1.2B-Instruct",  # Instruct
-        "TinyLlama/TinyLlama-1.1B-Chat-v1.0",  # Chat
+        # 🥇 Top Picks: Coder Models (Absolute best for strict JSON, zero fluff, highly literal)
+        "Qwen/Qwen2.5-Coder-0.5B-Instruct",
+        "deepseek-ai/deepseek-coder-1.3b-instruct",
+        "Qwen/Qwen2.5-Coder-3B-Instruct",
 
-        "Alibaba-NLP/gte-base-en-v1.5",
-        "LiquidAI/LFM2-1.2B",
-        "LiquidAI/LFM2.5-230M",
-        "LiquidAI/LFM2.5-230M-Base",
-        "LiquidAI/LFM2.5-350M",
+        # 🥈 Excellent Small Instruct Models (Tiny, robotic, very direct, low VRAM usage)
+        "Qwen/Qwen2-0.5B-Instruct",
+        "Qwen/Qwen2-1.5B-Instruct",
+        "Qwen/Qwen2.5-0.5B-Instruct",
+        "Qwen/Qwen2.5-1.5B-Instruct",
+        "Qwen/Qwen2.5-3B-Instruct",
+        "HuggingFaceTB/SmolLM2-135M-Instruct",
+        "unsloth/SmolLM2-135M-Instruct",
+        "unsloth/SmolLM-135M-Instruct",
+        "unsloth/SmolLM-360M-Instruct",
+        "unsloth/SmolLM2-360M-Instruct",
+        "unsloth/SmolLM-1.7B-Instruct",
+        "unsloth/SmolLM2-1.7B-Instruct",
+        "LiquidAI/LFM2.5-1.2B-Instruct",
+        "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+        "allenai/OLMo-2-0425-1B-Instruct",
+        "OpenLLM-France/Luciole-1B-Instruct-1.1",
+        "tencent/Hunyuan-1.8B-Instruct",
 
-        # 🥇 Top Picks: Coder & Math models (Highly literal, rule-following, zero fluff)
-        # "01-ai/Yi-Coder-1.5B-Chat",  # Chat
-        "01-ai/Yi-Coder-1.5B",
-        "Qwen/Qwen2.5-Coder-0.5B-Instruct",  # Instruct
-        "Qwen/Qwen2.5-Math-1.5B-Instruct",  # Instruct
-
-        # 🥉 Other Notable Small Instruct Models
-        "allenai/OLMo-2-0425-1B-Instruct",  # Instruct
-        "OpenLLM-France/Luciole-1B-Instruct-1.1",  # Instruct
-        "tencent/Hunyuan-1.8B-Instruct",  # Instruct
-
-        # Base & Unquantized Models
-        "Qwen/Qwen1.5-0.5B",
-        "Qwen/Qwen2-1.5B",
-        "Qwen/Qwen2.5-0.5B",
-        "Qwen/Qwen2.5-1.5B",
-        "Qwen/Qwen2.5-Coder-1.5B",
-        "Qwen/Qwen2.5-Math-1.5B",
-        "Qwen/Qwen3-0.6B",
-        "Qwen/Qwen3-1.7B",
-        "Qwen/Qwen3-1.7B-Base",
-
-        # GGUF Models
-        # "Qwen/Qwen3-0.6B-GGUF",  # GGUF
-        # "Qwen/Qwen3-1.7B-GGUF",  # GGUF
-        # "QuantFactory/SmolLM-135M-GGUF",  # GGUF
-        # "QuantFactory/SmolLM-135M-Instruct-GGUF",  # GGUF & Instruct
-        # "unsloth/bge-small-en-v1.5-GGUF",  # GGUF
-
-        # Other Models
-        "apple/CLaRa-7B-Instruct",  # Instruct
-        "deepseek-ai/deepseek-coder-1.3b-instruct",  # Instruct
-        "microsoft/Phi-4-mini-instruct",  # Instruct
-        "Qwen/Qwen2.5-1.5B-Instruct",  # Instruct
-        "Qwen/Qwen2.5-3B-Instruct",  # Instruct
-        "Qwen/Qwen2.5-Coder-3B-Instruct",  # Instruct
-        "unsloth/Llama-3.2-1B-Instruct",  # Instruct
-        "unsloth/Llama-3.2-3B-Instruct",  # Instruct
-        "unsloth/Phi-3-mini-4k-instruct",  # Instruct
-        "unsloth/SmolLM-1.7B-Instruct",  # Instruct
-        "unsloth/SmolLM2-360M-Instruct",  # Instruct
-
-        # (Removed duplicates: "Qwen/Qwen3-0.6B-GGUF", "Qwen/Qwen3-1.7B-GGUF", "Qwen/Qwen2.5-0.5B")
-        "Qwen/Qwen2.5-0.5B-Instruct",  # Instruct
-        # "LiquidAI/LFM2-1.2B",
-        "Qwen/Qwen3-Embedding-0.6B",
-        "unsloth/Qwen3-0.6B",
-        "unsloth/Qwen3-4B",
-
-        # Embeddings & BERT
-        "microsoft/deberta-v3-base",
-        "sentence-transformers/all-MiniLM-L6-v2",
-        "BAAI/bge-base-en",
-        "google-bert/bert-base-cased",
-
-        # GGUF Models
-        # "ggml-org/bge-m3-Q8_0-GGUF",  # GGUF
-        # "lmstudio-community/SmolLM2-135M-Instruct-GGUF",  # GGUF & Instruct
-        # "hugging-quants/Llama-3.2-1B-Instruct-Q8_0-GGUF",  # GGUF & Instruct
-        # "QuantFactory/SmolLM2-135M-GGUF",  # GGUF
-
-        # GPTQ Models
-        "TheBloke/TinyLlama-1.1B-Chat-v0.3-GPTQ",  # GPTQ & Chat
-        "TheBlokeAI/Mixtral-tiny-GPTQ",  # GPTQ
-
-        # ONNX Models
-        "Qdrant/all-MiniLM-L6-v2-onnx",
-        "corto-ai/jina-reranker-v1-turbo-en-onnx",
-        "Qdrant/bge-small-en-v1.5-onnx-Q",
-        "Qdrant/paraphrase-multilingual-MiniLM-L12-v2-onnx-Q",
-
-        # MLX Models
-        "mlx-community/SmolLM3-3B-4bit",
-        "mlx-community/starcoder2-3b-4bit",
-        "prism-ml/Bonsai-8B-mlx-1bit",
-        "prism-ml/Ternary-Bonsai-1.7B-mlx-2bit",
-
-        # BNB-4bit & Quantized
-        "unsloth/SmolLM2-135M-Instruct-bnb-4bit",  # Instruct
-        "unsloth/SmolLM2-360M-bnb-4bit",
-        "unsloth/SmolLM2-1.7B-bnb-4bit",
-        "unsloth/SmolLM2-1.7B-Instruct-bnb-4bit",  # Instruct
-        "unsloth/DeepSeek-R1-Distill-Qwen-1.5B-unsloth-bnb-4bit",
-        "unsloth/DeepSeek-R1-Distill-Qwen-1.5B",
-        "nakue/SmolLM2-1.7B-W4A16-instruct",  # Instruct
-        "nm-testing/SmolLM-1.7B-Instruct-quantized.w4a16",  # Instruct
-
-        "Bhuvneesh/gemma-4-E4B-it-Q8_0-GGUF",
-
-        "microsoft/phi-2",
-        "microsoft/phi-4",
+        # 🥉 Strong Mid-Size Instruct Models (Best balance for complex JSON, fit in 12GB VRAM with 4-bit/8-bit)
+        "apple/CLaRa-7B-Instruct",
+        "microsoft/Phi-4-mini-instruct",
+        "unsloth/Llama-3.2-1B-Instruct",
+        "unsloth/Llama-3.2-3B-Instruct",
+        "unsloth/Phi-3-mini-4k-instruct",
         "microsoft/Phi-3-mini-128k-instruct",
         "microsoft/Phi-3-mini-4k-instruct",
-
-        "Qwen/Qwen2.5-7B",
         "Qwen/Qwen2.5-7B-Instruct",
-        "Qwen/Qwen3-8B",
-        "Qwen/Qwen3-8B-Base",
 
-        # FP8
-        # "Qwen/Qwen3-0.6B-FP8",
+        # ✅ Recommended Quantized Formats (GGUF / GPTQ / BNB-4bit) of the above models
+        "TheBloke/TinyLlama-1.1B-Chat-v0.3-GPTQ",
+        "TheBlokeAI/Mixtral-tiny-GPTQ",
+        "mlx-community/SmolLM3-3B-4bit",
+        "unsloth/SmolLM2-135M-Instruct-bnb-4bit",
+        "unsloth/SmolLM2-1.7B-Instruct-bnb-4bit",
+        "nakue/SmolLM2-1.7B-W4A16-instruct",
+        "nm-testing/SmolLM-1.7B-Instruct-quantized.w4a16",
+        "Bhuvneesh/gemma-4-E4B-it-Q8_0-GGUF",
+        "Bhuvneesh/gemma-4-E4B-it-Q5_K_M-GGUF",
+        "Bhuvneesh/gemma-3-4b-it-Q8_0-GGUF",
+        "Bhuvneesh/gemma-3-12b-it-Q5_K_M-GGUF"  # Note: 12B Q5 is ~10-11GB, fits tightly in 12GB VRAM
     ]
     print("=== RUNNING FIRST BENCHMARK (Questions 1) ===")
-    results1 = run_benchmark(client, questions1, prompt_template, test_models[:2], 99999999)
+    #results1 = run_benchmark(client, questions1, prompt_template, test_models[:2], 99999999)
 
-    results1 = run_benchmark(client, questions1, prompt_template, test_models, 99999999)
+    #results1 = run_benchmark(client, questions1, prompt_template,
+    #                         test_models, 99999999, cache_models_only=True)
+    results1 = run_benchmark(client, questions1, prompt_template,
+                             test_models, 99999999,
+                             cache_models_only=False,
+                             request_timeout=60 * 10)
 
     qualified_models = [
         res["model_id"] for res in results1
@@ -196,7 +131,9 @@ def run_benchmark(
         questions: list[dict[str, str]],
         prompt_template: str,
         test_models: list[str],
-        limit: int = 99999999):
+        limit: int = 99999999,
+        cache_models_only = False,
+        request_timeout = 60):
     # Make list of models distinct
     test_models = list(dict.fromkeys(test_models))
 
@@ -209,69 +146,29 @@ def run_benchmark(
     for model_id in test_models[:limit]:
         print(f"\nBenchmarking {model_id}...")
         model_results = {"model_id": model_id, "scores": [], "times": [], "total_time": 0.0}
+        debug_printed = False
 
         start_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         print(f"{start_timestamp} caching model {model_id}")
         client.cache_model(model_id)
         end_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         print(f"{end_timestamp} model cached {model_id}")
+        if cache_models_only:
+            continue
 
+        abort = False
         for i, q in enumerate(questions):
-            for j in range(2 if i == 0 else 1):
-                start_time = time.time()
-                start_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                print(f"{start_timestamp} Sending request {i + 1}/{len(questions)}...")
-                try:
-                    final_prompt = prompt_template.format(question=q["question"])
-                    response = client.generate(model_id, final_prompt, model_limit_seconds=60)
-                    end_time = time.time()
-                    duration = end_time - start_time
-                    if j == 0 and i == 0:
-                        print(f"{end_timestamp} Test run duration {duration:.2f}s")
-                        continue
-                    #answers_list.append(q["answer"])
-                    end_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                    generated_text = response.get("generated_text", "")
-                    if not isinstance(generated_text, str):
-                        generated_text = str(generated_text)
-                    print(f"{end_timestamp} Received response in {duration:.2f}s")
-                    is_correct = (q["answer"].strip().lower() == generated_text.strip().lower())
-                    model_results["scores"].append("ok" if is_correct else "fail")
-                    model_results["times"].append(duration)
-                    model_results["total_time"] += duration
-                    print(f"  Q: {q['question'][:70]}... -> {'ok' if is_correct else 'fail'}")
-                    print(f"  A: {generated_text[:len(q['answer']) * 5]} ({duration:.2f}s)")
+            for k in range(2 if i == 0 else 1):
+                debug_printed, abort = make_one_request(
+                    answers_list, client, debug_printed,
+                    end_timestamp, i, k, model_id,
+                    model_results, prompt_template, q, questions,
+                    request_timeout)
+                if abort:
+                    break
+            if abort:
+                break
 
-                    # Save tuple for the new table
-                    answers_list.append((q["question"], model_id, generated_text.strip()))
-                except Exception as e:
-                    end_time = time.time()
-                    duration = end_time - start_time
-                    end_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                    error_msg = str(e)
-                    print(f"  [{end_timestamp}] Request failed after {duration:.2f}s: {error_msg}")
-                    # Print debug info on client side when error occurs
-                    print_model_debug_info(model_id)
-
-                    # Save '-' for the new table
-                    answers_list.append((q["question"], model_id, "-"))
-
-                    if i == 0 and "500" in error_msg:
-                        print(f"  Q: {q['question'][:70]}... -> fail (500 Error on 1st question, aborting model)")
-                        model_results["scores"].append("fail")
-                        model_results["times"].append(duration)
-                        model_results["total_time"] += duration
-                        # Mark remaining questions as fail with 0 time
-                        for j in range(i + 1, len(questions)):
-                            model_results["scores"].append("fail")
-                            model_results["times"].append(0.0)
-                            answers_list.append((questions[j]["question"], model_id, "-"))
-                        break
-                    else:
-                        model_results["scores"].append("fail")
-                        model_results["times"].append(duration)
-                        model_results["total_time"] += duration
-                        print(f"  Q: {q['question'][:70]}... -> fail (Error)")
         results.append(model_results)
         if i % 5 == 0 and i > 0:
             print_answers(answers_list)
@@ -321,6 +218,83 @@ def run_benchmark(
     print(f"Total Benchmark Time: {total_time_str}")
 
     return results
+
+
+def make_one_request(
+        answers_list: list[Any],
+        client: TextToTextClient,
+        debug_printed: bool,
+        end_timestamp: str,
+        i: int | Literal[0],
+        k: int,
+        model_id: str,
+        model_results: dict[str, str | list[Any] | float],
+        prompt_template: str,
+        q: dict[str, str],
+        questions: list[dict[str, str]],
+        request_timeout: int):
+
+    abort = False
+    start_time = time.time()
+    start_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    print(f"{start_timestamp} Sending request {i + 1}/{len(questions)}...")
+    try:
+        final_prompt = prompt_template.format(question=q["question"])
+        if i == 0:
+            print(f"prompt: {final_prompt}")
+        response = client.generate(model_id, final_prompt, model_limit_seconds=request_timeout)
+        print(f"full response: {str(response)[:1024 * 2]}")
+        end_time = time.time()
+        duration = end_time - start_time
+        if k == 0 and i == 0:
+            print(f"{end_timestamp} Test run duration {duration:.2f}s")
+        else:
+            # answers_list.append(q["answer"])
+            end_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            generated_text = response.get("generated_text", "")
+            if not isinstance(generated_text, str):
+                generated_text = str(generated_text)
+            print(f"{end_timestamp} Received response in {duration:.2f}s")
+            is_correct = (q["answer"].strip().lower() == generated_text.strip().lower())
+            model_results["scores"].append("ok" if is_correct else "fail")
+            model_results["times"].append(duration)
+            model_results["total_time"] += duration
+            print(f"  Q: {q['question'][:70]}... -> {'ok' if is_correct else 'fail'}")
+            print(f"  A: {generated_text[:len(q['answer']) * 5]} ({duration:.2f}s)")
+
+            # Save tuple for the new table
+            answers_list.append((q["question"], model_id, generated_text.strip()))
+    except Exception as e:
+        end_time = time.time()
+        duration = end_time - start_time
+        end_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        error_msg = str(e)
+        print(f"  [{end_timestamp}] Request failed after {duration:.2f}s: {error_msg}")
+        # Print debug info on client side when error occurs
+        if not debug_printed:
+            print_model_debug_info(model_id)
+            debug_printed = True
+
+        # Save '-' for the new table
+        answers_list.append((q["question"], model_id, "-"))
+
+        if i == 0 and "500" in error_msg:
+            print(f"  Q: {q['question'][:70]}... -> fail (500 Error on 1st question, aborting model)")
+            model_results["scores"].append("fail")
+            model_results["times"].append(duration)
+            model_results["total_time"] += duration
+            # Mark remaining questions as fail with 0 time
+            for j in range(i + 1, len(questions)):
+                model_results["scores"].append("fail")
+                model_results["times"].append(0.0)
+                answers_list.append((questions[j]["question"], model_id, "-"))
+            abort = True
+        else:
+            model_results["scores"].append("fail")
+            model_results["times"].append(duration)
+            model_results["total_time"] += duration
+            print(f"  Q: {q['question'][:70]}... -> fail (Error)")
+    return debug_printed, abort
 
 
 def print_answers(answers_list: list[Any]):
