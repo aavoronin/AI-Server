@@ -68,6 +68,16 @@ class GGUFTextToTextModel(TextToTextModel):
                         self.tokenizer = AutoTokenizer.from_pretrained("google/gemma-3-4b-it", trust_remote_code=True)
                     elif "gemma-3-12b" in model_id_lower:
                         self.tokenizer = AutoTokenizer.from_pretrained("google/gemma-3-12b-it", trust_remote_code=True)
+                    elif "qwen3-0.6b" in model_id_lower:
+                        self.tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen3-0.6B", trust_remote_code=True)
+                    elif "qwen3-1.7b" in model_id_lower:
+                        self.tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen3-1.7B", trust_remote_code=True)
+                    elif "smollm-135m-instruct" in model_id_lower:
+                        self.tokenizer = AutoTokenizer.from_pretrained("HuggingFaceTB/SmolLM2-135M-Instruct", trust_remote_code=True)
+                    elif "smollm-135m" in model_id_lower:
+                        self.tokenizer = AutoTokenizer.from_pretrained("HuggingFaceTB/SmolLM2-135M", trust_remote_code=True)
+                    elif "bge-small-en-v1.5" in model_id_lower:
+                        self.tokenizer = AutoTokenizer.from_pretrained("BAAI/bge-small-en-v1.5", trust_remote_code=True)
                     else:
                         raise
 

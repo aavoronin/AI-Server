@@ -122,3 +122,64 @@ test_models0 = [
         # FP8
         # "Qwen/Qwen3-0.6B-FP8",
     ]
+
+test_models_20260804 = [
+        "mergekit-community/Qwen3-7B-Instruct",
+        "Ygz-08123/Qwen3-7B-Instruct-Q2_K-GGUF",
+        "Ygz-08123/Qwen3-7B-Instruct-Q4_K_M-GGUF",
+        "goodgooodboy/Qwen3-7B-Instruct-Q4_K_M-GGUF",
+        "lm-kit/qwen-3-14b-instruct-gguf",
+
+        "deepseek-ai/deepseek-coder-1.3b-instruct",
+        "deepseek-ai/deepseek-coder-7b-instruct-v1.5",
+        "Qwen/Qwen2.5-Coder-3B-Instruct",
+        "Qwen/Qwen2.5-3B-Instruct",
+        "Qwen/Qwen2.5-7B-Instruct",
+
+        "Bhuvneesh/gemma-3-27b-it-Q5_K_M-GGUF",
+        "Bhuvneesh/gemma-4-E4B-it-Q8_0-GGUF",
+        "Bhuvneesh/gemma-4-E4B-it-Q5_K_M-GGUF",
+        "Bhuvneesh/gemma-3-4b-it-Q8_0-GGUF",
+        "Bhuvneesh/gemma-3-12b-it-Q5_K_M-GGUF",  # Note: 12B Q5 is ~10-11GB, fits tightly in 12GB VRAM
+
+        # 🥇 Top Picks: Coder Models (Absolute best for strict JSON, zero fluff, highly literal)
+        #"Qwen/Qwen2.5-Coder-0.5B-Instruct",
+
+        # 🥈 Excellent Small Instruct Models (Tiny, robotic, very direct, low VRAM usage)
+        #"Qwen/Qwen2-0.5B-Instruct",
+        #"Qwen/Qwen2-1.5B-Instruct",
+        #"Qwen/Qwen2.5-0.5B-Instruct",
+        #"Qwen/Qwen2.5-1.5B-Instruct",
+        "HuggingFaceTB/SmolLM2-135M-Instruct",
+        "unsloth/SmolLM2-135M-Instruct",
+        #"unsloth/SmolLM-135M-Instruct",
+        #"unsloth/SmolLM-360M-Instruct",
+        "unsloth/SmolLM2-360M-Instruct",
+        #"unsloth/SmolLM-1.7B-Instruct",
+        "unsloth/SmolLM2-1.7B-Instruct",
+        "LiquidAI/LFM2.5-1.2B-Instruct",
+        "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+        #"allenai/OLMo-2-0425-1B-Instruct",
+        "OpenLLM-France/Luciole-1B-Instruct-1.1",
+        "tencent/Hunyuan-1.8B-Instruct",
+
+        # 🥉 Strong Mid-Size Instruct Models (Best balance for complex JSON, fit in 12GB VRAM with 4-bit/8-bit)
+        #"apple/CLaRa-7B-Instruct",
+        "microsoft/Phi-4-mini-instruct",
+        #"unsloth/Llama-3.2-1B-Instruct",
+        "unsloth/Llama-3.2-3B-Instruct",
+        #"unsloth/Phi-3-mini-4k-instruct",
+        #"microsoft/Phi-3-mini-128k-instruct",
+        #"microsoft/Phi-3-mini-4k-instruct",
+
+        # ✅ Recommended Quantized Formats (GGUF / GPTQ / BNB-4bit) of the above models
+        "TheBloke/TinyLlama-1.1B-Chat-v0.3-GPTQ",
+        "TheBlokeAI/Mixtral-tiny-GPTQ",
+        "mlx-community/SmolLM3-3B-4bit",
+        #"unsloth/SmolLM2-135M-Instruct-bnb-4bit",
+        "unsloth/SmolLM2-1.7B-Instruct-bnb-4bit",
+        "nakue/SmolLM2-1.7B-W4A16-instruct",
+        #"nm-testing/SmolLM-1.7B-Instruct-quantized.w4a16",
+
+
+    ]

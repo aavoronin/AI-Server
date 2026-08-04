@@ -157,8 +157,7 @@ Output: Paris
 Question: {question}
 Output:"""
 
-    prompt_template = """You are a strict data-extraction engine. You must output EXACTLY ONE WORD OR NUMBER."""
-    prompt_template = "{question} /no_think "
+    #prompt_template = """You are a strict data-extraction engine. You must output EXACTLY ONE WORD OR NUMBER."""
 
 
 
@@ -167,92 +166,81 @@ Output:"""
         "Bhuvneesh/gemma-4-E4B-it-Q5_K_M-GGUF",
         "Bhuvneesh/gemma-3-4b-it-Q8_0-GGUF",
         "Bhuvneesh/gemma-3-12b-it-Q5_K_M-GGUF",  # Note: 12B Q5 is ~10-11GB, fits tightly in 12GB VRAM
-
-        # 🥇 Top Picks: Coder Models (Absolute best for strict JSON, zero fluff, highly literal)
-        "Qwen/Qwen2.5-Coder-0.5B-Instruct",
+        "unsloth/gemma-4-12b-it-GGUF",
         "deepseek-ai/deepseek-coder-1.3b-instruct",
-        "Qwen/Qwen2.5-Coder-3B-Instruct",
-
-        # 🥈 Excellent Small Instruct Models (Tiny, robotic, very direct, low VRAM usage)
-        "Qwen/Qwen2-0.5B-Instruct",
         "Qwen/Qwen2-1.5B-Instruct",
-        "Qwen/Qwen2.5-0.5B-Instruct",
         "Qwen/Qwen2.5-1.5B-Instruct",
         "Qwen/Qwen2.5-3B-Instruct",
+        "Qwen/Qwen2.5-7B-Instruct",
+
+        "Qwen/Qwen2.5-Coder-3B-Instruct",
+        "deepseek-ai/deepseek-coder-7b-instruct-v1.5",
+
+        "Bhuvneesh/gemma-3-27b-it-Q5_K_M-GGUF",
+
+        "mergekit-community/Qwen3-7B-Instruct",
+        "Ygz-08123/Qwen3-7B-Instruct-Q2_K-GGUF",
+        "Ygz-08123/Qwen3-7B-Instruct-Q4_K_M-GGUF",
+        "goodgooodboy/Qwen3-7B-Instruct-Q4_K_M-GGUF",
+        "lm-kit/qwen-3-14b-instruct-gguf",
+
         "HuggingFaceTB/SmolLM2-135M-Instruct",
         "unsloth/SmolLM2-135M-Instruct",
-        "unsloth/SmolLM-135M-Instruct",
-        "unsloth/SmolLM-360M-Instruct",
         "unsloth/SmolLM2-360M-Instruct",
-        "unsloth/SmolLM-1.7B-Instruct",
         "unsloth/SmolLM2-1.7B-Instruct",
         "LiquidAI/LFM2.5-1.2B-Instruct",
         "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
-        "allenai/OLMo-2-0425-1B-Instruct",
         "OpenLLM-France/Luciole-1B-Instruct-1.1",
         "tencent/Hunyuan-1.8B-Instruct",
 
-        # 🥉 Strong Mid-Size Instruct Models (Best balance for complex JSON, fit in 12GB VRAM with 4-bit/8-bit)
-        "apple/CLaRa-7B-Instruct",
         "microsoft/Phi-4-mini-instruct",
-        "unsloth/Llama-3.2-1B-Instruct",
         "unsloth/Llama-3.2-3B-Instruct",
-        "unsloth/Phi-3-mini-4k-instruct",
-        "microsoft/Phi-3-mini-128k-instruct",
-        "microsoft/Phi-3-mini-4k-instruct",
-        "Qwen/Qwen2.5-7B-Instruct",
 
         # ✅ Recommended Quantized Formats (GGUF / GPTQ / BNB-4bit) of the above models
         "TheBloke/TinyLlama-1.1B-Chat-v0.3-GPTQ",
         "TheBlokeAI/Mixtral-tiny-GPTQ",
         "mlx-community/SmolLM3-3B-4bit",
-        "unsloth/SmolLM2-135M-Instruct-bnb-4bit",
         "unsloth/SmolLM2-1.7B-Instruct-bnb-4bit",
         "nakue/SmolLM2-1.7B-W4A16-instruct",
-        "nm-testing/SmolLM-1.7B-Instruct-quantized.w4a16",
-
-        #"Bhuvneesh/gemma-3-27b-it-Q5_K_M-GGUF",
     ]
 
-    print("=== CACHING MODELS ===")
-    run_benchmark(client, questions1, prompt_template,
-                             test_models, 99999999,
-                             cache_models_only=True,
-                             request_timeout=3600 * 4)
+    for model_slice in [10, 9999999]:
+        print("=== CACHING MODELS ===")
+        run_benchmark(client, questions1,
+                      test_models[:model_slice], 99999999,
+                      cache_models_only=True,
+                      request_timeout=3600 * 4)
 
-    print("=== RUNNING FIRST BENCHMARK (Questions 1) ===")
-    results1 = run_benchmark(client, questions1, prompt_template,
-                             test_models[:4], 99999999,
-                             cache_models_only=False,
-                             request_timeout=60 * 10)
+        print("=== RUNNING FIRST BENCHMARK (Questions 1) ===")
+        print(f"\n=== ALL MODELS: {len(test_models[:model_slice])} ===")
+        for m in test_models[:model_slice]:
+            print(f"  - {m}")
+        results1 = run_benchmark(client, questions1,
+                                 test_models[:model_slice], 99999999,
+                                 cache_models_only=False,
+                                 request_timeout=60 * 10)
 
-    qualified_models = [
-        res["model_id"] for res in results1
-        if len(res["scores"]) > 0 and (sum(1 for s in res["scores"] if s == "ok") / len(res["scores"]) * 100) >= 50.0
-    ]
+        qualified_models = [
+            res["model_id"] for res in results1
+            if len(res["scores"]) > 0 and (sum(1 for s in res["scores"] if s == "ok") / len(res["scores"]) * 100) >= 50.0
+        ]
 
-    print(f"\n=== QUALIFIED MODELS (>= 50% accuracy): {len(qualified_models)} ===")
-    for m in qualified_models:
-        print(f"  - {m}")
+        print(f"\n=== QUALIFIED MODELS (>= 50% accuracy): {len(qualified_models)} ===")
+        for m in qualified_models:
+            print(f"  - {m}")
 
-    if qualified_models:
-        print("\n=== RUNNING SECOND BENCHMARK (Questions 2) ===")
-        results2 = run_benchmark(client, questions2, prompt_template, qualified_models, 99999999)
-        return results1, results2
+        if qualified_models:
+            print("\n=== RUNNING SECOND BENCHMARK (Questions 2) ===")
+            results2 = run_benchmark(client, questions2,
+                                 qualified_models, 99999999,
+                                 cache_models_only=False,
+                                 request_timeout=60 * 10)
 
-    results3 = run_benchmark(client, questions1, prompt_template,
-                             test_models, 99999999,
-                             cache_models_only=False,
-                             request_timeout=60 * 10)
-
-
-    return results3
 
 
 def run_benchmark(
         client: TextToTextClient,
         questions: list[dict[str, str]],
-        prompt_template: str,
         test_models: list[str],
         limit: int = 99999999,
         cache_models_only = False,
@@ -285,7 +273,7 @@ def run_benchmark(
                 debug_printed, abort = make_one_request(
                     answers_list, client, debug_printed,
                     end_timestamp, i, k, model_id,
-                    model_results, prompt_template, q, questions,
+                    model_results, q, questions,
                     request_timeout)
                 if abort:
                     break
@@ -352,7 +340,6 @@ def make_one_request(
         k: int,
         model_id: str,
         model_results: dict[str, str | list[Any] | float],
-        prompt_template: str,
         q: dict[str, str],
         questions: list[dict[str, str]],
         request_timeout: int):
@@ -362,7 +349,7 @@ def make_one_request(
     start_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     print(f"{start_timestamp} Sending request {i + 1}/{len(questions)}...")
     try:
-        final_prompt = prompt_template.format(question=q["question"])
+        final_prompt = propose_prompt(model_id, q)
         if i == 0:
             print(f"prompt: {final_prompt}")
         response = client.generate(model_id, final_prompt, model_limit_seconds=request_timeout)
@@ -419,6 +406,32 @@ def make_one_request(
             print(f"  Q: {q['question'][:70]}... -> fail (Error)")
     return debug_printed, abort
 
+
+def propose_prompt(model_id: str, q: dict[str, str]) -> str:
+    """
+    Proposes a prompt template tailored to the specific model family to enforce
+    exact, concise answers without additional text, reasoning, or explanations.
+    """
+    model_id_lower = model_id.lower()
+    question = q["question"]
+
+    if "gemma" in model_id_lower:
+        # Gemma models respond well to the /no_think suffix to prevent reasoning loops
+        prompt_template = "{question} /no_think"
+    elif "qwen" in model_id_lower:
+        # Qwen models benefit from explicit strictness to avoid repeating the prompt or adding fluff
+        prompt_template = "{question}\n\nAnswer strictly with the requested value and nothing else."
+    elif "deepseek" in model_id_lower:
+        # DeepSeek Coder is highly instruction-following but benefits from explicit constraints
+        prompt_template = "{question}\n\nProvide ONLY the exact answer, no explanations."
+    elif any(x in model_id_lower for x in ["smollm", "tinyllama", "luciole", "hunyuan", "phi", "llama", "mixtral"]):
+        # General strict prompt for other instruct models to prevent rambling
+        prompt_template = "{question}\n\nIMPORTANT: Reply with ONLY the answer. Do not add any other words, punctuation, or explanations."
+    else:
+        # Fallback for unspecified models
+        prompt_template = "{question}\n\nOutput ONLY the exact answer requested, with no additional text."
+
+    return prompt_template.format(question=question)
 
 def print_answers(answers_list: list[Any]):
     # Print the new table format before the final result
