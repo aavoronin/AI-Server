@@ -56,7 +56,7 @@ def run_model_benchmark():
         "nakue/SmolLM2-1.7B-W4A16-instruct",
     ]
 
-    for model_slice in [14, 9999999]:
+    for model_slice in [10, 14, 9999999]:
         print("=== CACHING MODELS ===")
         run_benchmark(client, questions1,
                       test_models[:model_slice], 99999999,
@@ -97,13 +97,9 @@ def run_benchmark(
         limit: int = 99999999,
         cache_models_only: bool = False,
         request_timeout: int = 60):
-    # Make list of models distinct
     test_models = list(dict.fromkeys(test_models))
-
     results = []
     total_start_time = time.time()
-
-    # Save tuples of (question, model, answer, time_taken)
     answers_list = []
 
     for model_seq, model_id in enumerate(test_models[:limit]):
@@ -151,7 +147,6 @@ def run_benchmark(
 
     print_answers(answers_list)
 
-    # First loop: collect all final values into prepared_results
     prepared_results = []
     for res in results:
         scores_str = " ".join(res["scores"])
@@ -176,7 +171,6 @@ def run_benchmark(
             "total_time_str_res": total_time_str_res
         })
 
-    # Second loop: print table using prepared values
     print("\n" + "=" * 110)
     print(
         f"{'Model ID':<50} | {'Successes':<10} | {'Failures':<10} | {'Results':<20} | {'Accuracy':<10} | {'Total Time':<10}")
@@ -298,11 +292,23 @@ def print_answers(answers_list: list[Any]):
 
 
 def evaluate_json_response(output_text: str, expected_json: dict) -> float:
-    """Evaluates if the model's output is strictly valid JSON and matches expected keys/values."""
+    """Evaluates if the model's output is valid JSON and matches expected keys/values."""
     output_text = output_text.strip()
-    # Must be strictly JSON (no extra words/symbols)
+
+    # Remove markdown code blocks if present
+    if output_text.startswith("```"):
+        output_text = output_text[3:].strip()
+        if output_text.lower().startswith("json"):
+            output_text = output_text[4:].strip()
+        if output_text.endswith("```"):
+            output_text = output_text[:-3].strip()
+
+    output_text = output_text.strip()
+
+    # Must be strictly JSON
     if not (output_text.startswith('{') and output_text.endswith('}')):
         return 0.0
+
     try:
         parsed = json.loads(output_text)
     except json.JSONDecodeError:
@@ -314,10 +320,23 @@ def evaluate_json_response(output_text: str, expected_json: dict) -> float:
     correct_keys = 0
     total_keys = len(expected_json)
     for key, expected_value in expected_json.items():
-        actual_value = str(parsed.get(key, "")).strip().lower()
-        expected_value_str = str(expected_value).strip().lower()
-        if actual_value == expected_value_str:
-            correct_keys += 1
+        actual_value = parsed.get(key)
+
+        if isinstance(expected_value, list):
+            # Normalize both to sorted lists of lowercase strings for comparison
+            if isinstance(actual_value, list):
+                actual_list = sorted([str(v).strip().lower() for v in actual_value])
+            else:
+                actual_list = sorted([str(actual_value).strip().lower()]) if actual_value is not None else []
+
+            expected_list = sorted([str(v).strip().lower() for v in expected_value])
+            if actual_list == expected_list:
+                correct_keys += 1
+        else:
+            actual_value_str = str(actual_value).strip().lower() if actual_value is not None else ""
+            expected_value_str = str(expected_value).strip().lower()
+            if actual_value_str == expected_value_str:
+                correct_keys += 1
 
     return correct_keys / total_keys if total_keys > 0 else 0.0
 
@@ -331,8 +350,6 @@ def run_benchmark_json(
     test_models = list(dict.fromkeys(test_models))
     results = []
     total_start_time = time.time()
-
-    # answers_by_q[q_idx][model_id] = {"time": t, "score": s, "json_output": j}
     answers_by_q = defaultdict(dict)
 
     for model_seq, model_id in enumerate(test_models[:limit]):
@@ -417,7 +434,6 @@ def run_benchmark_json(
     m, s = divmod(int(total_elapsed), 60)
     total_time_str = f"{m}:{s:02d}"
 
-    # Print per-question summary
     print("\n" + "=" * 110)
     print("PER-QUESTION SUMMARY")
     print("=" * 110)
@@ -428,7 +444,6 @@ def run_benchmark_json(
             data = answers_by_q[q_idx].get(model_id, {"time": 0.0, "score": 0.0, "json_output": "SKIPPED"})
             print(f"  {model_id} ({data['time']:.2f}s): Score: {data['score']:.2f} | {data['json_output'][:100]}")
 
-    # Print final summary table
     print("\n" + "=" * 110)
     print(f"{'Model ID':<50} | {'Results (First 10)':<30} | {'Total Score':<12} | {'Total Time':<10}")
     print("-" * 110)
@@ -441,7 +456,6 @@ def run_benchmark_json(
         m_res, s_res = divmod(int(res["total_time"]), 60)
         total_time_str_res = f"{m_res}:{s_res:02d}"
 
-        # Format first 10 scores
         scores_str = " ".join(f"{s:.2f}" for s in res["scores"][:10])
         if len(res["scores"]) > 10:
             scores_str += " ..."
@@ -477,7 +491,7 @@ def run_model_benchmark_json():
     run_benchmark_json(
         client=client,
         questions=questions,
-        test_models=test_models[:2],
+        test_models=test_models,
         limit=99999999,
         request_timeout=60 * 10
     )
