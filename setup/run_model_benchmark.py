@@ -1,21 +1,12 @@
 import time
+import json
 from datetime import datetime
-from typing import Any, Literal
+from typing import Any
 from collections import defaultdict
 
 from ai_clients.model_client_base import TextToTextClient
 from setup.start_server import print_model_debug_info
 from setup.questions_helper import QuestionsHelper
-
-import time
-import json
-from datetime import datetime
-from typing import Any, Literal
-from collections import defaultdict
-
-from ai_clients.model_client_base import TextToTextClient
-from setup.start_server import print_model_debug_info
-
 
 
 def run_model_benchmark():
@@ -34,33 +25,20 @@ def run_model_benchmark():
         "Bhuvneesh/gemma-4-E4B-it-Q8_0-GGUF",
         "Bhuvneesh/gemma-4-E4B-it-Q5_K_M-GGUF",
         "Bhuvneesh/gemma-3-4b-it-Q8_0-GGUF",
-        "Bhuvneesh/gemma-3-12b-it-Q5_K_M-GGUF",  # Note: 12B Q5 is ~10-11GB, fits tightly in 12GB VRAM
-        #"unsloth/gemma-4-12b-it-GGUF",
+        "Bhuvneesh/gemma-3-12b-it-Q5_K_M-GGUF",
         "unsloth/gemma-3-1b-it-unsloth-bnb-4bit",
         "unsloth/gemma-3-1b-pt-unsloth-bnb-4bit",
         "mlx-community/gemma-3-1b-it-4bit",
         "google/gemma-3n-E4B-it-litert-lm",
-
-        #"deepseek-ai/deepseek-coder-1.3b-instruct",
-        #"Qwen/Qwen2-1.5B-Instruct",
-        #"Qwen/Qwen2.5-1.5B-Instruct",
-        #"Qwen/Qwen2.5-3B-Instruct",
-        #"Qwen/Qwen2.5-7B-Instruct",
-
-        #"Qwen/Qwen2.5-Coder-3B-Instruct",
         "deepseek-ai/deepseek-coder-7b-instruct-v1.5",
-
         "Bhuvneesh/gemma-3-27b-it-Q5_K_M-GGUF",
         "lynnea1517/huihui-ai_gemma-3-27b-it-abliterated-Q8_0-GGUF",
         "paultimothymooney/gemma-3-27b-it-Q8_0-GGUF",
         "aminlouhichi/gemma-3-merged-GGUF-Q16",
-
         "mergekit-community/Qwen3-7B-Instruct",
         "Ygz-08123/Qwen3-7B-Instruct-Q2_K-GGUF",
         "Ygz-08123/Qwen3-7B-Instruct-Q4_K_M-GGUF",
         "goodgooodboy/Qwen3-7B-Instruct-Q4_K_M-GGUF",
-        #"lm-kit/qwen-3-14b-instruct-gguf",
-
         "HuggingFaceTB/SmolLM2-135M-Instruct",
         "unsloth/SmolLM2-135M-Instruct",
         "unsloth/SmolLM2-360M-Instruct",
@@ -69,11 +47,8 @@ def run_model_benchmark():
         "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
         "OpenLLM-France/Luciole-1B-Instruct-1.1",
         "tencent/Hunyuan-1.8B-Instruct",
-
         "microsoft/Phi-4-mini-instruct",
         "unsloth/Llama-3.2-3B-Instruct",
-
-        # ✅ Recommended Quantized Formats (GGUF / GPTQ / BNB-4bit) of the above models
         "TheBloke/TinyLlama-1.1B-Chat-v0.3-GPTQ",
         "TheBlokeAI/Mixtral-tiny-GPTQ",
         "mlx-community/SmolLM3-3B-4bit",
@@ -81,9 +56,7 @@ def run_model_benchmark():
         "nakue/SmolLM2-1.7B-W4A16-instruct",
     ]
 
-    for model_slice in [
-        10,
-        14, 9999999]:
+    for model_slice in [14, 9999999]:
         print("=== CACHING MODELS ===")
         run_benchmark(client, questions1,
                       test_models[:model_slice], 99999999,
@@ -146,7 +119,6 @@ def run_benchmark(
             print(f"{end_timestamp} model cached {model_id}")
         except Exception as e:
             print(f"Failed to cache model {model_id}: {e}")
-            # Mark as failed for all questions and continue to next model
             for _ in range(len(questions)):
                 model_results["scores"].append("fail")
                 model_results["times"].append(0.0)
@@ -187,7 +159,6 @@ def run_benchmark(
         m_res, s_res = divmod(int(res["total_time"]), 60)
         total_time_str_res = f"{m_res}:{s_res:02d}"
 
-        # Fetch stats
         try:
             stats = client.get_model_stats(res["model_id"])
             init_ok = stats.get("num_init_successes", 0)
@@ -225,10 +196,10 @@ def make_one_request(
         client: TextToTextClient,
         debug_printed: bool,
         end_timestamp: str,
-        i: int | Literal[0],
+        i: int,
         k: int,
         model_id: str,
-        model_results: dict[str, str | list[Any] | float],
+        model_results: dict[str, Any],
         q: dict[str, str],
         questions: list[dict[str, str]],
         request_timeout: int):
@@ -259,7 +230,6 @@ def make_one_request(
             print(f"  Q: {q['question'][:70]}... -> {'ok' if is_correct else 'fail'}")
             print(f"  A: {generated_text[:len(q['answer']) * 5]} ({duration:.2f}s)")
 
-            # Save tuple for the new table
             answers_list.append((q["question"], model_id, generated_text.strip(), duration))
     except Exception as e:
         end_time = time.time()
@@ -267,12 +237,10 @@ def make_one_request(
         end_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         error_msg = str(e)
         print(f"  [{end_timestamp}] Request failed after {duration:.2f}s: {error_msg}")
-        # Print debug info on client side when error occurs
         if not debug_printed:
             print_model_debug_info(model_id)
             debug_printed = True
 
-        # Save '-' for the new table
         answers_list.append((q["question"], model_id, "-", duration))
 
         if i == 0 and "500" in error_msg:
@@ -280,7 +248,6 @@ def make_one_request(
             model_results["scores"].append("fail")
             model_results["times"].append(duration)
             model_results["total_time"] += duration
-            # Mark remaining questions as fail with 0 time
             for j in range(i + 1, len(questions)):
                 model_results["scores"].append("fail")
                 model_results["times"].append(0.0)
@@ -295,40 +262,29 @@ def make_one_request(
 
 
 def propose_prompt(model_id: str, q: dict[str, str]) -> str:
-    """
-    Proposes a prompt template tailored to the specific model family to enforce
-    exact, concise answers without additional text, reasoning, or explanations.
-    """
     model_id_lower = model_id.lower()
     question = q["question"]
 
     if "gemma" in model_id_lower:
-        # Gemma models respond exceptionally well to the /no_think suffix
         prompt_template = "{question} /no_think"
     elif "qwen" in model_id_lower:
-        # Qwen models tend to repeat the prompt and explain. Need strong negative constraints.
         prompt_template = "{question}\n\nOutput ONLY the exact answer requested. Do not repeat the question, do not add punctuation, and do not provide any explanations."
     elif "deepseek" in model_id_lower:
-        # DeepSeek Coder tends to output "Answer: " or repeat the prompt.
         prompt_template = "{question}\n\nRespond with EXACTLY the requested value and nothing else. Do not output 'Answer:', do not repeat the question, and do not explain."
     elif any(x in model_id_lower for x in
              ["smollm", "tinyllama", "luciole", "hunyuan", "phi", "llama", "mixtral", "olmo", "lfm"]):
-        # General small instruct models respond better to positive constraints.
         prompt_template = "{question}\n\nRespond with EXACTLY the requested value (e.g., a single word or number) and absolutely nothing else."
     else:
-        # Fallback for unspecified models: strong, clear, positive constraint.
         prompt_template = "{question}\n\nOutput ONLY the exact answer requested, with no additional text, explanations, or punctuation."
 
     return prompt_template.format(question=question)
 
 
 def print_answers(answers_list: list[Any]):
-    # Print the new table format before the final result
     print("\n" + "=" * 110)
     print("ANSWERS BY QUESTION")
     print("=" * 110)
 
-    # Group by question
     answers_by_question = defaultdict(list)
     for q_text, model_id, answer, time_taken in answers_list:
         answers_by_question[q_text].append((model_id, answer, time_taken))
@@ -339,8 +295,6 @@ def print_answers(answers_list: list[Any]):
             clean_answer = "".join(c for c in answer[:800] if c.isprintable())
             print(f"  {model_id} ({time_taken:.2f}s): {clean_answer[:200]}")
     print("\n" + "=" * 110)
-
-
 
 
 def evaluate_json_response(output_text: str, expected_json: dict) -> float:
@@ -397,6 +351,9 @@ def run_benchmark_json(
             start_time = time.time()
             start_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
+            print(f"\n[{start_timestamp}] Question {i + 1} | Model: {model_id}")
+            print(f"Question Text: {q['question']}")
+
             try:
                 response = client.generate(model_id, q["question"], model_limit_seconds=request_timeout)
                 end_time = time.time()
@@ -407,6 +364,10 @@ def run_benchmark_json(
 
                 score = evaluate_json_response(generated_text, q["expected_json"])
 
+                json_output_one_line = generated_text.replace('\n', ' ').replace('\r', ' ').strip()
+                print(f"Answer (JSON): {json_output_one_line}")
+                print(f"Time Taken: {duration:.2f}s | Score: {score:.2f}")
+
                 model_results["scores"].append(score)
                 model_results["times"].append(duration)
                 model_results["total_time"] += duration
@@ -416,13 +377,16 @@ def run_benchmark_json(
                 answers_by_q[i][model_id] = {
                     "time": duration,
                     "score": score,
-                    "json_output": generated_text.replace('\n', ' ').strip()
+                    "json_output": json_output_one_line
                 }
 
             except Exception as e:
                 end_time = time.time()
                 duration = end_time - start_time
                 error_msg = str(e)
+
+                print(f"Answer: ERROR - {error_msg}")
+                print(f"Time Taken: {duration:.2f}s | Score: 0.00")
 
                 if not debug_printed:
                     print_model_debug_info(model_id)
@@ -440,7 +404,6 @@ def run_benchmark_json(
                 }
 
                 if i == 0 and "500" in error_msg:
-                    # Fill remaining with 0s
                     for j in range(i + 1, len(questions)):
                         model_results["scores"].append(0.0)
                         model_results["times"].append(0.0)
@@ -483,7 +446,7 @@ def run_benchmark_json(
         if len(res["scores"]) > 10:
             scores_str += " ..."
 
-        print(f"{res['model_id']:<50} | {scores_str:<30} | {total_score_pct:>5.2f}%      | {total_time_str_res:<10}")
+        print(f"{res['model_id']:<50} | {scores_str:<30} | {total_score_pct:>6.2f}%    | {total_time_str_res:<10}")
     print("=" * 110)
     print(f"Total Benchmark Time: {total_time_str}")
 
@@ -514,8 +477,7 @@ def run_model_benchmark_json():
     run_benchmark_json(
         client=client,
         questions=questions,
-        test_models=test_models,
+        test_models=test_models[:2],
         limit=99999999,
         request_timeout=60 * 10
     )
-

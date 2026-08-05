@@ -20,7 +20,7 @@ if __name__ == '__main__':
     tester = ServerTester()
     tester.run_all()
 
-    #run_model_benchmark()
     run_model_benchmark_json()
+    run_model_benchmark()
 
     stop_wsl_server()
