@@ -1,3 +1,6 @@
+import json
+
+
 class QuestionsHelper:
     @staticmethod
     def get_questions1():
@@ -136,3 +139,103 @@ class QuestionsHelper:
                 "answer": "def"
             }
         ]
+
+    import json
+
+    @staticmethod
+    def get_vacancy_json_questions():
+        """Generates 50 vacancy extraction questions with increasing complexity."""
+        questions = []
+        companies = ["TechCorp", "DataSolutions", "AI Innovations", "CloudNine", "SoftWorks",
+                     "DevHub", "CodeCraft", "ByteLogic", "NetSphere", "SysAdmin Pro"]
+        countries = ["USA", "UK", "Germany", "Canada", "Australia",
+                     "France", "Netherlands", "Poland", "Spain", "Italy"]
+        cities = ["New York", "London", "Berlin", "Toronto", "Sydney",
+                  "Paris", "Amsterdam", "Warsaw", "Madrid", "Rome"]
+        titles = ["Software Engineer", "Data Scientist", "DevOps Engineer", "Product Manager", "Frontend Developer",
+                  "Backend Developer", "ML Engineer", "System Administrator", "QA Engineer", "Project Manager"]
+
+        for i in range(50):
+            complexity = i // 10  # 0 to 4
+
+            if complexity == 0:
+                keys = ["title", "company", "country", "city"]
+            elif complexity == 1:
+                keys = ["title", "company", "country", "city", "salary_min", "salary_max"]
+            elif complexity == 2:
+                keys = ["title", "company", "country", "city", "employment_type", "experience_min", "experience_max",
+                        "remote"]
+            elif complexity == 3:
+                keys = ["title", "company", "country", "city", "salary_currency", "salary_period", "team_size",
+                        "required_languages", "visa_sponsorship", "relocation"]
+            else:
+                keys = ["title", "company", "country", "city", "salary_min", "salary_max", "employment_type",
+                        "experience_min", "experience_max", "remote", "visa_sponsorship", "required_languages"]
+
+            # Generate vacancy text based on complexity
+            text_parts = [f"We are hiring a {titles[i % 10]} at {companies[i % 10]}."]
+            text_parts.append(f"The position is based in {cities[i % 10]}, {countries[i % 10]}.")
+
+            if complexity >= 1:
+                text_parts.append(f"The salary range is {50 + i}k to {80 + i}k per year.")
+            if complexity >= 2:
+                text_parts.append(f"This is a {['full-time', 'part-time', 'contract'][i % 3]} position.")
+                text_parts.append(f"We require {1 + (i % 5)} to {3 + (i % 5)} years of experience.")
+                text_parts.append(f"Remote work is {['allowed', 'not allowed', 'hybrid'][i % 3]}.")
+            if complexity >= 3:
+                text_parts.append(
+                    f"Salary is paid in {['USD', 'EUR', 'GBP'][i % 3]} on a {['monthly', 'yearly'][i % 2]} basis.")
+                text_parts.append(f"The team size is {10 + (i % 20)} people.")
+                text_parts.append(f"Required languages: {['English', 'English, German', 'English, French'][i % 3]}.")
+                text_parts.append(f"Visa sponsorship is {['available', 'not available'][i % 2]}.")
+                text_parts.append(f"Relocation support is {['provided', 'not provided'][i % 2]}.")
+            if complexity >= 4:
+                text_parts.append(f"Minimum salary is {60 + i}000 and maximum is {90 + i}000.")
+                text_parts.append(f"Experience required is between {2 + (i % 6)} and {8 + (i % 6)} years.")
+                text_parts.append("We offer a dynamic work environment with cutting-edge technologies.")
+                text_parts.append("Candidates must have strong problem-solving skills and a passion for innovation.")
+                text_parts.append(
+                    "The role involves collaborating with cross-functional teams to deliver high-quality software.")
+                text_parts.append("We provide comprehensive health insurance and a flexible working schedule.")
+                text_parts.append("Opportunities for professional growth and continuous learning are abundant.")
+                text_parts.append("The ideal candidate will have a proven track record in similar roles.")
+                text_parts.append("We value diversity and are an equal opportunity employer.")
+                text_parts.append("Join us in shaping the future of technology and making a real impact.")
+
+            vacancy_text = " ".join(text_parts)
+
+            # Generate expected JSON
+            expected = {}
+            if "title" in keys: expected["title"] = titles[i % 10]
+            if "company" in keys: expected["company"] = companies[i % 10]
+            if "country" in keys: expected["country"] = countries[i % 10]
+            if "city" in keys: expected["city"] = cities[i % 10]
+            if "salary_min" in keys: expected["salary_min"] = f"{50 + i}k"
+            if "salary_max" in keys: expected["salary_max"] = f"{80 + i}k"
+            if "employment_type" in keys: expected["employment_type"] = ["full-time", "part-time", "contract"][i % 3]
+            if "experience_min" in keys: expected["experience_min"] = str(1 + (i % 5))
+            if "experience_max" in keys: expected["experience_max"] = str(3 + (i % 5))
+            if "remote" in keys: expected["remote"] = ["allowed", "not allowed", "hybrid"][i % 3]
+            if "salary_currency" in keys: expected["salary_currency"] = ["USD", "EUR", "GBP"][i % 3]
+            if "salary_period" in keys: expected["salary_period"] = ["monthly", "yearly"][i % 2]
+            if "team_size" in keys: expected["team_size"] = str(10 + (i % 20))
+            if "required_languages" in keys: expected["required_languages"] = \
+            ["English", "English, German", "English, French"][i % 3]
+            if "visa_sponsorship" in keys: expected["visa_sponsorship"] = ["available", "not available"][i % 2]
+            if "relocation" in keys: expected["relocation"] = ["provided", "not provided"][i % 2]
+
+            keys_str = ", ".join([f'"{k}"' for k in keys])
+            question_prompt = (
+                f"====TEXT of VACANCY====\n{vacancy_text}\n====END TEXT====\n\n"
+                f"Based on the vacancy text above, extract the following details and return ONLY a valid JSON object "
+                f"with these exact keys: {keys_str}. Do not add any markdown formatting, extra text, or explanations. "
+                f"EXACT EXPECTED JSON: {json.dumps(expected)}"
+            )
+
+            questions.append({
+                "question": question_prompt,
+                "expected_json": expected,
+                "summary": f"Extract {', '.join(keys)} from vacancy {i + 1}."
+            })
+
+        return questions

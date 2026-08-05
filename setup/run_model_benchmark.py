@@ -7,6 +7,16 @@ from ai_clients.model_client_base import TextToTextClient
 from setup.start_server import print_model_debug_info
 from setup.questions_helper import QuestionsHelper
 
+import time
+import json
+from datetime import datetime
+from typing import Any, Literal
+from collections import defaultdict
+
+from ai_clients.model_client_base import TextToTextClient
+from setup.start_server import print_model_debug_info
+
+
 
 def run_model_benchmark():
     """Benchmark models by asking a series of questions and measuring correctness/time."""
@@ -329,3 +339,183 @@ def print_answers(answers_list: list[Any]):
             clean_answer = "".join(c for c in answer[:800] if c.isprintable())
             print(f"  {model_id} ({time_taken:.2f}s): {clean_answer[:200]}")
     print("\n" + "=" * 110)
+
+
+
+
+def evaluate_json_response(output_text: str, expected_json: dict) -> float:
+    """Evaluates if the model's output is strictly valid JSON and matches expected keys/values."""
+    output_text = output_text.strip()
+    # Must be strictly JSON (no extra words/symbols)
+    if not (output_text.startswith('{') and output_text.endswith('}')):
+        return 0.0
+    try:
+        parsed = json.loads(output_text)
+    except json.JSONDecodeError:
+        return 0.0
+
+    if not isinstance(parsed, dict):
+        return 0.0
+
+    correct_keys = 0
+    total_keys = len(expected_json)
+    for key, expected_value in expected_json.items():
+        actual_value = str(parsed.get(key, "")).strip().lower()
+        expected_value_str = str(expected_value).strip().lower()
+        if actual_value == expected_value_str:
+            correct_keys += 1
+
+    return correct_keys / total_keys if total_keys > 0 else 0.0
+
+
+def run_benchmark_json(
+        client: TextToTextClient,
+        questions: list[dict[str, Any]],
+        test_models: list[str],
+        limit: int = 99999999,
+        request_timeout: int = 60):
+    test_models = list(dict.fromkeys(test_models))
+    results = []
+    total_start_time = time.time()
+
+    # answers_by_q[q_idx][model_id] = {"time": t, "score": s, "json_output": j}
+    answers_by_q = defaultdict(dict)
+
+    for model_seq, model_id in enumerate(test_models[:limit]):
+        print(f"\nBenchmarking JSON: {model_id}...")
+        model_results = {
+            "model_id": model_id,
+            "scores": [],
+            "times": [],
+            "total_time": 0.0,
+            "total_correct_keys": 0.0,
+            "total_expected_keys": 0
+        }
+        debug_printed = False
+
+        for i, q in enumerate(questions):
+            start_time = time.time()
+            start_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+            try:
+                response = client.generate(model_id, q["question"], model_limit_seconds=request_timeout)
+                end_time = time.time()
+                duration = end_time - start_time
+                generated_text = response.get("generated_text", "")
+                if not isinstance(generated_text, str):
+                    generated_text = str(generated_text)
+
+                score = evaluate_json_response(generated_text, q["expected_json"])
+
+                model_results["scores"].append(score)
+                model_results["times"].append(duration)
+                model_results["total_time"] += duration
+                model_results["total_correct_keys"] += score * len(q["expected_json"])
+                model_results["total_expected_keys"] += len(q["expected_json"])
+
+                answers_by_q[i][model_id] = {
+                    "time": duration,
+                    "score": score,
+                    "json_output": generated_text.replace('\n', ' ').strip()
+                }
+
+            except Exception as e:
+                end_time = time.time()
+                duration = end_time - start_time
+                error_msg = str(e)
+
+                if not debug_printed:
+                    print_model_debug_info(model_id)
+                    debug_printed = True
+
+                model_results["scores"].append(0.0)
+                model_results["times"].append(duration)
+                model_results["total_time"] += duration
+                model_results["total_expected_keys"] += len(q["expected_json"])
+
+                answers_by_q[i][model_id] = {
+                    "time": duration,
+                    "score": 0.0,
+                    "json_output": f"ERROR: {error_msg}"
+                }
+
+                if i == 0 and "500" in error_msg:
+                    # Fill remaining with 0s
+                    for j in range(i + 1, len(questions)):
+                        model_results["scores"].append(0.0)
+                        model_results["times"].append(0.0)
+                        model_results["total_expected_keys"] += len(questions[j]["expected_json"])
+                        answers_by_q[j][model_id] = {"time": 0.0, "score": 0.0, "json_output": "ABORTED"}
+                    break
+
+        results.append(model_results)
+
+    total_elapsed = time.time() - total_start_time
+    m, s = divmod(int(total_elapsed), 60)
+    total_time_str = f"{m}:{s:02d}"
+
+    # Print per-question summary
+    print("\n" + "=" * 110)
+    print("PER-QUESTION SUMMARY")
+    print("=" * 110)
+    for q_idx, q in enumerate(questions):
+        print(f"\nQuestion {q_idx + 1}: {q['summary']}")
+        for res in results:
+            model_id = res["model_id"]
+            data = answers_by_q[q_idx].get(model_id, {"time": 0.0, "score": 0.0, "json_output": "SKIPPED"})
+            print(f"  {model_id} ({data['time']:.2f}s): Score: {data['score']:.2f} | {data['json_output'][:100]}")
+
+    # Print final summary table
+    print("\n" + "=" * 110)
+    print(f"{'Model ID':<50} | {'Results (First 10)':<30} | {'Total Score':<12} | {'Total Time':<10}")
+    print("-" * 110)
+    for res in results:
+        if res["total_expected_keys"] > 0:
+            total_score_pct = (res["total_correct_keys"] / res["total_expected_keys"]) * 100
+        else:
+            total_score_pct = 0.0
+
+        m_res, s_res = divmod(int(res["total_time"]), 60)
+        total_time_str_res = f"{m_res}:{s_res:02d}"
+
+        # Format first 10 scores
+        scores_str = " ".join(f"{s:.2f}" for s in res["scores"][:10])
+        if len(res["scores"]) > 10:
+            scores_str += " ..."
+
+        print(f"{res['model_id']:<50} | {scores_str:<30} | {total_score_pct:>5.2f}%      | {total_time_str_res:<10}")
+    print("=" * 110)
+    print(f"Total Benchmark Time: {total_time_str}")
+
+    return results
+
+
+def run_model_benchmark_json():
+    """Benchmark models on JSON extraction from vacancy texts."""
+    client = TextToTextClient()
+    questions = QuestionsHelper.get_vacancy_json_questions()
+
+    test_models = [
+        "NikolayKozloff/gemma-3-1b-it-Q8_0-GGUF",
+        "NikolayKozloff/gemma-3-4b-it-Q8_0-GGUF",
+        "NikolayKozloff/gemma-3-12b-it-Q8_0-GGUF",
+        "NikolayKozloff/gemma-3-12b-it-Q5_K_S-GGUF",
+        "NikolayKozloff/gemma-3-12b-it-Q6_K-GGUF",
+        "Bhuvneesh/gemma-4-E4B-it-Q8_0-GGUF",
+        "Bhuvneesh/gemma-4-E4B-it-Q5_K_M-GGUF",
+        "Bhuvneesh/gemma-3-4b-it-Q8_0-GGUF",
+        "Bhuvneesh/gemma-3-12b-it-Q5_K_M-GGUF",
+    ]
+
+    print("=== RUNNING JSON BENCHMARK ===")
+    print(f"Total Models: {len(test_models)}")
+    print(f"Total Questions: {len(questions)}")
+
+    run_benchmark_json(
+        client=client,
+        questions=questions,
+        test_models=test_models,
+        limit=99999999,
+        request_timeout=60 * 10
+    )
+
