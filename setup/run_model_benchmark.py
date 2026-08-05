@@ -157,23 +157,24 @@ Output: Paris
 Question: {question}
 Output:"""
 
-    #prompt_template = """You are a strict data-extraction engine. You must output EXACTLY ONE WORD OR NUMBER."""
-
-
-
     test_models = [
         "Bhuvneesh/gemma-4-E4B-it-Q8_0-GGUF",
         "Bhuvneesh/gemma-4-E4B-it-Q5_K_M-GGUF",
         "Bhuvneesh/gemma-3-4b-it-Q8_0-GGUF",
         "Bhuvneesh/gemma-3-12b-it-Q5_K_M-GGUF",  # Note: 12B Q5 is ~10-11GB, fits tightly in 12GB VRAM
-        "unsloth/gemma-4-12b-it-GGUF",
-        "deepseek-ai/deepseek-coder-1.3b-instruct",
-        "Qwen/Qwen2-1.5B-Instruct",
-        "Qwen/Qwen2.5-1.5B-Instruct",
-        "Qwen/Qwen2.5-3B-Instruct",
-        "Qwen/Qwen2.5-7B-Instruct",
+        #"unsloth/gemma-4-12b-it-GGUF",
+        "unsloth/gemma-3-1b-it-unsloth-bnb-4bit",
+        "unsloth/gemma-3-1b-pt-unsloth-bnb-4bit",
+        "mlx-community/gemma-3-1b-it-4bit",
+        "google/gemma-3n-E4B-it-litert-lm",
 
-        "Qwen/Qwen2.5-Coder-3B-Instruct",
+        #"deepseek-ai/deepseek-coder-1.3b-instruct",
+        #"Qwen/Qwen2-1.5B-Instruct",
+        #"Qwen/Qwen2.5-1.5B-Instruct",
+        #"Qwen/Qwen2.5-3B-Instruct",
+        #"Qwen/Qwen2.5-7B-Instruct",
+
+        #"Qwen/Qwen2.5-Coder-3B-Instruct",
         "deepseek-ai/deepseek-coder-7b-instruct-v1.5",
 
         "Bhuvneesh/gemma-3-27b-it-Q5_K_M-GGUF",
@@ -182,7 +183,7 @@ Output:"""
         "Ygz-08123/Qwen3-7B-Instruct-Q2_K-GGUF",
         "Ygz-08123/Qwen3-7B-Instruct-Q4_K_M-GGUF",
         "goodgooodboy/Qwen3-7B-Instruct-Q4_K_M-GGUF",
-        "lm-kit/qwen-3-14b-instruct-gguf",
+        #"lm-kit/qwen-3-14b-instruct-gguf",
 
         "HuggingFaceTB/SmolLM2-135M-Instruct",
         "unsloth/SmolLM2-135M-Instruct",
@@ -222,7 +223,8 @@ Output:"""
 
         qualified_models = [
             res["model_id"] for res in results1
-            if len(res["scores"]) > 0 and (sum(1 for s in res["scores"] if s == "ok") / len(res["scores"]) * 100) >= 50.0
+            if
+            len(res["scores"]) > 0 and (sum(1 for s in res["scores"] if s == "ok") / len(res["scores"]) * 100) >= 50.0
         ]
 
         print(f"\n=== QUALIFIED MODELS (>= 50% accuracy): {len(qualified_models)} ===")
@@ -232,10 +234,9 @@ Output:"""
         if qualified_models:
             print("\n=== RUNNING SECOND BENCHMARK (Questions 2) ===")
             results2 = run_benchmark(client, questions2,
-                                 qualified_models, 99999999,
-                                 cache_models_only=False,
-                                 request_timeout=60 * 10)
-
+                                     qualified_models, 99999999,
+                                     cache_models_only=False,
+                                     request_timeout=60 * 10)
 
 
 def run_benchmark(
@@ -243,8 +244,8 @@ def run_benchmark(
         questions: list[dict[str, str]],
         test_models: list[str],
         limit: int = 99999999,
-        cache_models_only = False,
-        request_timeout = 60):
+        cache_models_only: bool = False,
+        request_timeout: int = 60):
     # Make list of models distinct
     test_models = list(dict.fromkeys(test_models))
 
@@ -261,9 +262,19 @@ def run_benchmark(
 
         start_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         print(f"{start_timestamp} caching model {model_id}")
-        client.cache_model(model_id)
-        end_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        print(f"{end_timestamp} model cached {model_id}")
+        try:
+            client.cache_model(model_id)
+            end_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            print(f"{end_timestamp} model cached {model_id}")
+        except Exception as e:
+            print(f"Failed to cache model {model_id}: {e}")
+            # Mark as failed for all questions and continue to next model
+            for _ in range(len(questions)):
+                model_results["scores"].append("fail")
+                model_results["times"].append(0.0)
+            results.append(model_results)
+            continue
+
         if cache_models_only:
             continue
 
@@ -343,7 +354,6 @@ def make_one_request(
         q: dict[str, str],
         questions: list[dict[str, str]],
         request_timeout: int):
-
     abort = False
     start_time = time.time()
     start_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -359,7 +369,6 @@ def make_one_request(
         if k == 0 and i == 0:
             print(f"{end_timestamp} Test run duration {duration:.2f}s")
         else:
-            # answers_list.append(q["answer"])
             end_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             generated_text = response.get("generated_text", "")
             if not isinstance(generated_text, str):
@@ -433,6 +442,7 @@ def propose_prompt(model_id: str, q: dict[str, str]) -> str:
         prompt_template = "{question}\n\nOutput ONLY the exact answer requested, with no additional text, explanations, or punctuation."
 
     return prompt_template.format(question=question)
+
 
 def print_answers(answers_list: list[Any]):
     # Print the new table format before the final result

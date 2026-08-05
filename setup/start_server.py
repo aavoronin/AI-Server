@@ -1,5 +1,6 @@
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 
@@ -56,6 +57,10 @@ def start_wsl_server():
     try:
         subprocess.Popen(command)
         print("Server started in background. Control released.")
+        # Wait for the server to initialize to prevent race conditions
+        # where the client connects while the old instance is terminating
+        # or the new instance is still loading models.
+        time.sleep(5)
     except FileNotFoundError:
         print("WSL is not installed or 'wsl' command not found.")
         sys.exit(1)

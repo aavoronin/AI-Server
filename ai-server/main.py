@@ -102,7 +102,8 @@ def ensure_model_cached(model_id: str, cache_folder: str, hf_token_path: str) ->
             with open(usage_file, 'w') as f:
                 json.dump(usage_data, f, indent=2)
             return True
-        except subprocess.CalledProcessError as e:
+        except Exception as e:
+            logger.error(f"Failed to download or cache model {model_id}: {e}")
             usage_data["num_fails"] = usage_data.get("num_fails", 0) + 1
             with open(usage_file, 'w') as f:
                 json.dump(usage_data, f, indent=2)
@@ -226,11 +227,15 @@ async def get_model_by_id(model_id: str):
 @app.post("/models/{model_id:path}/cache")
 async def cache_model(model_id: str):
     """Cache a model by downloading it to the cache folder."""
-    if ensure_model_cached(model_id, config.cache_folder_path, config.hf_token_path):
-        model_dir = Path(config.cache_folder_path) / model_id.replace("/", "_")
-        with open(model_dir / "model_usage.json", 'r') as f:
-            return json.load(f)
-    raise HTTPException(status_code=500, detail="Failed to download model")
+    try:
+        if ensure_model_cached(model_id, config.cache_folder_path, config.hf_token_path):
+            model_dir = Path(config.cache_folder_path) / model_id.replace("/", "_")
+            with open(model_dir / "model_usage.json", 'r') as f:
+                return json.load(f)
+        raise HTTPException(status_code=500, detail="Failed to download model")
+    except Exception as e:
+        logger.error(f"Error caching model: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.post("/models/{model_id:path}/uncache")
