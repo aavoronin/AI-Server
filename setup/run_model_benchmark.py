@@ -425,13 +425,20 @@ def run_models_on_vacancies(vacancies_dir: str):
     """Benchmark models on real vacancy text files against ground truth JSONs."""
     client = TextToTextClient()
     vacancies_path = Path(vacancies_dir)
-    prompt_file = vacancies_path.parent / "PROMPT.txt"
 
-    if not prompt_file.exists():
-        print(f"Error: PROMPT.txt not found at {prompt_file}")
-        return
+    prompt_files7 = [
+        "PROMPT_01.txt",
+        "PROMPT_02.txt",
+        "PROMPT_03.txt",
+        "PROMPT_04.txt",
+        "PROMPT_05.txt",
+        "PROMPT_06.txt",
+        "PROMPT_07.txt"
+    ]
 
-    prompt_text = prompt_file.read_text(encoding='utf-8')
+    prompt_files1 = [
+        "PROMPT.txt"
+    ]
 
     # Find all vacancy txt files and their corresponding result jsons
     vacancies = []
@@ -445,9 +452,9 @@ def run_models_on_vacancies(vacancies_dir: str):
         return
 
     test_models = [
-        "NikolayKozloff/gemma-3-1b-it-Q8_0-GGUF",
+        #"NikolayKozloff/gemma-3-1b-it-Q8_0-GGUF",
         "NikolayKozloff/gemma-3-4b-it-Q8_0-GGUF",
-        "NikolayKozloff/gemma-3-12b-it-Q5_K_S-GGUF",
+        #"NikolayKozloff/gemma-3-12b-it-Q5_K_S-GGUF",
         "NikolayKozloff/gemma-3-12b-it-Q8_0-GGUF",
         "Bhuvneesh/gemma-3-27b-it-Q5_K_M-GGUF",
     ]
@@ -457,6 +464,7 @@ def run_models_on_vacancies(vacancies_dir: str):
     print(f"Total Vacancies: {len(vacancies)}")
 
     model_summaries = []
+    TIMEOUT = 60 * 30
 
     for model_id in test_models:
         print(f"\n{'=' * 80}")
@@ -464,7 +472,7 @@ def run_models_on_vacancies(vacancies_dir: str):
         print(f"{'=' * 80}")
 
         total_keys = 0
-        correct_keys = 0
+        total_correct_keys = 0
         total_time = 0.0
         vacancy_scores = []
 
@@ -482,49 +490,74 @@ def run_models_on_vacancies(vacancies_dir: str):
                 print(f"\n[{vacancy_name}] ERROR: Failed to read {result_json_file.name}: {e}. Scoring as 0.00")
                 expected_json = {}
 
-            full_prompt = prompt_text + "\n" + vacancy_text
+            combined_parsed_dict = {}
+            total_vacancy_time = 0.0
 
-            start_time = time.time()
-            try:
-                response = client.generate(model_id, full_prompt, model_limit_seconds=60 * 10)
-                duration = time.time() - start_time
-                total_time += duration
+            #if Any(s in model_id for s in ["-1b-", "-4b-"]):
+            #    prompt_files = prompt_files7
+            #else:
+            #    prompt_files = prompt_files1
+            prompt_files = prompt_files7
 
-                generated_text = response.get("generated_text", "")
-                if not isinstance(generated_text, str):
-                    generated_text = str(generated_text)
+            for p_file in prompt_files:
+                prompt_path = vacancies_path.parent / p_file
+                if not prompt_path.exists():
+                    continue
+                prompt_text = prompt_path.read_text(encoding='utf-8')
+                full_prompt = prompt_text + "\n" + vacancy_text
 
-                score = evaluate_json_response(generated_text, expected_json)
-                parsed_dict = parse_json_safely(generated_text)
+                start_time = time.time()
+                try:
+                    response = client.generate(model_id, full_prompt, model_limit_seconds=TIMEOUT)
+                    duration = time.time() - start_time
+                    total_vacancy_time += duration
 
-                keys_in_expected = len(expected_json)
-                total_keys += keys_in_expected
-                correct_keys += score * keys_in_expected
+                    generated_text = response.get("generated_text", "")
+                    if not isinstance(generated_text, str):
+                        generated_text = str(generated_text)
 
-                vacancy_scores.append({
-                    "vacancy": vacancy_name,
-                    "score": score,
-                    "time": duration
-                })
+                    parsed_dict = parse_json_safely(generated_text)
+                    if parsed_dict is not None:
+                        for key, value in parsed_dict.items():
+                            if key not in combined_parsed_dict:
+                                combined_parsed_dict[key] = value
 
-                print(f"\n[{vacancy_name}] Time: {duration:.2f}s | Score: {score:.2f}")
-                if score < 1.0 and keys_in_expected > 0:
-                    print_json_failures(expected_json, parsed_dict)
-                elif keys_in_expected == 0:
-                    print(f"  (Skipped failure details due to empty expected JSON)")
+                    print(
+                        f"  [{p_file}] Time: {duration:.2f}s | Valid JSON: {'Yes' if parsed_dict is not None else 'No'}")
 
-            except Exception as e:
-                duration = time.time() - start_time
-                total_time += duration
-                print(f"\n[{vacancy_name}] ERROR: {str(e)} | Time: {duration:.2f}s | Score: 0.00")
-                vacancy_scores.append({
-                    "vacancy": vacancy_name,
-                    "score": 0.0,
-                    "time": duration
-                })
+                except Exception as e:
+                    duration = time.time() - start_time
+                    total_vacancy_time += duration
+                    print(f"  [{p_file}] ERROR: {str(e)} | Time: {duration:.2f}s")
+
+            # Evaluate combined result
+            keys_in_expected = len(expected_json)
+            correct_keys = 0
+            if keys_in_expected > 0:
+                for key, expected_value in expected_json.items():
+                    actual_value = combined_parsed_dict.get(key)
+                    if compare_values(actual_value, expected_value):
+                        correct_keys += 1
+
+            score = correct_keys / keys_in_expected if keys_in_expected > 0 else 0.0
+
+            total_keys += keys_in_expected
+            total_correct_keys += correct_keys
+
+            vacancy_scores.append({
+                "vacancy": vacancy_name,
+                "score": score,
+                "time": total_vacancy_time
+            })
+
+            print(f"\n[{vacancy_name}] Combined Time: {total_vacancy_time:.2f}s | Score: {score:.2f}")
+            if score < 1.0 and keys_in_expected > 0:
+                print_json_failures(expected_json, combined_parsed_dict)
+            elif keys_in_expected == 0:
+                print(f"  (Skipped failure details due to empty expected JSON)")
 
         # Model Summary
-        avg_score = (correct_keys / total_keys) if total_keys > 0 else 0.0
+        avg_score = (total_correct_keys / total_keys) if total_keys > 0 else 0.0
         m, s = divmod(int(total_time), 60)
         time_str = f"{m}:{s:02d}"
 
