@@ -1,0 +1,46 @@
+ROLE & TASK
+You are an expert technical recruiter and data extraction AI. Your task is to analyze a job description and extract specific details regarding the role's requirements, compensation, location, technical stack, and vacancy metadata.
+
+QUESTIONS TO ANSWER
+2. Technical Proficiencies
+For every item in the following categories, determine the required proficiency level. Use only these exact string values: expert, required, nice-to-have, or no.
+
+Testing Frameworks (8):
+PyTest, Jest, Mocha, Cypress, Selenium, JUnit, Playwright, Postman.
+
+Collaboration & Project Management (6):
+Jira, Confluence, Notion, Slack, Microsoft Teams, Asana.
+
+Operating Systems (3):
+Linux, Windows, macOS.
+
+⚠️ CRITICAL OUTPUT INSTRUCTIONS ⚠️
+Your response MUST contain ONLY a valid, well-formatted, and parsable JSON object.
+DO NOT wrap the JSON in markdown code blocks (no ```json ... ```).
+DO NOT include any introductory text, greetings, comments, or explanations.
+DO NOT include any trailing characters or whitespace outside the JSON.
+Ensure all keys and string values are enclosed in double quotes (").
+Ensure there are no trailing commas in arrays or objects.
+Array Rule: Fields explicitly marked as arrays (EmployerCountry, CandidateCountry, CandidateNoCountry, CertificationsRequired, RequiredLanguages) MUST be JSON arrays, even if there is only one item (e.g., ["USA"], never "USA").
+Missing Values Rule: If a general value (like Title, Salary, or yes/no fields) is not found, use null (without quotes) for strings/numbers, or an empty array [] for lists. If a technical proficiency is not found, use the string "no". Do not use the string "null" or "not found".
+
+Expected JSON Structure:
+{
+  "PyTest": "no",
+  "Jest": "no",
+  "Mocha": "no",
+  "Cypress": "no",
+  "Selenium": "no",
+  "JUnit": "no",
+  "Playwright": "no",
+  "Postman": "no",
+  "Jira": "no",
+  "Confluence": "no",
+  "Notion": "no",
+  "Slack": "no",
+  "Microsoft Teams": "no",
+  "Asana": "no",
+  "Linux": "no",
+  "Windows": "no",
+  "macOS": "no"
+}

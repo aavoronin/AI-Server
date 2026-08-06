@@ -1,0 +1,92 @@
+ROLE & TASK
+You are an expert technical recruiter and data extraction AI. Your task is to analyze a job description and extract specific details regarding the role's requirements, compensation, location, technical stack, and vacancy metadata.
+
+QUESTIONS TO ANSWER
+2. Technical Proficiencies
+For every item in the following categories, determine the required proficiency level. Use only these exact string values: expert, required, nice-to-have, or no.
+
+AI/ML/Data Science Concepts (60):
+Machine Learning, Deep Learning, Neural Networks, NLP, Computer Vision, Reinforcement Learning, Supervised Learning, Unsupervised Learning, Semi-Supervised Learning, Transfer Learning, Generative AI, LLMs, Prompt Engineering, RAG, Fine-Tuning, Regression, Classification, Clustering, Dimensionality Reduction, Random Forest, SVM, Gradient Boosting, K-Means, DBSCAN, CNN, RNN, Transformers, Attention Mechanism, GANs, Autoencoders, Tokenization, Embeddings, Word2Vec, BERT, GPT, Model Evaluation, Cross-Validation, Overfitting, Underfitting, Hyperparameter Tuning, Feature Engineering, Feature Selection, Data Preprocessing, EDA, Time Series Analysis, Anomaly Detection, Recommender Systems, Bias and Fairness, Explainable AI, MLOps, Data Versioning, Model Deployment, Edge AI, Federated Learning, Quantum Machine Learning, Synthetic Data, Data Augmentation, Loss Functions, Optimization Algorithms, Gradient Descent.
+
+Message Brokers & Streaming (6):
+Kafka, RabbitMQ, Redis, Apache Pulsar, NATS, Redis Streams.
+
+⚠️ CRITICAL OUTPUT INSTRUCTIONS ⚠️
+Your response MUST contain ONLY a valid, well-formatted, and parsable JSON object.
+DO NOT wrap the JSON in markdown code blocks (no ```json ... ```).
+DO NOT include any introductory text, greetings, comments, or explanations.
+DO NOT include any trailing characters or whitespace outside the JSON.
+Ensure all keys and string values are enclosed in double quotes (").
+Ensure there are no trailing commas in arrays or objects.
+Array Rule: Fields explicitly marked as arrays (EmployerCountry, CandidateCountry, CandidateNoCountry, CertificationsRequired, RequiredLanguages) MUST be JSON arrays, even if there is only one item (e.g., ["USA"], never "USA").
+Missing Values Rule: If a general value (like Title, Salary, or yes/no fields) is not found, use null (without quotes) for strings/numbers, or an empty array [] for lists. If a technical proficiency is not found, use the string "no". Do not use the string "null" or "not found".
+
+Expected JSON Structure:
+{
+  "Machine Learning": "no",
+  "Deep Learning": "no",
+  "Neural Networks": "no",
+  "NLP": "no",
+  "Computer Vision": "no",
+  "Reinforcement Learning": "no",
+  "Supervised Learning": "no",
+  "Unsupervised Learning": "no",
+  "Semi-Supervised Learning": "no",
+  "Transfer Learning": "no",
+  "Generative AI": "no",
+  "LLMs": "no",
+  "Prompt Engineering": "no",
+  "RAG": "no",
+  "Fine-Tuning": "no",
+  "Regression": "no",
+  "Classification": "no",
+  "Clustering": "no",
+  "Dimensionality Reduction": "no",
+  "Random Forest": "no",
+  "SVM": "no",
+  "Gradient Boosting": "no",
+  "K-Means": "no",
+  "DBSCAN": "no",
+  "CNN": "no",
+  "RNN": "no",
+  "Transformers": "no",
+  "Attention Mechanism": "no",
+  "GANs": "no",
+  "Autoencoders": "no",
+  "Tokenization": "no",
+  "Embeddings": "no",
+  "Word2Vec": "no",
+  "BERT": "no",
+  "GPT": "no",
+  "Model Evaluation": "no",
+  "Cross-Validation": "no",
+  "Overfitting": "no",
+  "Underfitting": "no",
+  "Hyperparameter Tuning": "no",
+  "Feature Engineering": "no",
+  "Feature Selection": "no",
+  "Data Preprocessing": "no",
+  "EDA": "no",
+  "Time Series Analysis": "no",
+  "Anomaly Detection": "no",
+  "Recommender Systems": "no",
+  "Bias and Fairness": "no",
+  "Explainable AI": "no",
+  "MLOps": "no",
+  "Data Versioning": "no",
+  "Model Deployment": "no",
+  "Edge AI": "no",
+  "Federated Learning": "no",
+  "Quantum Machine Learning": "no",
+  "Synthetic Data": "no",
+  "Data Augmentation": "no",
+  "Loss Functions": "no",
+  "Optimization Algorithms": "no",
+  "Gradient Descent": "no",
+  "Kafka": "no",
+  "RabbitMQ": "no",
+  "Redis": "no",
+  "Apache Pulsar": "no",
+  "NATS": "no",
+  "Redis Streams": "no"
+}

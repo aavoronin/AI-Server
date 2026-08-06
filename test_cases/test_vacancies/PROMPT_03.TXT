@@ -1,0 +1,96 @@
+ROLE & TASK
+You are an expert technical recruiter and data extraction AI. Your task is to analyze a job description and extract specific details regarding the role's requirements, compensation, location, technical stack, and vacancy metadata.
+
+QUESTIONS TO ANSWER
+2. Technical Proficiencies
+For every item in the following categories, determine the required proficiency level. Use only these exact string values: expert, required, nice-to-have, or no.
+
+ETL Tools (30):
+Apache Airflow, dbt, Informatica, Apache Spark, AWS Glue, Azure Data Factory, Talend, IBM DataStage, SSIS, Fivetran, Matillion, Apache NiFi, Dagster, Airbyte, Alteryx, Apache Beam, Google Cloud Dataflow, Prefect, Pentaho, Dell Boomi, SAP BODS, Oracle Data Integrator, Apache Flink, Luigi, SnapLogic, Stitch, Mage, HVR, Qlik Replicate, Kafka Connect.
+
+DWH Concepts (40):
+Star Schema, Snowflake Schema, 3NF, Anchor Modeling, Data Vault, Columnstore, Query Plan, SCD, Fact Table, Dimension Table, Surrogate Key, Conformed Dimension, Data Mart, Data Lakehouse, OLAP, OLTP, ELT, ETL, CDC, Table Partitioning, Sharding, Materialized View, Degenerate Dimension, Junk Dimension, Bridge Table, Role-Playing Dimension, Data Lineage, Data Governance, MDM, Kimball Methodology, Inmon Methodology, Medallion Architecture, Data Mesh, Denormalization, Upsert, Bitmap Index, Data Quality, Aggregation Table, Natural Key, Data Fabric.
+
+⚠️ CRITICAL OUTPUT INSTRUCTIONS ⚠️
+Your response MUST contain ONLY a valid, well-formatted, and parsable JSON object.
+DO NOT wrap the JSON in markdown code blocks (no ```json ... ```).
+DO NOT include any introductory text, greetings, comments, or explanations.
+DO NOT include any trailing characters or whitespace outside the JSON.
+Ensure all keys and string values are enclosed in double quotes (").
+Ensure there are no trailing commas in arrays or objects.
+Array Rule: Fields explicitly marked as arrays (EmployerCountry, CandidateCountry, CandidateNoCountry, CertificationsRequired, RequiredLanguages) MUST be JSON arrays, even if there is only one item (e.g., ["USA"], never "USA").
+Missing Values Rule: If a general value (like Title, Salary, or yes/no fields) is not found, use null (without quotes) for strings/numbers, or an empty array [] for lists. If a technical proficiency is not found, use the string "no". Do not use the string "null" or "not found".
+
+Expected JSON Structure:
+{
+  "Apache Airflow": "required",
+  "dbt": "no",
+  "Informatica": "no",
+  "Apache Spark": "no",
+  "AWS Glue": "no",
+  "Azure Data Factory": "no",
+  "Talend": "no",
+  "IBM DataStage": "no",
+  "SSIS": "no",
+  "Fivetran": "no",
+  "Matillion": "no",
+  "Apache NiFi": "no",
+  "Dagster": "no",
+  "Airbyte": "no",
+  "Alteryx": "no",
+  "Apache Beam": "no",
+  "Google Cloud Dataflow": "no",
+  "Prefect": "no",
+  "Pentaho": "no",
+  "Dell Boomi": "no",
+  "SAP BODS": "no",
+  "Oracle Data Integrator": "no",
+  "Apache Flink": "no",
+  "Luigi": "no",
+  "SnapLogic": "no",
+  "Stitch": "no",
+  "Mage": "no",
+  "HVR": "no",
+  "Qlik Replicate": "no",
+  "Kafka Connect": "no",
+  "Star Schema": "no",
+  "Snowflake Schema": "no",
+  "3NF": "no",
+  "Anchor Modeling": "no",
+  "Data Vault": "no",
+  "Columnstore": "no",
+  "Query Plan": "no",
+  "SCD": "no",
+  "Fact Table": "no",
+  "Dimension Table": "no",
+  "Surrogate Key": "no",
+  "Conformed Dimension": "no",
+  "Data Mart": "no",
+  "Data Lakehouse": "no",
+  "OLAP": "no",
+  "OLTP": "no",
+  "ELT": "no",
+  "ETL": "expert",
+  "CDC": "no",
+  "Table Partitioning": "no",
+  "Sharding": "no",
+  "Materialized View": "no",
+  "Degenerate Dimension": "no",
+  "Junk Dimension": "no",
+  "Bridge Table": "no",
+  "Role-Playing Dimension": "no",
+  "Data Lineage": "no",
+  "Data Governance": "no",
+  "MDM": "no",
+  "Kimball Methodology": "no",
+  "Inmon Methodology": "no",
+  "Medallion Architecture": "no",
+  "Data Mesh": "no",
+  "Denormalization": "no",
+  "Upsert": "no",
+  "Bitmap Index": "no",
+  "Data Quality": "no",
+  "Aggregation Table": "no",
+  "Natural Key": "no",
+  "Data Fabric": "no"
+}
