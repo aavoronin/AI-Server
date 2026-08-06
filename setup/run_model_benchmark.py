@@ -9,6 +9,126 @@ from setup.start_server import print_model_debug_info
 from setup.questions_helper import QuestionsHelper
 
 
+def format_time(total_elapsed):
+    m, s = divmod(int(total_elapsed), 60)
+    return f"{m}:{s:02d}"
+
+
+def format_value(val):
+    return str(val).replace('\n', ' ').replace('"', "'") if val is not None else ""
+
+
+def compare_values(actual_value, expected_value):
+    if isinstance(expected_value, list):
+        actual_list = sorted([str(v).strip().lower() for v in actual_value]) if isinstance(actual_value, list) else []
+        expected_list = sorted([str(v).strip().lower() for v in expected_value])
+        return actual_list == expected_list
+    else:
+        actual_str = str(actual_value).strip().lower() if actual_value is not None else ""
+        expected_str = str(expected_value).strip().lower()
+        return actual_str == expected_str
+
+
+def compare_json_with_expected(expected_json, parsed_dict):
+    for key, expected_value in expected_json.items():
+        expected_disp = format_value(expected_value)
+        if parsed_dict is not None and key in parsed_dict:
+            actual_value = parsed_dict[key]
+            actual_disp = format_value(actual_value)
+            if compare_values(actual_value, expected_value):
+                print(f'    "{key}": ok ("{actual_disp}")')
+            else:
+                print(f'    "{key}": fail ("{actual_disp}"|"{expected_disp}")')
+        else:
+            print(f'    "{key}": fail (|"{expected_disp}")')
+
+
+def print_json_failures(expected_json, parsed_dict):
+    for key, expected_value in expected_json.items():
+        expected_disp = format_value(expected_value)
+        if parsed_dict is not None and key in parsed_dict:
+            actual_value = parsed_dict[key]
+            actual_disp = format_value(actual_value)
+            if not compare_values(actual_value, expected_value):
+                print(f'    "{key}": fail ("{actual_disp}"|"{expected_disp}")')
+        else:
+            print(f'    "{key}": fail (|"{expected_disp}")')
+
+
+def record_failure(model_results, duration, is_json=False, expected_keys=0):
+    model_results["scores"].append(0.0 if is_json else "fail")
+    model_results["times"].append(duration)
+    model_results["total_time"] += duration
+    if is_json:
+        model_results["total_expected_keys"] += expected_keys
+
+
+def parse_json_safely(json_output: str) -> Any:
+    parsed_dict = None
+    try:
+        parsed_output = json_output.strip()
+        if parsed_output.startswith("```"):
+            parsed_output = parsed_output[3:].strip()
+            if parsed_output.lower().startswith("json"):
+                parsed_output = parsed_output[4:].strip()
+            if parsed_output.endswith("```"):
+                parsed_output = parsed_output[:-3].strip()
+        parsed_dict = json.loads(parsed_output)
+    except Exception:
+        parsed_dict = None
+    return parsed_dict
+
+
+def evaluate_json_response(output_text: str, expected_json: dict) -> float:
+    """Evaluates if the model's output is valid JSON and matches expected keys/values."""
+    output_text = output_text.strip()
+
+    # Remove markdown code blocks if present
+    if output_text.startswith("```"):
+        output_text = output_text[3:].strip()
+        if output_text.lower().startswith("json"):
+            output_text = output_text[4:].strip()
+        if output_text.endswith("```"):
+            output_text = output_text[:-3].strip()
+
+    output_text = output_text.strip()
+
+    # Must be strictly JSON
+    if not (output_text.startswith('{') and output_text.endswith('}')):
+        return 0.0
+
+    try:
+        parsed = json.loads(output_text)
+    except json.JSONDecodeError:
+        return 0.0
+
+    if not isinstance(parsed, dict):
+        return 0.0
+
+    correct_keys = 0
+    total_keys = len(expected_json)
+    for key, expected_value in expected_json.items():
+        actual_value = parsed.get(key)
+
+        if isinstance(expected_value, list):
+            # Treat lists as sets for comparison (order doesn't matter, duplicates don't matter)
+            if isinstance(actual_value, list):
+                actual_set = set([str(v).strip().lower() for v in actual_value])
+            else:
+                actual_set = set([str(actual_value).strip().lower()]) if actual_value is not None else set()
+
+            expected_set = set([str(v).strip().lower() for v in expected_value])
+            if actual_set == expected_set:
+                correct_keys += 1
+        else:
+            actual_value_str = str(actual_value).strip().lower() if actual_value is not None else ""
+            expected_value_str = str(expected_value).strip().lower()
+            if actual_value_str == expected_value_str:
+                correct_keys += 1
+
+    return correct_keys / total_keys if total_keys > 0 else 0.0
+
+
 def run_model_benchmark():
     """Benchmark models by asking a series of questions and measuring correctness/time."""
     client = TextToTextClient()
@@ -75,8 +195,7 @@ def run_model_benchmark():
 
         qualified_models = [
             res["model_id"] for res in results1
-            if
-            len(res["scores"]) > 0 and (sum(1 for s in res["scores"] if s == "ok") / len(res["scores"]) * 100) >= 50.0
+            if len(res["scores"]) > 0 and (sum(1 for s in res["scores"] if s == "ok") / len(res["scores"]) * 100) >= 50.0
         ]
 
         print(f"\n=== QUALIFIED MODELS (>= 50% accuracy): {len(qualified_models)} ===")
@@ -101,7 +220,6 @@ def run_benchmark(
     test_models = list(dict.fromkeys(test_models))
     results = []
     total_start_time = time.time()
-    answers_list = []
 
     for model_seq, model_id in enumerate(test_models[:limit]):
         print(f"\nBenchmarking {model_id}...")
@@ -116,17 +234,14 @@ def run_benchmark(
             print(f"{end_timestamp} model cached {model_id}")
         except Exception as e:
             print(f"Failed to cache model {model_id}: {e}")
-            # Mark as failed for all questions and do not proceed
             for _ in range(len(questions)):
-                model_results["scores"].append("fail")
-                model_results["times"].append(0.0)
+                record_failure(model_results, 0.0)
             results.append(model_results)
             continue
 
         if cache_models_only:
             continue
 
-        abort = False
         for i, q in enumerate(questions):
             start_time = time.time()
             start_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -151,28 +266,23 @@ def run_benchmark(
                 end_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 error_msg = str(e)
                 print(f"  [{end_timestamp}] Request failed after {duration:.2f}s: {error_msg}")
-                # Print debug info on client side when error occurs
-                print_model_debug_info(model_id)
+                if not debug_printed:
+                    print_model_debug_info(model_id)
+                    debug_printed = True
+
+                record_failure(model_results, duration)
+
                 if i == 0 and "500" in error_msg:
                     print(f"  Q: {q['question'][:70]}... -> fail (500 Error on 1st question, aborting model)")
-                    model_results["scores"].append("fail")
-                    model_results["times"].append(duration)
-                    model_results["total_time"] += duration
-                    # Mark remaining questions as fail with 0 time
                     for _ in range(len(questions) - 1):
-                        model_results["scores"].append("fail")
-                        model_results["times"].append(0.0)
+                        record_failure(model_results, 0.0)
                     break
                 else:
-                    model_results["scores"].append("fail")
-                    model_results["times"].append(duration)
-                    model_results["total_time"] += duration
                     print(f"  Q: {q['question'][:70]}... -> fail (Error)")
         results.append(model_results)
 
     total_elapsed = time.time() - total_start_time
-    m, s = divmod(int(total_elapsed), 60)
-    total_time_str = f"{m}:{s:02d}"
+    total_time_str = format_time(total_elapsed)
 
     print("\n" + "=" * 90)
     print(f"{'Model ID':<35} | {'Results':<20} | {'Accuracy':<10} | {'Total Time':<10}")
@@ -180,62 +290,11 @@ def run_benchmark(
     for res in results:
         scores_str = " ".join(res["scores"])
         accuracy = sum(1 for s in res["scores"] if s == "ok") / len(res["scores"]) * 100
-        m, s = divmod(int(res["total_time"]), 60)
-        total_time_str = f"{m}:{s:02d}"
-        print(f"{res['model_id']:<35} | {scores_str:<20} | {accuracy:>5.1f}%    | {total_time_str:<10}")
+        res_time_str = format_time(res["total_time"])
+        print(f"{res['model_id']:<35} | {scores_str:<20} | {accuracy:>5.1f}%    | {res_time_str:<10}")
     print("=" * 90)
 
     return results
-
-
-def evaluate_json_response(output_text: str, expected_json: dict) -> float:
-    """Evaluates if the model's output is valid JSON and matches expected keys/values."""
-    output_text = output_text.strip()
-
-    # Remove markdown code blocks if present
-    if output_text.startswith("```"):
-        output_text = output_text[3:].strip()
-        if output_text.lower().startswith("json"):
-            output_text = output_text[4:].strip()
-        if output_text.endswith("```"):
-            output_text = output_text[:-3].strip()
-
-    output_text = output_text.strip()
-
-    # Must be strictly JSON
-    if not (output_text.startswith('{') and output_text.endswith('}')):
-        return 0.0
-
-    try:
-        parsed = json.loads(output_text)
-    except json.JSONDecodeError:
-        return 0.0
-
-    if not isinstance(parsed, dict):
-        return 0.0
-
-    correct_keys = 0
-    total_keys = len(expected_json)
-    for key, expected_value in expected_json.items():
-        actual_value = parsed.get(key)
-
-        if isinstance(expected_value, list):
-            # Treat lists as sets for comparison (order doesn't matter, duplicates don't matter)
-            if isinstance(actual_value, list):
-                actual_set = set([str(v).strip().lower() for v in actual_value])
-            else:
-                actual_set = set([str(actual_value).strip().lower()]) if actual_value is not None else set()
-
-            expected_set = set([str(v).strip().lower() for v in expected_value])
-            if actual_set == expected_set:
-                correct_keys += 1
-        else:
-            actual_value_str = str(actual_value).strip().lower() if actual_value is not None else ""
-            expected_value_str = str(expected_value).strip().lower()
-            if actual_value_str == expected_value_str:
-                correct_keys += 1
-
-    return correct_keys / total_keys if total_keys > 0 else 0.0
 
 
 def run_benchmark_json(
@@ -281,39 +340,8 @@ def run_benchmark_json(
                 print(f"Time Taken: {duration:.2f}s | Score: {score:.2f}")
 
                 if score < 1.0:
-                    parsed_dict = None
-                    try:
-                        parsed_output = json_output_one_line
-                        if parsed_output.startswith("```"):
-                            parsed_output = parsed_output[3:].strip()
-                            if parsed_output.lower().startswith("json"):
-                                parsed_output = parsed_output[4:].strip()
-                            if parsed_output.endswith("```"):
-                                parsed_output = parsed_output[:-3].strip()
-                        parsed_dict = json.loads(parsed_output)
-                    except Exception:
-                        parsed_dict = None
-
-                    for key, expected_value in q["expected_json"].items():
-                        if parsed_dict is not None and key in parsed_dict:
-                            actual_value = parsed_dict[key]
-                            is_match = False
-                            if isinstance(expected_value, list):
-                                actual_list = sorted([str(v).strip().lower() for v in actual_value]) if isinstance(actual_value, list) else []
-                                expected_list = sorted([str(v).strip().lower() for v in expected_value])
-                                is_match = (actual_list == expected_list)
-                            else:
-                                actual_str = str(actual_value).strip().lower() if actual_value is not None else ""
-                                expected_str = str(expected_value).strip().lower()
-                                is_match = (actual_str == expected_str)
-
-                            if not is_match:
-                                actual_disp = str(actual_value).replace('\n', ' ').replace('"', "'") if actual_value is not None else ""
-                                expected_disp = str(expected_value).replace('\n', ' ').replace('"', "'")
-                                print(f'    "{key}": fail ("{actual_disp}"|"{expected_disp}")')
-                        else:
-                            expected_disp = str(expected_value).replace('\n', ' ').replace('"', "'")
-                            print(f'    "{key}": fail (|"{expected_disp}")')
+                    parsed_dict = parse_json_safely(json_output_one_line)
+                    print_json_failures(q["expected_json"], parsed_dict)
 
                 model_results["scores"].append(score)
                 model_results["times"].append(duration)
@@ -339,10 +367,7 @@ def run_benchmark_json(
                     print_model_debug_info(model_id)
                     debug_printed = True
 
-                model_results["scores"].append(0.0)
-                model_results["times"].append(duration)
-                model_results["total_time"] += duration
-                model_results["total_expected_keys"] += len(q["expected_json"])
+                record_failure(model_results, duration, is_json=True, expected_keys=len(q["expected_json"]))
 
                 answers_by_q[i][model_id] = {
                     "time": duration,
@@ -352,17 +377,14 @@ def run_benchmark_json(
 
                 if i == 0 and "500" in error_msg:
                     for j in range(i + 1, len(questions)):
-                        model_results["scores"].append(0.0)
-                        model_results["times"].append(0.0)
-                        model_results["total_expected_keys"] += len(questions[j]["expected_json"])
+                        record_failure(model_results, 0.0, is_json=True, expected_keys=len(questions[j]["expected_json"]))
                         answers_by_q[j][model_id] = {"time": 0.0, "score": 0.0, "json_output": "ABORTED"}
                     break
 
         results.append(model_results)
 
     total_elapsed = time.time() - total_start_time
-    m, s = divmod(int(total_elapsed), 60)
-    total_time_str = f"{m}:{s:02d}"
+    total_time_str = format_time(total_elapsed)
 
     print("\n" + "=" * 110)
     print("PER-QUESTION SUMMARY")
@@ -377,44 +399,8 @@ def run_benchmark_json(
             json_output = data["json_output"]
             expected_json = q["expected_json"]
 
-            parsed_dict = None
-            try:
-                parsed_output = json_output.strip()
-                if parsed_output.startswith("```"):
-                    parsed_output = parsed_output[3:].strip()
-                    if parsed_output.lower().startswith("json"):
-                        parsed_output = parsed_output[4:].strip()
-                    if parsed_output.endswith("```"):
-                        parsed_output = parsed_output[:-3].strip()
-                parsed_dict = json.loads(parsed_output)
-            except Exception:
-                parsed_dict = None
-
-            for key, expected_value in expected_json.items():
-                if parsed_dict is not None and key in parsed_dict:
-                    actual_value = parsed_dict[key]
-                    is_match = False
-                    if isinstance(expected_value, list):
-                        actual_list = sorted([str(v).strip().lower() for v in actual_value]) if isinstance(actual_value,
-                                                                                                           list) else []
-                        expected_list = sorted([str(v).strip().lower() for v in expected_value])
-                        is_match = (actual_list == expected_list)
-                    else:
-                        actual_str = str(actual_value).strip().lower() if actual_value is not None else ""
-                        expected_str = str(expected_value).strip().lower()
-                        is_match = (actual_str == expected_str)
-
-                    if is_match:
-                        actual_disp = str(actual_value).replace('\n', ' ').replace('"', "'")
-                        print(f'    "{key}": ok ("{actual_disp}")')
-                    else:
-                        actual_disp = str(actual_value).replace('\n', ' ').replace('"',
-                                                                                   "'") if actual_value is not None else ""
-                        expected_disp = str(expected_value).replace('\n', ' ').replace('"', "'")
-                        print(f'    "{key}": fail ("{actual_disp}"|"{expected_disp}")')
-                else:
-                    expected_disp = str(expected_value).replace('\n', ' ').replace('"', "'")
-                    print(f'    "{key}": fail (|"{expected_disp}")')
+            parsed_dict = parse_json_safely(json_output)
+            compare_json_with_expected(expected_json, parsed_dict)
 
     print("\n" + "=" * 110)
     print(f"{'Model ID':<50} | {'Total Score':<12} | {'Total Time':<10} | Results Scores")
@@ -425,11 +411,10 @@ def run_benchmark_json(
         else:
             total_score_pct = 0.0
 
-        m_res, s_res = divmod(int(res["total_time"]), 60)
-        total_time_str_res = f"{m_res}:{s_res:02d}"
+        res_time_str = format_time(res["total_time"])
 
         scores_str = " ".join(f"{s:.2f}" for s in res["scores"])
-        print(f"{res['model_id']:<50} | {total_score_pct:>6.2f}%    | {total_time_str_res:<10} | {scores_str}")
+        print(f"{res['model_id']:<50} | {total_score_pct:>6.2f}%    | {res_time_str:<10} | {scores_str}")
     print("=" * 110)
     print(f"Total Benchmark Time: {total_time_str}")
 
@@ -458,7 +443,7 @@ def run_model_benchmark_json():
     print(f"Total Models: {len(test_models)}")
     print(f"Total Questions: {len(questions)}")
 
-    for volume in [0.2, 1]:
+    for volume in [0.3, 1]:
         questions_slice_index = int(volume * len(questions)) if volume < 1 else len(questions)
         questions_slice_index = 1 if questions_slice_index == 0 else questions_slice_index
         test_models_index = int(volume * len(test_models)) if volume < 1 else len(test_models)
