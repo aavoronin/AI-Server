@@ -427,6 +427,7 @@ def run_model_benchmark_json():
     questions = QuestionsHelper.get_vacancy_json_questions()
 
     test_models = [
+        #"lynnea1517/huihui-ai_gemma-3-27b-it-abliterated-Q8_0-GGUF",
         "NikolayKozloff/gemma-3-1b-it-Q8_0-GGUF",
         "NikolayKozloff/gemma-3-4b-it-Q8_0-GGUF",
         "Bhuvneesh/gemma-3-27b-it-Q5_K_M-GGUF",
