@@ -3,6 +3,7 @@ import json
 from datetime import datetime
 from typing import Any
 from collections import defaultdict
+from pathlib import Path
 
 from ai_clients.model_client_base import TextToTextClient
 from setup.start_server import print_model_debug_info
@@ -83,7 +84,6 @@ def evaluate_json_response(output_text: str, expected_json: dict) -> float:
     """Evaluates if the model's output is valid JSON and matches expected keys/values."""
     output_text = output_text.strip()
 
-    # Remove markdown code blocks if present
     if output_text.startswith("```"):
         output_text = output_text[3:].strip()
         if output_text.lower().startswith("json"):
@@ -93,7 +93,6 @@ def evaluate_json_response(output_text: str, expected_json: dict) -> float:
 
     output_text = output_text.strip()
 
-    # Must be strictly JSON
     if not (output_text.startswith('{') and output_text.endswith('}')):
         return 0.0
 
@@ -111,7 +110,6 @@ def evaluate_json_response(output_text: str, expected_json: dict) -> float:
         actual_value = parsed.get(key)
 
         if isinstance(expected_value, list):
-            # Treat lists as sets for comparison (order doesn't matter, duplicates don't matter)
             if isinstance(actual_value, list):
                 actual_set = set([str(v).strip().lower() for v in actual_value])
             else:
@@ -195,7 +193,8 @@ def run_model_benchmark():
 
         qualified_models = [
             res["model_id"] for res in results1
-            if len(res["scores"]) > 0 and (sum(1 for s in res["scores"] if s == "ok") / len(res["scores"]) * 100) >= 50.0
+            if
+            len(res["scores"]) > 0 and (sum(1 for s in res["scores"] if s == "ok") / len(res["scores"]) * 100) >= 50.0
         ]
 
         print(f"\n=== QUALIFIED MODELS (>= 50% accuracy): {len(qualified_models)} ===")
@@ -377,7 +376,8 @@ def run_benchmark_json(
 
                 if i == 0 and "500" in error_msg:
                     for j in range(i + 1, len(questions)):
-                        record_failure(model_results, 0.0, is_json=True, expected_keys=len(questions[j]["expected_json"]))
+                        record_failure(model_results, 0.0, is_json=True,
+                                       expected_keys=len(questions[j]["expected_json"]))
                         answers_by_q[j][model_id] = {"time": 0.0, "score": 0.0, "json_output": "ABORTED"}
                     break
 
@@ -421,16 +421,142 @@ def run_benchmark_json(
     return results
 
 
+def run_models_on_vacancies(vacancies_dir: str):
+    """Benchmark models on real vacancy text files against ground truth JSONs."""
+    client = TextToTextClient()
+    vacancies_path = Path(vacancies_dir)
+    prompt_file = vacancies_path.parent / "PROMPT.txt"
+
+    if not prompt_file.exists():
+        print(f"Error: PROMPT.txt not found at {prompt_file}")
+        return
+
+    prompt_text = prompt_file.read_text(encoding='utf-8')
+
+    # Find all vacancy txt files and their corresponding result jsons
+    vacancies = []
+    for txt_file in sorted(vacancies_path.glob("*.txt")):
+        result_json_file = txt_file.with_name(txt_file.stem + "_result.json")
+        if result_json_file.exists():
+            vacancies.append((txt_file, result_json_file))
+
+    if not vacancies:
+        print(f"No matching vacancy/result pairs found in {vacancies_dir}")
+        return
+
+    test_models = [
+        "NikolayKozloff/gemma-3-1b-it-Q8_0-GGUF",
+        "NikolayKozloff/gemma-3-4b-it-Q8_0-GGUF",
+        "NikolayKozloff/gemma-3-12b-it-Q5_K_S-GGUF",
+        "NikolayKozloff/gemma-3-12b-it-Q8_0-GGUF",
+        "Bhuvneesh/gemma-3-27b-it-Q5_K_M-GGUF",
+    ]
+
+    print("=== RUNNING VACANCIES BENCHMARK ===")
+    print(f"Total Models: {len(test_models)}")
+    print(f"Total Vacancies: {len(vacancies)}")
+
+    model_summaries = []
+
+    for model_id in test_models:
+        print(f"\n{'=' * 80}")
+        print(f"Testing Model: {model_id}")
+        print(f"{'=' * 80}")
+
+        total_keys = 0
+        correct_keys = 0
+        total_time = 0.0
+        vacancy_scores = []
+
+        for txt_file, result_json_file in vacancies:
+            vacancy_name = txt_file.stem
+            vacancy_text = txt_file.read_text(encoding='utf-8')
+
+            try:
+                with open(result_json_file, 'r', encoding='utf-8') as f:
+                    expected_json = json.load(f)
+            except json.JSONDecodeError:
+                print(f"\n[{vacancy_name}] ERROR: Invalid JSON in {result_json_file.name}. Scoring as 0.00")
+                expected_json = {}
+            except Exception as e:
+                print(f"\n[{vacancy_name}] ERROR: Failed to read {result_json_file.name}: {e}. Scoring as 0.00")
+                expected_json = {}
+
+            full_prompt = prompt_text + "\n" + vacancy_text
+
+            start_time = time.time()
+            try:
+                response = client.generate(model_id, full_prompt, model_limit_seconds=60 * 10)
+                duration = time.time() - start_time
+                total_time += duration
+
+                generated_text = response.get("generated_text", "")
+                if not isinstance(generated_text, str):
+                    generated_text = str(generated_text)
+
+                score = evaluate_json_response(generated_text, expected_json)
+                parsed_dict = parse_json_safely(generated_text)
+
+                keys_in_expected = len(expected_json)
+                total_keys += keys_in_expected
+                correct_keys += score * keys_in_expected
+
+                vacancy_scores.append({
+                    "vacancy": vacancy_name,
+                    "score": score,
+                    "time": duration
+                })
+
+                print(f"\n[{vacancy_name}] Time: {duration:.2f}s | Score: {score:.2f}")
+                if score < 1.0 and keys_in_expected > 0:
+                    print_json_failures(expected_json, parsed_dict)
+                elif keys_in_expected == 0:
+                    print(f"  (Skipped failure details due to empty expected JSON)")
+
+            except Exception as e:
+                duration = time.time() - start_time
+                total_time += duration
+                print(f"\n[{vacancy_name}] ERROR: {str(e)} | Time: {duration:.2f}s | Score: 0.00")
+                vacancy_scores.append({
+                    "vacancy": vacancy_name,
+                    "score": 0.0,
+                    "time": duration
+                })
+
+        # Model Summary
+        avg_score = (correct_keys / total_keys) if total_keys > 0 else 0.0
+        m, s = divmod(int(total_time), 60)
+        time_str = f"{m}:{s:02d}"
+
+        print(f"\n--- Summary for {model_id} ---")
+        for vs in vacancy_scores:
+            print(f"  {vs['vacancy']:<40} | Score: {vs['score']:.2f} | Time: {vs['time']:.2f}s")
+        print(f"  {'AVERAGE':<40} | Score: {avg_score:.2%} | Total Time: {time_str}")
+
+        model_summaries.append({
+            "model_id": model_id,
+            "avg_score": avg_score,
+            "total_time": total_time,
+            "time_str": time_str
+        })
+
+    # Final Overall Summary
+    print("\n" + "=" * 90)
+    print(f"{'Model ID':<50} | {'Avg Score':<12} | {'Total Time':<10}")
+    print("-" * 90)
+    for ms in model_summaries:
+        print(f"{ms['model_id']:<50} | {ms['avg_score']:>6.2%}    | {ms['time_str']:<10}")
+    print("=" * 90)
+
+
 def run_model_benchmark_json():
     """Benchmark models on JSON extraction from vacancy texts."""
     client = TextToTextClient()
     questions = QuestionsHelper.get_vacancy_json_questions()
 
     test_models = [
-        #"lynnea1517/huihui-ai_gemma-3-27b-it-abliterated-Q8_0-GGUF",
         "NikolayKozloff/gemma-3-1b-it-Q8_0-GGUF",
         "NikolayKozloff/gemma-3-4b-it-Q8_0-GGUF",
-        "Bhuvneesh/gemma-3-27b-it-Q5_K_M-GGUF",
         "NikolayKozloff/gemma-3-12b-it-Q8_0-GGUF",
         "NikolayKozloff/gemma-3-12b-it-Q5_K_S-GGUF",
         "NikolayKozloff/gemma-3-12b-it-Q6_K-GGUF",

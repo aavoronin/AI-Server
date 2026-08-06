@@ -7,7 +7,7 @@ sys.path.insert(0, str(Path(__file__).parent / "ai-server"))
 from project_to_file.project_to_file import project_to_file_main
 from setup.copy_server_files import copy_server_files
 from setup.start_server import start_wsl_server, stop_wsl_server
-from setup.run_model_benchmark import run_model_benchmark, run_model_benchmark_json
+from setup.run_model_benchmark import run_model_benchmark, run_model_benchmark_json, run_models_on_vacancies
 from test_server import ServerTester
 
 
@@ -20,6 +20,7 @@ if __name__ == '__main__':
     tester = ServerTester()
     tester.run_all()
 
+    run_models_on_vacancies(r"C:\Py\AI-Server\test_cases\test_vacancies\01")
     run_model_benchmark_json()
     run_model_benchmark()
 
