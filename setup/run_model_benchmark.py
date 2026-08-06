@@ -280,6 +280,41 @@ def run_benchmark_json(
                 json_output_one_line = generated_text.replace('\n', ' ').replace('\r', ' ').strip()
                 print(f"Time Taken: {duration:.2f}s | Score: {score:.2f}")
 
+                if score < 1.0:
+                    parsed_dict = None
+                    try:
+                        parsed_output = json_output_one_line
+                        if parsed_output.startswith("```"):
+                            parsed_output = parsed_output[3:].strip()
+                            if parsed_output.lower().startswith("json"):
+                                parsed_output = parsed_output[4:].strip()
+                            if parsed_output.endswith("```"):
+                                parsed_output = parsed_output[:-3].strip()
+                        parsed_dict = json.loads(parsed_output)
+                    except Exception:
+                        parsed_dict = None
+
+                    for key, expected_value in q["expected_json"].items():
+                        if parsed_dict is not None and key in parsed_dict:
+                            actual_value = parsed_dict[key]
+                            is_match = False
+                            if isinstance(expected_value, list):
+                                actual_list = sorted([str(v).strip().lower() for v in actual_value]) if isinstance(actual_value, list) else []
+                                expected_list = sorted([str(v).strip().lower() for v in expected_value])
+                                is_match = (actual_list == expected_list)
+                            else:
+                                actual_str = str(actual_value).strip().lower() if actual_value is not None else ""
+                                expected_str = str(expected_value).strip().lower()
+                                is_match = (actual_str == expected_str)
+
+                            if not is_match:
+                                actual_disp = str(actual_value).replace('\n', ' ').replace('"', "'") if actual_value is not None else ""
+                                expected_disp = str(expected_value).replace('\n', ' ').replace('"', "'")
+                                print(f'    "{key}": fail ("{actual_disp}"|"{expected_disp}")')
+                        else:
+                            expected_disp = str(expected_value).replace('\n', ' ').replace('"', "'")
+                            print(f'    "{key}": fail (|"{expected_disp}")')
+
                 model_results["scores"].append(score)
                 model_results["times"].append(duration)
                 model_results["total_time"] += duration
