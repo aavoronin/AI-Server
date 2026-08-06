@@ -323,14 +323,14 @@ def evaluate_json_response(output_text: str, expected_json: dict) -> float:
         actual_value = parsed.get(key)
 
         if isinstance(expected_value, list):
-            # Normalize both to sorted lists of lowercase strings for comparison
+            # Treat lists as sets for comparison (order doesn't matter, duplicates don't matter)
             if isinstance(actual_value, list):
-                actual_list = sorted([str(v).strip().lower() for v in actual_value])
+                actual_set = set([str(v).strip().lower() for v in actual_value])
             else:
-                actual_list = sorted([str(actual_value).strip().lower()]) if actual_value is not None else []
+                actual_set = set([str(actual_value).strip().lower()]) if actual_value is not None else set()
 
-            expected_list = sorted([str(v).strip().lower() for v in expected_value])
-            if actual_list == expected_list:
+            expected_set = set([str(v).strip().lower() for v in expected_value])
+            if actual_set == expected_set:
                 correct_keys += 1
         else:
             actual_value_str = str(actual_value).strip().lower() if actual_value is not None else ""
@@ -442,10 +442,10 @@ def run_benchmark_json(
         for res in results:
             model_id = res["model_id"]
             data = answers_by_q[q_idx].get(model_id, {"time": 0.0, "score": 0.0, "json_output": "SKIPPED"})
-            print(f"  {model_id} ({data['time']:.2f}s): Score: {data['score']:.2f} | {data['json_output'][:100]}")
+            print(f"  {model_id} ({data['time']:.2f}s): Score: {data['score']:.2f} | {data['json_output']}")
 
     print("\n" + "=" * 110)
-    print(f"{'Model ID':<50} | {'Results (First 10)':<30} | {'Total Score':<12} | {'Total Time':<10}")
+    print(f"{'Model ID':<50} | {'Total Score':<12} | {'Total Time':<10} | Results Scores")
     print("-" * 110)
     for res in results:
         if res["total_expected_keys"] > 0:
@@ -456,11 +456,8 @@ def run_benchmark_json(
         m_res, s_res = divmod(int(res["total_time"]), 60)
         total_time_str_res = f"{m_res}:{s_res:02d}"
 
-        scores_str = " ".join(f"{s:.2f}" for s in res["scores"][:10])
-        if len(res["scores"]) > 10:
-            scores_str += " ..."
-
-        print(f"{res['model_id']:<50} | {scores_str:<30} | {total_score_pct:>6.2f}%    | {total_time_str_res:<10}")
+        scores_str = " ".join(f"{s:.2f}" for s in res["scores"])
+        print(f"{res['model_id']:<50} | {total_score_pct:>6.2f}%  | {total_time_str_res:<10} | {scores_str}")
     print("=" * 110)
     print(f"Total Benchmark Time: {total_time_str}")
 
@@ -473,6 +470,7 @@ def run_model_benchmark_json():
     questions = QuestionsHelper.get_vacancy_json_questions()
 
     test_models = [
+        "Bhuvneesh/gemma-3-27b-it-Q5_K_M-GGUF",
         "NikolayKozloff/gemma-3-1b-it-Q8_0-GGUF",
         "NikolayKozloff/gemma-3-4b-it-Q8_0-GGUF",
         "NikolayKozloff/gemma-3-12b-it-Q8_0-GGUF",
