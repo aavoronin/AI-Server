@@ -420,13 +420,37 @@ def run_benchmark_json(
 
     return results
 
+def shorten_vacancy_text(v_name: str, v_text: str) -> str:
+    vacancy_slice = [
+        ("LinkedIn_Vacancy", "About the job", "Unlock hiring insights"),
+        ("Hirify_Vacancy", "Job description", ""),
+    ]
+
+    for prefix, start_marker, end_marker in vacancy_slice:
+        if v_name.startswith(prefix):
+            start_idx = 0
+            if start_marker:
+                idx = v_text.find(start_marker)
+                if idx != -1:
+                    start_idx = idx + len(end_marker)
+
+            end_idx = len(v_text)
+            if end_marker:
+                idx = v_text.rfind(end_marker)
+                if idx != -1:
+                    end_idx = idx
+
+            return v_text[start_idx:end_idx].strip()
+    return v_text
+
 
 def run_models_on_vacancies(vacancies_dir: str):
     """Benchmark models on real vacancy text files against ground truth JSONs."""
     client = TextToTextClient()
     vacancies_path = Path(vacancies_dir)
 
-    prompt_files7 = [
+
+    prompt_files = [
         "PROMPT_01.txt",
         "PROMPT_02.txt",
         "PROMPT_03.txt",
@@ -434,10 +458,6 @@ def run_models_on_vacancies(vacancies_dir: str):
         "PROMPT_05.txt",
         "PROMPT_06.txt",
         "PROMPT_07.txt"
-    ]
-
-    prompt_files1 = [
-        "PROMPT.txt"
     ]
 
     # Find all vacancy txt files and their corresponding result jsons
@@ -452,9 +472,9 @@ def run_models_on_vacancies(vacancies_dir: str):
         return
 
     test_models = [
-        #"NikolayKozloff/gemma-3-1b-it-Q8_0-GGUF",
+        "NikolayKozloff/gemma-3-1b-it-Q8_0-GGUF",
         "NikolayKozloff/gemma-3-4b-it-Q8_0-GGUF",
-        #"NikolayKozloff/gemma-3-12b-it-Q5_K_S-GGUF",
+        "NikolayKozloff/gemma-3-12b-it-Q5_K_S-GGUF",
         "NikolayKozloff/gemma-3-12b-it-Q8_0-GGUF",
         "Bhuvneesh/gemma-3-27b-it-Q5_K_M-GGUF",
     ]
@@ -464,7 +484,6 @@ def run_models_on_vacancies(vacancies_dir: str):
     print(f"Total Vacancies: {len(vacancies)}")
 
     model_summaries = []
-    TIMEOUT = 60 * 30
 
     for model_id in test_models:
         print(f"\n{'=' * 80}")
@@ -479,6 +498,7 @@ def run_models_on_vacancies(vacancies_dir: str):
         for txt_file, result_json_file in vacancies:
             vacancy_name = txt_file.stem
             vacancy_text = txt_file.read_text(encoding='utf-8')
+            vacancy_text = shorten_vacancy_text(vacancy_name, vacancy_text)
 
             try:
                 with open(result_json_file, 'r', encoding='utf-8') as f:
@@ -493,12 +513,6 @@ def run_models_on_vacancies(vacancies_dir: str):
             combined_parsed_dict = {}
             total_vacancy_time = 0.0
 
-            #if Any(s in model_id for s in ["-1b-", "-4b-"]):
-            #    prompt_files = prompt_files7
-            #else:
-            #    prompt_files = prompt_files1
-            prompt_files = prompt_files7
-
             for p_file in prompt_files:
                 prompt_path = vacancies_path.parent / p_file
                 if not prompt_path.exists():
@@ -508,7 +522,7 @@ def run_models_on_vacancies(vacancies_dir: str):
 
                 start_time = time.time()
                 try:
-                    response = client.generate(model_id, full_prompt, model_limit_seconds=TIMEOUT)
+                    response = client.generate(model_id, full_prompt, model_limit_seconds=60 * 10)
                     duration = time.time() - start_time
                     total_vacancy_time += duration
 
