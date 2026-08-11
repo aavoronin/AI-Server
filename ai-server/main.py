@@ -59,7 +59,8 @@ except Exception as e:
 
 def ensure_model_cached(model_id: str, cache_folder: str, hf_token_path: str) -> bool:
     """Ensure the model is cached, downloading it if necessary."""
-    model_folder_name = model_id.replace("/", "_")
+    clean_model_id = model_id.split("|")[0]
+    model_folder_name = clean_model_id.replace("/", "_")
     model_dir = Path(cache_folder) / model_folder_name
     model_dir.mkdir(parents=True, exist_ok=True)
 
@@ -91,7 +92,7 @@ def ensure_model_cached(model_id: str, cache_folder: str, hf_token_path: str) ->
 
         try:
             subprocess.run(
-                ["huggingface-cli", "download", model_id, "--local-dir", str(model_dir)],
+                ["huggingface-cli", "download", clean_model_id, "--local-dir", str(model_dir)],
                 env=env,
                 check=True,
                 capture_output=True,
@@ -227,21 +228,19 @@ async def get_model_by_id(model_id: str):
 @app.post("/models/{model_id:path}/cache")
 async def cache_model(model_id: str):
     """Cache a model by downloading it to the cache folder."""
-    try:
-        if ensure_model_cached(model_id, config.cache_folder_path, config.hf_token_path):
-            model_dir = Path(config.cache_folder_path) / model_id.replace("/", "_")
-            with open(model_dir / "model_usage.json", 'r') as f:
-                return json.load(f)
-        raise HTTPException(status_code=500, detail="Failed to download model")
-    except Exception as e:
-        logger.error(f"Error caching model: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+    if ensure_model_cached(model_id, config.cache_folder_path, config.hf_token_path):
+        clean_model_id = model_id.split("|")[0]
+        model_dir = Path(config.cache_folder_path) / clean_model_id.replace("/", "_")
+        with open(model_dir / "model_usage.json", 'r') as f:
+            return json.load(f)
+    raise HTTPException(status_code=500, detail="Failed to download model")
 
 
 @app.post("/models/{model_id:path}/uncache")
 async def uncache_model(model_id: str):
     """Uncache a model by removing its files but keeping usage tracking."""
-    model_folder_name = model_id.replace("/", "_")
+    clean_model_id = model_id.split("|")[0]
+    model_folder_name = clean_model_id.replace("/", "_")
     model_dir = Path(config.cache_folder_path) / model_folder_name
 
     if not model_dir.exists():
@@ -302,7 +301,8 @@ async def list_cached_models():
 @app.get("/models/{model_id:path}/stats")
 async def get_model_stats(model_id: str):
     """Get model statistics (failures and successful initializations)."""
-    model_folder_name = model_id.replace("/", "_")
+    clean_model_id = model_id.split("|")[0]
+    model_folder_name = clean_model_id.replace("/", "_")
     model_dir = Path(config.cache_folder_path) / model_folder_name
     usage_file = model_dir / "model_usage.json"
 

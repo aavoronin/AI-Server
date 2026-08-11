@@ -12,8 +12,9 @@ class ModelBase(ABC):
 
     def __init__(self, model_id: str, cache_dir: str):
         self.model_id = model_id
+        self.clean_model_id = model_id.split("|")[0]
         self.cache_dir = Path(cache_dir)
-        self.model_folder_name = model_id.replace("/", "_")
+        self.model_folder_name = self.clean_model_id.replace("/", "_")
         self.model_path = self.cache_dir / self.model_folder_name
         self.usage_file = self.model_path / "model_usage.json"
         self.is_loaded = False

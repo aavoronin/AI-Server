@@ -22,6 +22,6 @@ if __name__ == '__main__':
 
     run_model_benchmark()
     #run_model_benchmark_json()
-    run_models_on_vacancies(r"C:\Py\AI-Server\test_cases\test_vacancies\01")
+    #run_models_on_vacancies(r"C:\Py\AI-Server\test_cases\test_vacancies\01")
 
     stop_wsl_server()

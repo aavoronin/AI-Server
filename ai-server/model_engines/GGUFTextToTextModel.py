@@ -11,6 +11,21 @@ class GGUFTextToTextModel(TextToTextModel):
         self.tokenizer = None
         self.llm = None
         self.use_llama_cpp = False
+        self.llama_verbose = False
+
+        # Parse model_id for device and context preferences
+        self.device_preference = "CPU"  # Default
+        self.context_size = 32768  # Default
+
+        if "|" in model_id:
+            parts = model_id.split("|")
+            if len(parts) >= 2:
+                self.device_preference = parts[1].strip().upper()
+            if len(parts) >= 3:
+                try:
+                    self.context_size = int(parts[2].strip())
+                except ValueError:
+                    logger.warning(f"Invalid context size in model_id: {model_id}")
 
     def load(self):
         # 1. Try using llama-cpp-python first (Recommended for GGUF)
@@ -23,19 +38,21 @@ class GGUFTextToTextModel(TextToTextModel):
 
             gguf_path = str(gguf_files[0])
 
-            # Determine n_ctx based on model size for Gemma-3
-            model_id_lower = self.model_id.lower()
-            if "gemma-3-1b" in model_id_lower or "gemma-3-1b-it" in model_id_lower:
-                n_ctx = 32768  # 32K tokens for 1B size
+            # Determine n_gpu_layers based on device preference
+            model_id_lower = self.clean_model_id.lower()
+            if self.device_preference == "GPU" or "gemma-3-1b" in model_id_lower or "gemma-3-4b" in model_id_lower:
+                n_gpu_layers = -1  # All layers on GPU
             else:
-                n_ctx = 131072  # 128K tokens for 4B, 12B, and 27B sizes
+                n_gpu_layers = 0  # All layers on CPU
 
-            # Set verbose=True to see the exact number of layers offloaded to the GPU in the console logs
+            logger.info(
+                f"Device preference: {self.device_preference}, Context size: {self.context_size}, GPU layers: {n_gpu_layers}")
+
             self.llm = Llama(
                 model_path=gguf_path,
-                n_gpu_layers=-1,  # Attempt to offload all layers to GPU
-                n_ctx=n_ctx,
-                verbose=True
+                n_gpu_layers=n_gpu_layers,
+                n_ctx=self.context_size,
+                verbose=self.llama_verbose
             )
             self.use_llama_cpp = True
             self.is_loaded = True
@@ -60,7 +77,7 @@ class GGUFTextToTextModel(TextToTextModel):
             # Try loading tokenizer from the original model ID first
             try:
                 self.tokenizer = AutoTokenizer.from_pretrained(
-                    self.model_id, trust_remote_code=True
+                    self.clean_model_id, trust_remote_code=True
                 )
             except Exception:
                 # If that fails, try the local path
@@ -70,7 +87,7 @@ class GGUFTextToTextModel(TextToTextModel):
                     )
                 except Exception:
                     # Fallback for known GGUF repos that lack tokenizer files locally
-                    model_id_lower = self.model_id.lower()
+                    model_id_lower = self.clean_model_id.lower()
                     if "gemma-4-e4b" in model_id_lower:
                         self.tokenizer = AutoTokenizer.from_pretrained("google/gemma-4-E4B-it", trust_remote_code=True)
                     elif "gemma-3-4b" in model_id_lower:
@@ -131,7 +148,7 @@ class GGUFTextToTextModel(TextToTextModel):
             raise RuntimeError("Model is not loaded")
 
         # Set max_new_tokens to 8192 for Gemma-3 models as per specification
-        model_id_lower = self.model_id.lower()
+        model_id_lower = self.clean_model_id.lower()
         default_max_tokens = 8192 if "gemma-3" in model_id_lower else 2048
         max_new_tokens = kwargs.get("max_new_tokens", default_max_tokens)
         temperature = kwargs.get("temperature", 0.7)

@@ -134,26 +134,56 @@ def run_model_benchmark():
     questions2 = QuestionsHelper.get_questions2()
 
     test_models = [
-        "Bhuvneesh/gemma-3-4b-it-Q8_0-GGUF",
-        "Bhuvneesh/gemma-3-12b-it-Q5_K_M-GGUF",
-        "Bhuvneesh/gemma-3-27b-it-Q5_K_M-GGUF",
-        "Bhuvneesh/gemma-4-E4B-it-Q8_0-GGUF",
-        "Bhuvneesh/gemma-4-E4B-it-Q5_K_M-GGUF",
         "NikolayKozloff/gemma-3-1b-it-Q8_0-GGUF",
-        "NikolayKozloff/gemma-3-4b-it-Q8_0-GGUF",
-        "NikolayKozloff/gemma-3-12b-it-Q8_0-GGUF",
+        "NikolayKozloff/gemma-3-4b-it-Q8_0-GGUF|GPU|131072",
+        "Bhuvneesh/gemma-3-4b-it-Q8_0-GGUF|GPU|131072",
+        #"google/gemma-4-12B-it-qat-q4_0-unquantized-assistant|GPU|32768",
+        #"majentik/gemma-4-12B-it-TurboQuant-GGUF-Q4_K_M|GPU|32768",
+        "majentik/gemma-4-12B-it-RotorQuant-GGUF-Q4_K_M|GPU|32768",
+        "majentik/gemma-4-12B-it-TurboQuant-GGUF-Q5_K_M|GPU|32768",
+        "majentik/gemma-4-12B-it-RotorQuant-GGUF-Q5_K_M|GPU|32768",
+        "majentik/gemma-4-12B-it-RotorQuant-GGUF-Q4_K_M|GPU|65536",
+        "majentik/gemma-4-12B-it-TurboQuant-GGUF-Q5_K_M|GPU|65536",
+        "majentik/gemma-4-12B-it-RotorQuant-GGUF-Q5_K_M|GPU|65536",
+        "majentik/gemma-4-12B-it-RotorQuant-GGUF-Q4_K_M|GPU|98304",
+        "majentik/gemma-4-12B-it-TurboQuant-GGUF-Q5_K_M|GPU|98304",
+        "majentik/gemma-4-12B-it-RotorQuant-GGUF-Q5_K_M|GPU|98304",
+        "majentik/gemma-4-12B-it-RotorQuant-GGUF-Q4_K_M|GPU|131072",
+        "majentik/gemma-4-12B-it-TurboQuant-GGUF-Q5_K_M|GPU|131072",
+        "majentik/gemma-4-12B-it-RotorQuant-GGUF-Q5_K_M|GPU|131072",
+
+
+        "NikolayKozloff/amoral-gemma3-12B-Q5_K_M-GGUF|GPU|32768",
+        "NikolayKozloff/amoral-gemma3-12B-Q5_K_M-GGUF|GPU|32768",
+        "NikolayKozloff/amoral-gemma3-12B-Q6_K-GGUF|GPU|32768",
+        "WesPro/amoral-gemma3-12B-Q6_K-GGUF|GPU|32768",
+        "tg-rising/gemma-3-12b-it-heretic-v2-MLX-Q6|GPU|32768",
+        "soob3123/GrayLine-Gemma3-12B-Q4_K_M-GGUF|GPU|32768",
+        "Medvedko/gemma-3-12b-it-heretic-v2-Q4_K_M-GGUF|GPU|32768",
+        "ilya-chak/gemma-4-12B-it-qat-GGUF-UD-Q4_K_XL-layers|GPU|32768",
+        "Fazmin/solus_v1_gemma-4-12b-uncensored-q4|GPU|32768",
+        "Bhuvneesh/gemma-4-E4B-it-Q5_K_M-GGUF|GPU|32768",
+        "nocturne23/gemma-3-12b-it-Q4_K_M-GGUF|GPU|32768",
+        #"sjoe1244/gemma-4-12B-it-abliterated-uncensored-exl3-4bpw|GPU|32768",
+        "Bhuvneesh/gemma-4-E4B-it-Q8_0-GGUF|GPU|32768",
+        "Bhuvneesh/gemma-3-12b-it-Q5_K_M-GGUF",
         "NikolayKozloff/gemma-3-12b-it-Q5_K_S-GGUF",
         "NikolayKozloff/gemma-3-12b-it-Q6_K-GGUF",
-        "NikolayKozloff/Mistral-Nemo-Instruct-2407-Q8_0-GGUF",
+        "aminlouhichi/gemma-3-merged-GGUF-Q16",
+        "NikolayKozloff/gemma-3-12b-it-Q8_0-GGUF",
+
+        # 27B
+        #"Bhuvneesh/gemma-3-27b-it-Q5_K_M-GGUF",
+        #"Bhuvneesh/gemma-3-27b-it-Q5_K_M-GGUF",
+        #"lynnea1517/huihui-ai_gemma-3-27b-it-abliterated-Q8_0-GGUF",
+        #"paultimothymooney/gemma-3-27b-it-Q8_0-GGUF",
+
+        #"NikolayKozloff/Mistral-Nemo-Instruct-2407-Q8_0-GGUF",
         #"unsloth/gemma-3-1b-it-unsloth-bnb-4bit",
         #"unsloth/gemma-3-1b-pt-unsloth-bnb-4bit",
         #"mlx-community/gemma-3-1b-it-4bit",
         #"google/gemma-3n-E4B-it-litert-lm",
         #"deepseek-ai/deepseek-coder-7b-instruct-v1.5",
-        "Bhuvneesh/gemma-3-27b-it-Q5_K_M-GGUF",
-        "lynnea1517/huihui-ai_gemma-3-27b-it-abliterated-Q8_0-GGUF",
-        "paultimothymooney/gemma-3-27b-it-Q8_0-GGUF",
-        "aminlouhichi/gemma-3-merged-GGUF-Q16",
         #"mergekit-community/Qwen3-7B-Instruct",
         #"Ygz-08123/Qwen3-7B-Instruct-Q2_K-GGUF",
         #"Ygz-08123/Qwen3-7B-Instruct-Q4_K_M-GGUF",
@@ -173,6 +203,8 @@ def run_model_benchmark():
         #"mlx-community/SmolLM3-3B-4bit",
         #"unsloth/SmolLM2-1.7B-Instruct-bnb-4bit",
         #"nakue/SmolLM2-1.7B-W4A16-instruct",
+
+
     ]
     """
     ==========================================================================================
@@ -219,14 +251,15 @@ nakue/SmolLM2-1.7B-W4A16-instruct   | fail fail fail fail fail |   0.0%    | 0:0
 ==========================================================================================
     """
 
-    for model_slice in [
+    for model_slice in [4, 15,
         #10, 14,
         9999999]:
         print("=== CACHING MODELS ===")
-        run_benchmark(client, questions1,
-                      test_models[:model_slice], 99999999,
-                      cache_models_only=True,
-                      request_timeout=3600 * 4)
+        if True:
+            run_benchmark(client, questions1,
+                          test_models[:model_slice], 99999999,
+                          cache_models_only=True,
+                          request_timeout=3600 * 4)
 
         print("=== RUNNING FIRST BENCHMARK (Questions 1) ===")
         print(f"\n=== ALL MODELS: {len(test_models[:model_slice])} ===")
