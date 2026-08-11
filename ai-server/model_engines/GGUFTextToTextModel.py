@@ -22,11 +22,20 @@ class GGUFTextToTextModel(TextToTextModel):
                 raise FileNotFoundError(f"No .gguf file found in {self.model_path}")
 
             gguf_path = str(gguf_files[0])
+
+            # Determine n_ctx based on model size for Gemma-3
+            model_id_lower = self.model_id.lower()
+            if "gemma-3-1b" in model_id_lower or "gemma-3-1b-it" in model_id_lower:
+                n_ctx = 32768  # 32K tokens for 1B size
+            else:
+                n_ctx = 131072  # 128K tokens for 4B, 12B, and 27B sizes
+
+            # Set verbose=True to see the exact number of layers offloaded to the GPU in the console logs
             self.llm = Llama(
                 model_path=gguf_path,
-                n_gpu_layers=-1,  # Offload all layers to GPU if available
-                n_ctx=8192,
-                verbose=False
+                n_gpu_layers=-1,  # Attempt to offload all layers to GPU
+                n_ctx=n_ctx,
+                verbose=True
             )
             self.use_llama_cpp = True
             self.is_loaded = True
@@ -68,14 +77,18 @@ class GGUFTextToTextModel(TextToTextModel):
                         self.tokenizer = AutoTokenizer.from_pretrained("google/gemma-3-4b-it", trust_remote_code=True)
                     elif "gemma-3-12b" in model_id_lower:
                         self.tokenizer = AutoTokenizer.from_pretrained("google/gemma-3-12b-it", trust_remote_code=True)
+                    elif "gemma-3-1b" in model_id_lower:
+                        self.tokenizer = AutoTokenizer.from_pretrained("google/gemma-3-1b-it", trust_remote_code=True)
                     elif "qwen3-0.6b" in model_id_lower:
                         self.tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen3-0.6B", trust_remote_code=True)
                     elif "qwen3-1.7b" in model_id_lower:
                         self.tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen3-1.7B", trust_remote_code=True)
                     elif "smollm-135m-instruct" in model_id_lower:
-                        self.tokenizer = AutoTokenizer.from_pretrained("HuggingFaceTB/SmolLM2-135M-Instruct", trust_remote_code=True)
+                        self.tokenizer = AutoTokenizer.from_pretrained("HuggingFaceTB/SmolLM2-135M-Instruct",
+                                                                       trust_remote_code=True)
                     elif "smollm-135m" in model_id_lower:
-                        self.tokenizer = AutoTokenizer.from_pretrained("HuggingFaceTB/SmolLM2-135M", trust_remote_code=True)
+                        self.tokenizer = AutoTokenizer.from_pretrained("HuggingFaceTB/SmolLM2-135M",
+                                                                       trust_remote_code=True)
                     elif "bge-small-en-v1.5" in model_id_lower:
                         self.tokenizer = AutoTokenizer.from_pretrained("BAAI/bge-small-en-v1.5", trust_remote_code=True)
                     else:
@@ -117,7 +130,10 @@ class GGUFTextToTextModel(TextToTextModel):
         if not self.is_loaded:
             raise RuntimeError("Model is not loaded")
 
-        max_new_tokens = kwargs.get("max_new_tokens", 2048)
+        # Set max_new_tokens to 8192 for Gemma-3 models as per specification
+        model_id_lower = self.model_id.lower()
+        default_max_tokens = 8192 if "gemma-3" in model_id_lower else 2048
+        max_new_tokens = kwargs.get("max_new_tokens", default_max_tokens)
         temperature = kwargs.get("temperature", 0.7)
 
         try:

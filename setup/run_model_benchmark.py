@@ -495,8 +495,8 @@ def run_models_on_vacancies(vacancies_dir: str):
     client = TextToTextClient()
     vacancies_path = Path(vacancies_dir)
 
-
-    prompt_files = [
+    VACANCY_TIMEOUT = 60 * 20
+    prompt_files7 = [
         "PROMPT_01.txt",
         "PROMPT_02.txt",
         "PROMPT_03.txt",
@@ -504,6 +504,10 @@ def run_models_on_vacancies(vacancies_dir: str):
         "PROMPT_05.txt",
         "PROMPT_06.txt",
         "PROMPT_07.txt"
+    ]
+
+    prompt_files1 = [
+        "PROMPT.txt"
     ]
 
     # Find all vacancy txt files and their corresponding result jsons
@@ -518,12 +522,18 @@ def run_models_on_vacancies(vacancies_dir: str):
         return
 
     test_models = [
+        "Bhuvneesh/gemma-3-4b-it-Q8_0-GGUF",
+        "Bhuvneesh/gemma-3-12b-it-Q5_K_M-GGUF",
+        "lynnea1517/huihui-ai_gemma-3-27b-it-abliterated-Q8_0-GGUF",
+        "paultimothymooney/gemma-3-27b-it-Q8_0-GGUF",
+        "aminlouhichi/gemma-3-merged-GGUF-Q16",
+        "Bhuvneesh/gemma-3-27b-it-Q5_K_M-GGUF",
         "NikolayKozloff/gemma-3-1b-it-Q8_0-GGUF",
         "NikolayKozloff/gemma-3-4b-it-Q8_0-GGUF",
-        "NikolayKozloff/gemma-3-12b-it-Q5_K_S-GGUF",
+        #"NikolayKozloff/gemma-3-12b-it-Q5_K_S-GGUF",
         "NikolayKozloff/gemma-3-12b-it-Q8_0-GGUF",
-        "Bhuvneesh/gemma-3-27b-it-Q5_K_M-GGUF",
     ]
+
 
     print("=== RUNNING VACANCIES BENCHMARK ===")
     print(f"Total Models: {len(test_models)}")
@@ -558,6 +568,7 @@ def run_models_on_vacancies(vacancies_dir: str):
 
             combined_parsed_dict = {}
             total_vacancy_time = 0.0
+            prompt_files = prompt_files7 if "-1b-" in model_id else prompt_files1
 
             for p_file in prompt_files:
                 prompt_path = vacancies_path.parent / p_file
@@ -571,7 +582,7 @@ def run_models_on_vacancies(vacancies_dir: str):
 
                 start_time = time.time()
                 try:
-                    response = client.generate(model_id, full_prompt, model_limit_seconds=60 * 10)
+                    response = client.generate(model_id, full_prompt, model_limit_seconds=VACANCY_TIMEOUT)
                     duration = time.time() - start_time
                     total_vacancy_time += duration
 

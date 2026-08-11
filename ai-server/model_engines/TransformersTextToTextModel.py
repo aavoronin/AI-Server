@@ -69,7 +69,11 @@ class TransformersTextToTextModel(TextToTextModel):
         if not self.is_loaded:
             raise RuntimeError("Model is not loaded")
 
-        max_new_tokens = kwargs.get("max_new_tokens", 2048)
+        # Set max_new_tokens to 8192 for Gemma-3 models as per specification
+        model_id_lower = self.model_id.lower()
+        default_max_tokens = 8192 if "gemma-3" in model_id_lower else 2048
+        max_new_tokens = kwargs.get("max_new_tokens", default_max_tokens)
+
         try:
             result = self.pipeline(
                 prompt,
