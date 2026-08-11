@@ -134,45 +134,45 @@ def run_model_benchmark():
     questions2 = QuestionsHelper.get_questions2()
 
     test_models = [
+        "Bhuvneesh/gemma-3-4b-it-Q8_0-GGUF",
+        "Bhuvneesh/gemma-3-12b-it-Q5_K_M-GGUF",
         "Bhuvneesh/gemma-3-27b-it-Q5_K_M-GGUF",
+        "Bhuvneesh/gemma-4-E4B-it-Q8_0-GGUF",
+        "Bhuvneesh/gemma-4-E4B-it-Q5_K_M-GGUF",
         "NikolayKozloff/gemma-3-1b-it-Q8_0-GGUF",
         "NikolayKozloff/gemma-3-4b-it-Q8_0-GGUF",
         "NikolayKozloff/gemma-3-12b-it-Q8_0-GGUF",
         "NikolayKozloff/gemma-3-12b-it-Q5_K_S-GGUF",
         "NikolayKozloff/gemma-3-12b-it-Q6_K-GGUF",
         "NikolayKozloff/Mistral-Nemo-Instruct-2407-Q8_0-GGUF",
-        "Bhuvneesh/gemma-4-E4B-it-Q8_0-GGUF",
-        "Bhuvneesh/gemma-4-E4B-it-Q5_K_M-GGUF",
-        "Bhuvneesh/gemma-3-4b-it-Q8_0-GGUF",
-        "Bhuvneesh/gemma-3-12b-it-Q5_K_M-GGUF",
-        "unsloth/gemma-3-1b-it-unsloth-bnb-4bit",
-        "unsloth/gemma-3-1b-pt-unsloth-bnb-4bit",
-        "mlx-community/gemma-3-1b-it-4bit",
-        "google/gemma-3n-E4B-it-litert-lm",
-        "deepseek-ai/deepseek-coder-7b-instruct-v1.5",
+        #"unsloth/gemma-3-1b-it-unsloth-bnb-4bit",
+        #"unsloth/gemma-3-1b-pt-unsloth-bnb-4bit",
+        #"mlx-community/gemma-3-1b-it-4bit",
+        #"google/gemma-3n-E4B-it-litert-lm",
+        #"deepseek-ai/deepseek-coder-7b-instruct-v1.5",
         "Bhuvneesh/gemma-3-27b-it-Q5_K_M-GGUF",
         "lynnea1517/huihui-ai_gemma-3-27b-it-abliterated-Q8_0-GGUF",
         "paultimothymooney/gemma-3-27b-it-Q8_0-GGUF",
         "aminlouhichi/gemma-3-merged-GGUF-Q16",
-        "mergekit-community/Qwen3-7B-Instruct",
-        "Ygz-08123/Qwen3-7B-Instruct-Q2_K-GGUF",
-        "Ygz-08123/Qwen3-7B-Instruct-Q4_K_M-GGUF",
-        "goodgooodboy/Qwen3-7B-Instruct-Q4_K_M-GGUF",
-        "HuggingFaceTB/SmolLM2-135M-Instruct",
-        "unsloth/SmolLM2-135M-Instruct",
-        "unsloth/SmolLM2-360M-Instruct",
-        "unsloth/SmolLM2-1.7B-Instruct",
-        "LiquidAI/LFM2.5-1.2B-Instruct",
-        "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
-        "OpenLLM-France/Luciole-1B-Instruct-1.1",
-        "tencent/Hunyuan-1.8B-Instruct",
-        "microsoft/Phi-4-mini-instruct",
-        "unsloth/Llama-3.2-3B-Instruct",
-        "TheBloke/TinyLlama-1.1B-Chat-v0.3-GPTQ",
-        "TheBlokeAI/Mixtral-tiny-GPTQ",
-        "mlx-community/SmolLM3-3B-4bit",
-        "unsloth/SmolLM2-1.7B-Instruct-bnb-4bit",
-        "nakue/SmolLM2-1.7B-W4A16-instruct",
+        #"mergekit-community/Qwen3-7B-Instruct",
+        #"Ygz-08123/Qwen3-7B-Instruct-Q2_K-GGUF",
+        #"Ygz-08123/Qwen3-7B-Instruct-Q4_K_M-GGUF",
+        #"goodgooodboy/Qwen3-7B-Instruct-Q4_K_M-GGUF",
+        #"HuggingFaceTB/SmolLM2-135M-Instruct",
+        #"unsloth/SmolLM2-135M-Instruct",
+        #"unsloth/SmolLM2-360M-Instruct",
+        #"unsloth/SmolLM2-1.7B-Instruct",
+        #"LiquidAI/LFM2.5-1.2B-Instruct",
+        #"TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+        #"OpenLLM-France/Luciole-1B-Instruct-1.1",
+        #"tencent/Hunyuan-1.8B-Instruct",
+        #"microsoft/Phi-4-mini-instruct",
+        #"unsloth/Llama-3.2-3B-Instruct",
+        #"TheBloke/TinyLlama-1.1B-Chat-v0.3-GPTQ",
+        #"TheBlokeAI/Mixtral-tiny-GPTQ",
+        #"mlx-community/SmolLM3-3B-4bit",
+        #"unsloth/SmolLM2-1.7B-Instruct-bnb-4bit",
+        #"nakue/SmolLM2-1.7B-W4A16-instruct",
     ]
     """
     ==========================================================================================
@@ -288,23 +288,26 @@ def run_benchmark(
             continue
 
         for i, q in enumerate(questions):
-            start_time = time.time()
-            start_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            print(f"  [{start_timestamp}] Sending request {i + 1}/{len(questions)}...")
             try:
-                response = client.generate(model_id, q["question"], model_limit_seconds=request_timeout)
-                end_time = time.time()
-                duration = end_time - start_time
-                end_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                generated_text = response.get("generated_text", "")
-                if not isinstance(generated_text, str):
-                    generated_text = str(generated_text)
-                print(f"  {end_timestamp} Received response in {duration:.2f}s")
-                is_correct = (q["answer"].strip().lower() == generated_text.strip().lower())
-                model_results["scores"].append("ok" if is_correct else "fail")
-                model_results["times"].append(duration)
-                model_results["total_time"] += duration
-                print(f"  Q: {q['question'][:70]}... -> {'ok' if is_correct else 'fail'} ({duration:.2f}s)")
+                for j in range(1 if i > 0 else 2):
+                    start_time = time.time()
+                    start_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    print(f"  [{start_timestamp}] Sending request {i + 1}/{len(questions)}...")
+                    response = client.generate(model_id, q["question"], model_limit_seconds=request_timeout)
+                    end_time = time.time()
+                    duration = end_time - start_time
+                    end_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    if i == 0 and j == 0:
+                        continue
+                    generated_text = response.get("generated_text", "")
+                    if not isinstance(generated_text, str):
+                        generated_text = str(generated_text)
+                    print(f"  {end_timestamp} Received response in {duration:.2f}s")
+                    is_correct = (q["answer"].strip().lower() == generated_text.strip().lower())
+                    model_results["scores"].append("ok" if is_correct else "fail")
+                    model_results["times"].append(duration)
+                    model_results["total_time"] += duration
+                    print(f"  Q: {q['question'][:70]}... -> {'ok' if is_correct else 'fail'} ({duration:.2f}s)")
             except Exception as e:
                 end_time = time.time()
                 duration = end_time - start_time
