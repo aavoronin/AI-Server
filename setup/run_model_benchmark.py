@@ -174,8 +174,54 @@ def run_model_benchmark():
         "unsloth/SmolLM2-1.7B-Instruct-bnb-4bit",
         "nakue/SmolLM2-1.7B-W4A16-instruct",
     ]
+    """
+    ==========================================================================================
+Model ID                            | Results              | Accuracy   | Total Time
+------------------------------------------------------------------------------------------
+Bhuvneesh/gemma-3-27b-it-Q5_K_M-GGUF | ok ok ok ok ok       | 100.0%    | 9:51      
+NikolayKozloff/gemma-3-1b-it-Q8_0-GGUF | ok ok ok ok fail     |  80.0%    | 2:50      
+NikolayKozloff/gemma-3-4b-it-Q8_0-GGUF | ok ok ok ok ok       | 100.0%    | 5:02      
+NikolayKozloff/gemma-3-12b-it-Q8_0-GGUF | ok ok ok ok ok       | 100.0%    | 5:57      
+NikolayKozloff/gemma-3-12b-it-Q5_K_S-GGUF | ok ok ok ok ok       | 100.0%    | 5:44      
+NikolayKozloff/gemma-3-12b-it-Q6_K-GGUF | ok ok ok ok ok       | 100.0%    | 2:25      
+NikolayKozloff/Mistral-Nemo-Instruct-2407-Q8_0-GGUF | fail fail fail fail fail |   0.0%    | 0:09      
+Bhuvneesh/gemma-4-E4B-it-Q8_0-GGUF  | ok fail ok fail ok   |  60.0%    | 2:02      
+Bhuvneesh/gemma-4-E4B-it-Q5_K_M-GGUF | ok ok ok ok ok       | 100.0%    | 1:31      
+Bhuvneesh/gemma-3-4b-it-Q8_0-GGUF   | ok ok ok ok ok       | 100.0%    | 1:04      
+Bhuvneesh/gemma-3-12b-it-Q5_K_M-GGUF | ok ok ok ok ok       | 100.0%    | 1:54      
+unsloth/gemma-3-1b-it-unsloth-bnb-4bit | fail fail fail fail fail |   0.0%    | 0:07      
+unsloth/gemma-3-1b-pt-unsloth-bnb-4bit | fail fail fail fail fail |   0.0%    | 0:01      
+mlx-community/gemma-3-1b-it-4bit    | fail fail fail fail fail |   0.0%    | 0:00      
+google/gemma-3n-E4B-it-litert-lm    | fail fail fail fail fail |   0.0%    | 0:00      
+deepseek-ai/deepseek-coder-7b-instruct-v1.5 | fail fail fail fail fail |   0.0%    | 0:01      
+lynnea1517/huihui-ai_gemma-3-27b-it-abliterated-Q8_0-GGUF | ok ok ok ok ok       | 100.0%    | 7:35      
+paultimothymooney/gemma-3-27b-it-Q8_0-GGUF | ok ok ok ok ok       | 100.0%    | 8:19      
+aminlouhichi/gemma-3-merged-GGUF-Q16 | ok ok ok ok ok       | 100.0%    | 2:19      
+mergekit-community/Qwen3-7B-Instruct | fail fail fail fail fail |   0.0%    | 47:19     
+Ygz-08123/Qwen3-7B-Instruct-Q2_K-GGUF | fail fail fail fail fail |   0.0%    | 10:44     
+Ygz-08123/Qwen3-7B-Instruct-Q4_K_M-GGUF | fail fail fail fail fail |   0.0%    | 0:00      
+goodgooodboy/Qwen3-7B-Instruct-Q4_K_M-GGUF | fail fail fail fail fail |   0.0%    | 0:00      
+HuggingFaceTB/SmolLM2-135M-Instruct | fail fail fail fail fail |   0.0%    | 0:00      
+unsloth/SmolLM2-135M-Instruct       | fail fail fail fail fail |   0.0%    | 0:00      
+unsloth/SmolLM2-360M-Instruct       | fail fail fail fail fail |   0.0%    | 0:00      
+unsloth/SmolLM2-1.7B-Instruct       | fail fail fail fail fail |   0.0%    | 0:00      
+LiquidAI/LFM2.5-1.2B-Instruct       | fail fail fail fail fail |   0.0%    | 0:00      
+TinyLlama/TinyLlama-1.1B-Chat-v1.0  | fail fail fail fail fail |   0.0%    | 0:00      
+OpenLLM-France/Luciole-1B-Instruct-1.1 | fail fail fail fail fail |   0.0%    | 0:00      
+tencent/Hunyuan-1.8B-Instruct       | fail fail fail fail fail |   0.0%    | 0:00      
+microsoft/Phi-4-mini-instruct       | fail fail fail fail fail |   0.0%    | 0:00      
+unsloth/Llama-3.2-3B-Instruct       | fail fail fail fail fail |   0.0%    | 0:00      
+TheBloke/TinyLlama-1.1B-Chat-v0.3-GPTQ | fail fail fail fail fail |   0.0%    | 0:00      
+TheBlokeAI/Mixtral-tiny-GPTQ        | fail fail fail fail fail |   0.0%    | 0:00      
+mlx-community/SmolLM3-3B-4bit       | fail fail fail fail fail |   0.0%    | 0:00      
+unsloth/SmolLM2-1.7B-Instruct-bnb-4bit | fail fail fail fail fail |   0.0%    | 0:00      
+nakue/SmolLM2-1.7B-W4A16-instruct   | fail fail fail fail fail |   0.0%    | 0:00      
+==========================================================================================
+    """
 
-    for model_slice in [10, 14, 9999999]:
+    for model_slice in [
+        #10, 14,
+        9999999]:
         print("=== CACHING MODELS ===")
         run_benchmark(client, questions1,
                       test_models[:model_slice], 99999999,
@@ -246,7 +292,7 @@ def run_benchmark(
             start_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             print(f"  [{start_timestamp}] Sending request {i + 1}/{len(questions)}...")
             try:
-                response = client.generate(model_id, q["question"], model_limit_seconds=60)
+                response = client.generate(model_id, q["question"], model_limit_seconds=request_timeout)
                 end_time = time.time()
                 duration = end_time - start_time
                 end_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -421,6 +467,7 @@ def run_benchmark_json(
     return results
 
 def shorten_vacancy_text(v_name: str, v_text: str) -> str:
+
     vacancy_slice = [
         ("LinkedIn_Vacancy", "About the job", "Unlock hiring insights"),
         ("Hirify_Vacancy", "Job description", ""),
@@ -432,17 +479,16 @@ def shorten_vacancy_text(v_name: str, v_text: str) -> str:
             if start_marker:
                 idx = v_text.find(start_marker)
                 if idx != -1:
-                    start_idx = idx + len(end_marker)
+                    start_idx = idx
 
             end_idx = len(v_text)
             if end_marker:
                 idx = v_text.rfind(end_marker)
                 if idx != -1:
-                    end_idx = idx
+                    end_idx = idx + len(end_marker)
 
             return v_text[start_idx:end_idx].strip()
     return v_text
-
 
 def run_models_on_vacancies(vacancies_dir: str):
     """Benchmark models on real vacancy text files against ground truth JSONs."""
@@ -519,6 +565,9 @@ def run_models_on_vacancies(vacancies_dir: str):
                     continue
                 prompt_text = prompt_path.read_text(encoding='utf-8')
                 full_prompt = prompt_text + "\n" + vacancy_text
+
+                print(
+                    f"  [{p_file}] Vacancy Length: {len(vacancy_text)} chars | Total Prompt Length: {len(full_prompt)} chars")
 
                 start_time = time.time()
                 try:
