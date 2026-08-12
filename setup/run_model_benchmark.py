@@ -9,6 +9,26 @@ from ai_clients.model_client_base import TextToTextClient
 from setup.start_server import print_model_debug_info
 from setup.questions_helper import QuestionsHelper
 
+NULL_EQUIVALENTS = {"null", "", "no", "none", "-"}
+PROFICIENCY_PARTIAL_MATCHES = {
+    frozenset({"nice-to-have", "required"}),
+    frozenset({"required", "expert"})
+}
+COUNTRY_SYNONYMS = {
+    "us": "usa", "united states": "usa", "united states of america": "usa", "america": "usa", "usa": "usa",
+    "can": "canada", "ca": "canada", "canada": "canada",
+    "uk": "uk", "united kingdom": "uk", "great britain": "uk", "britain": "uk", "gb": "uk", "england": "uk",
+    "de": "germany", "deutschland": "germany", "germany": "germany",
+    "fr": "france", "france": "france",
+    "in": "india", "bharat": "india", "india": "india",
+    "au": "australia", "aussie": "australia", "australia": "australia",
+    "jp": "japan", "japan": "japan",
+    "cn": "china", "prc": "china", "china": "china",
+    "ru": "russia", "russian federation": "russia", "russia": "russia",
+    "ir": "iran", "iran": "iran",
+    "worldwide": "global", "world": "global", "anywhere": "global", "remote": "global", "global": "global",
+}
+
 
 def format_time(total_elapsed):
     m, s = divmod(int(total_elapsed), 60)
@@ -21,13 +41,43 @@ def format_value(val):
 
 def compare_values(actual_value, expected_value):
     if isinstance(expected_value, list):
-        actual_list = sorted([str(v).strip().lower() for v in actual_value]) if isinstance(actual_value, list) else []
-        expected_list = sorted([str(v).strip().lower() for v in expected_value])
-        return actual_list == expected_list
+        if not isinstance(actual_value, list):
+            actual_value = [actual_value] if actual_value is not None else []
+
+        act_list = [str(v).strip().lower() for v in actual_value]
+        exp_list = [str(v).strip().lower() for v in expected_value]
+
+        act_syn = sorted([COUNTRY_SYNONYMS.get(v, v) for v in act_list])
+        exp_syn = sorted([COUNTRY_SYNONYMS.get(v, v) for v in exp_list])
+
+        if act_syn == exp_syn:
+            return 1.0
+
+        act_nulls = all(v in NULL_EQUIVALENTS for v in act_list) if act_list else True
+        exp_nulls = all(v in NULL_EQUIVALENTS for v in exp_list) if exp_list else True
+        if act_nulls and exp_nulls:
+            return 1.0
+
+        return 0.0
     else:
         actual_str = str(actual_value).strip().lower() if actual_value is not None else ""
         expected_str = str(expected_value).strip().lower()
-        return actual_str == expected_str
+
+        if actual_str == expected_str:
+            return 1.0
+
+        if actual_str in NULL_EQUIVALENTS and expected_str in NULL_EQUIVALENTS:
+            return 1.0
+
+        actual_syn = COUNTRY_SYNONYMS.get(actual_str, actual_str)
+        expected_syn = COUNTRY_SYNONYMS.get(expected_str, expected_str)
+        if actual_syn == expected_syn:
+            return 1.0
+
+        if frozenset({actual_str, expected_str}) in PROFICIENCY_PARTIAL_MATCHES:
+            return 0.5
+
+        return 0.0
 
 
 def compare_json_with_expected(expected_json, parsed_dict):
@@ -36,12 +86,21 @@ def compare_json_with_expected(expected_json, parsed_dict):
         if parsed_dict is not None and key in parsed_dict:
             actual_value = parsed_dict[key]
             actual_disp = format_value(actual_value)
-            if compare_values(actual_value, expected_value):
+            score = compare_values(actual_value, expected_value)
+            if score == 1.0:
                 print(f'    "{key}": ok ("{actual_disp}")')
+            elif score == 0.5:
+                print(f'    "{key}": partial ("{actual_disp}"|"{expected_disp}")')
             else:
                 print(f'    "{key}": fail ("{actual_disp}"|"{expected_disp}")')
         else:
-            print(f'    "{key}": fail (|"{expected_disp}")')
+            score = compare_values(None, expected_value)
+            if score == 1.0:
+                print(f'    "{key}": ok (|"{expected_disp}")')
+            elif score == 0.5:
+                print(f'    "{key}": partial (|"{expected_disp}")')
+            else:
+                print(f'    "{key}": fail (|"{expected_disp}")')
 
 
 def print_json_failures(expected_json, parsed_dict):
@@ -50,10 +109,19 @@ def print_json_failures(expected_json, parsed_dict):
         if parsed_dict is not None and key in parsed_dict:
             actual_value = parsed_dict[key]
             actual_disp = format_value(actual_value)
-            if not compare_values(actual_value, expected_value):
-                print(f'    "{key}": fail ("{actual_disp}"|"{expected_disp}")')
+            score = compare_values(actual_value, expected_value)
+            if score < 1.0:
+                if score == 0.5:
+                    print(f'    "{key}": partial ("{actual_disp}"|"{expected_disp}")')
+                else:
+                    print(f'    "{key}": fail ("{actual_disp}"|"{expected_disp}")')
         else:
-            print(f'    "{key}": fail (|"{expected_disp}")')
+            score = compare_values(None, expected_value)
+            if score < 1.0:
+                if score == 0.5:
+                    print(f'    "{key}": partial (|"{expected_disp}")')
+                else:
+                    print(f'    "{key}": fail (|"{expected_disp}")')
 
 
 def record_failure(model_results, duration, is_json=False, expected_keys=0):
@@ -104,25 +172,12 @@ def evaluate_json_response(output_text: str, expected_json: dict) -> float:
     if not isinstance(parsed, dict):
         return 0.0
 
-    correct_keys = 0
+    correct_keys = 0.0
     total_keys = len(expected_json)
     for key, expected_value in expected_json.items():
         actual_value = parsed.get(key)
-
-        if isinstance(expected_value, list):
-            if isinstance(actual_value, list):
-                actual_set = set([str(v).strip().lower() for v in actual_value])
-            else:
-                actual_set = set([str(actual_value).strip().lower()]) if actual_value is not None else set()
-
-            expected_set = set([str(v).strip().lower() for v in expected_value])
-            if actual_set == expected_set:
-                correct_keys += 1
-        else:
-            actual_value_str = str(actual_value).strip().lower() if actual_value is not None else ""
-            expected_value_str = str(expected_value).strip().lower()
-            if actual_value_str == expected_value_str:
-                correct_keys += 1
+        score = compare_values(actual_value, expected_value)
+        correct_keys += score
 
     return correct_keys / total_keys if total_keys > 0 else 0.0
 
@@ -137,7 +192,7 @@ def run_model_benchmark():
         "NikolayKozloff/gemma-3-1b-it-Q8_0-GGUF",
         "NikolayKozloff/gemma-3-4b-it-Q8_0-GGUF|GPU|131072",
         "Bhuvneesh/gemma-3-4b-it-Q8_0-GGUF|GPU|131072",
-        #"google/gemma-4-12B-it-qat-q4_0-unquantized-assistant|GPU|32768",
+        # "google/gemma-4-12B-it-qat-q4_0-unquantized-assistant|GPU|32768",
         "majentik/gemma-4-12B-it-TurboQuant-GGUF-Q4_K_M|GPU|32768",
         "majentik/gemma-4-12B-it-RotorQuant-GGUF-Q4_K_M|GPU|32768",
         "majentik/gemma-4-12B-it-TurboQuant-GGUF-Q5_K_M|GPU|32768",
@@ -148,9 +203,9 @@ def run_model_benchmark():
         "majentik/gemma-4-12B-it-RotorQuant-GGUF-Q4_K_M|GPU|98304",
         "majentik/gemma-4-12B-it-TurboQuant-GGUF-Q5_K_M|GPU|98304",
         "majentik/gemma-4-12B-it-RotorQuant-GGUF-Q5_K_M|GPU|98304",
-        #"majentik/gemma-4-12B-it-RotorQuant-GGUF-Q4_K_M|GPU|131072",
-        #"majentik/gemma-4-12B-it-TurboQuant-GGUF-Q5_K_M|GPU|131072",
-        #"majentik/gemma-4-12B-it-RotorQuant-GGUF-Q5_K_M|GPU|131072",
+        # "majentik/gemma-4-12B-it-RotorQuant-GGUF-Q4_K_M|GPU|131072",
+        # "majentik/gemma-4-12B-it-TurboQuant-GGUF-Q5_K_M|GPU|131072",
+        # "majentik/gemma-4-12B-it-RotorQuant-GGUF-Q5_K_M|GPU|131072",
 
         "soob3123/GrayLine-Gemma3-12B-Q4_K_M-GGUF|GPU|32768",
         "Medvedko/gemma-3-12b-it-heretic-v2-Q4_K_M-GGUF|GPU|32768",
@@ -164,46 +219,48 @@ def run_model_benchmark():
         "tg-rising/gemma-3-12b-it-heretic-v2-MLX-Q6|GPU|32768",
         "Fazmin/solus_v1_gemma-4-12b-uncensored-q4|GPU|32768",
         "Bhuvneesh/gemma-4-E4B-it-Q5_K_M-GGUF|GPU|32768",
-        #"sjoe1244/gemma-4-12B-it-abliterated-uncensored-exl3-4bpw|GPU|32768",
+        # "sjoe1244/gemma-4-12B-it-abliterated-uncensored-exl3-4bpw|GPU|32768",
         "Bhuvneesh/gemma-4-E4B-it-Q8_0-GGUF|GPU|32768",
         "Bhuvneesh/gemma-3-12b-it-Q5_K_M-GGUF",
         "NikolayKozloff/gemma-3-12b-it-Q5_K_S-GGUF",
         "NikolayKozloff/gemma-3-12b-it-Q6_K-GGUF",
         "aminlouhichi/gemma-3-merged-GGUF-Q16",
         "NikolayKozloff/gemma-3-12b-it-Q8_0-GGUF",
+        "mlx-community/Huihui-gemma-3n-E4B-it-abliterated-lm-8bit",
+        "aryamannningombam/gemma-GPTQ_g128-3bits",
+        "bartowski/google_gemma-3n-E4B-it-GGUF",
 
         # 27B
-        #"Bhuvneesh/gemma-3-27b-it-Q5_K_M-GGUF",
-        #"Bhuvneesh/gemma-3-27b-it-Q5_K_M-GGUF",
-        #"lynnea1517/huihui-ai_gemma-3-27b-it-abliterated-Q8_0-GGUF",
-        #"paultimothymooney/gemma-3-27b-it-Q8_0-GGUF",
+        # "Bhuvneesh/gemma-3-27b-it-Q5_K_M-GGUF",
+        # "Bhuvneesh/gemma-3-27b-it-Q5_K_M-GGUF",
+        # "lynnea1517/huihui-ai_gemma-3-27b-it-abliterated-Q8_0-GGUF",
+        # "paultimothymooney/gemma-3-27b-it-Q8_0-GGUF",
 
-        #"NikolayKozloff/Mistral-Nemo-Instruct-2407-Q8_0-GGUF",
-        #"unsloth/gemma-3-1b-it-unsloth-bnb-4bit",
-        #"unsloth/gemma-3-1b-pt-unsloth-bnb-4bit",
-        #"mlx-community/gemma-3-1b-it-4bit",
-        #"google/gemma-3n-E4B-it-litert-lm",
-        #"deepseek-ai/deepseek-coder-7b-instruct-v1.5",
-        #"mergekit-community/Qwen3-7B-Instruct",
-        #"Ygz-08123/Qwen3-7B-Instruct-Q2_K-GGUF",
-        #"Ygz-08123/Qwen3-7B-Instruct-Q4_K_M-GGUF",
-        #"goodgooodboy/Qwen3-7B-Instruct-Q4_K_M-GGUF",
-        #"HuggingFaceTB/SmolLM2-135M-Instruct",
-        #"unsloth/SmolLM2-135M-Instruct",
-        #"unsloth/SmolLM2-360M-Instruct",
-        #"unsloth/SmolLM2-1.7B-Instruct",
-        #"LiquidAI/LFM2.5-1.2B-Instruct",
-        #"TinyLlama/TinyLlama-1.1B-Chat-v1.0",
-        #"OpenLLM-France/Luciole-1B-Instruct-1.1",
-        #"tencent/Hunyuan-1.8B-Instruct",
-        #"microsoft/Phi-4-mini-instruct",
-        #"unsloth/Llama-3.2-3B-Instruct",
-        #"TheBloke/TinyLlama-1.1B-Chat-v0.3-GPTQ",
-        #"TheBlokeAI/Mixtral-tiny-GPTQ",
-        #"mlx-community/SmolLM3-3B-4bit",
-        #"unsloth/SmolLM2-1.7B-Instruct-bnb-4bit",
-        #"nakue/SmolLM2-1.7B-W4A16-instruct",
-
+        # "NikolayKozloff/Mistral-Nemo-Instruct-2407-Q8_0-GGUF",
+        # "unsloth/gemma-3-1b-it-unsloth-bnb-4bit",
+        # "unsloth/gemma-3-1b-pt-unsloth-bnb-4bit",
+        # "mlx-community/gemma-3-1b-it-4bit",
+        # "google/gemma-3n-E4B-it-litert-lm",
+        # "deepseek-ai/deepseek-coder-7b-instruct-v1.5",
+        # "mergekit-community/Qwen3-7B-Instruct",
+        # "Ygz-08123/Qwen3-7B-Instruct-Q2_K-GGUF",
+        # "Ygz-08123/Qwen3-7B-Instruct-Q4_K_M-GGUF",
+        # "goodgooodboy/Qwen3-7B-Instruct-Q4_K_M-GGUF",
+        # "HuggingFaceTB/SmolLM2-135M-Instruct",
+        # "unsloth/SmolLM2-135M-Instruct",
+        # "unsloth/SmolLM2-360M-Instruct",
+        # "unsloth/SmolLM2-1.7B-Instruct",
+        # "LiquidAI/LFM2.5-1.2B-Instruct",
+        # "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+        # "OpenLLM-France/Luciole-1B-Instruct-1.1",
+        # "tencent/Hunyuan-1.8B-Instruct",
+        # "microsoft/Phi-4-mini-instruct",
+        # "unsloth/Llama-3.2-3B-Instruct",
+        # "TheBloke/TinyLlama-1.1B-Chat-v0.3-GPTQ",
+        # "TheBlokeAI/Mixtral-tiny-GPTQ",
+        # "mlx-community/SmolLM3-3B-4bit",
+        # "unsloth/SmolLM2-1.7B-Instruct-bnb-4bit",
+        # "nakue/SmolLM2-1.7B-W4A16-instruct",
 
     ]
     """
@@ -252,8 +309,8 @@ nakue/SmolLM2-1.7B-W4A16-instruct   | fail fail fail fail fail |   0.0%    | 0:0
     """
 
     for model_slice in [17,
-        #10, 14,
-        9999999]:
+                        # 10, 14,
+                        9999999]:
         print("=== CACHING MODELS ===")
         if True:
             run_benchmark(client, questions1,
@@ -502,8 +559,8 @@ def run_benchmark_json(
 
     return results
 
-def shorten_vacancy_text(v_name: str, v_text: str) -> str:
 
+def shorten_vacancy_text(v_name: str, v_text: str) -> str:
     vacancy_slice = [
         ("LinkedIn_Vacancy", "About the job", "Unlock hiring insights"),
         ("Hirify_Vacancy", "Job description", ""),
@@ -526,6 +583,7 @@ def shorten_vacancy_text(v_name: str, v_text: str) -> str:
             return v_text[start_idx:end_idx].strip()
     return v_text
 
+
 def run_models_on_vacancies(version, vacancies_dir: str):
     """Benchmark models on real vacancy text files against ground truth JSONs."""
     client = TextToTextClient()
@@ -547,7 +605,6 @@ def run_models_on_vacancies(version, vacancies_dir: str):
         print(f"No matching vacancy/result pairs found in {vacancies_dir}")
         return
 
-
     print("=== RUNNING VACANCIES BENCHMARK ===")
     print(f"Total Models: {len(test_models)}")
     print(f"Total Vacancies: {len(vacancies)}")
@@ -560,7 +617,7 @@ def run_models_on_vacancies(version, vacancies_dir: str):
         print(f"{'=' * 80}")
 
         total_keys = 0
-        total_correct_keys = 0
+        total_correct_keys = 0.0
         total_time = 0.0
         vacancy_scores = []
 
@@ -634,12 +691,12 @@ def run_models_on_vacancies(version, vacancies_dir: str):
 
             # Evaluate combined result
             keys_in_expected = len(expected_json)
-            correct_keys = 0
+            correct_keys = 0.0
             if keys_in_expected > 0:
                 for key, expected_value in expected_json.items():
                     actual_value = combined_parsed_dict.get(key)
-                    if compare_values(actual_value, expected_value):
-                        correct_keys += 1
+                    score = compare_values(actual_value, expected_value)
+                    correct_keys += score
 
             score = correct_keys / keys_in_expected if keys_in_expected > 0 else 0.0
 
@@ -748,11 +805,21 @@ def get_prompt_and_model(version) -> tuple[list[str], list[str]]:
             # "nocturne23/gemma-3-12b-it-Q4_K_M-GGUF|GPU|32768",
             # "ilya-chak/gemma-4-12B-it-qat-GGUF-UD-Q4_K_XL-layers|GPU|32768",
         ]
+        '''
+        ==========================================================================================
+        Model ID                                           | Avg Score    | Total Time
+        ------------------------------------------------------------------------------------------
+        NikolayKozloff/gemma-3-1b-it-Q8_0-GGUF|GPU|32768   | 86.11%    | 0:00      
+        NikolayKozloff/gemma-3-4b-it-Q8_0-GGUF|GPU|32768   | 86.90%    | 0:00      
+        NikolayKozloff/gemma-3-12b-it-Q6_K-GGUF|CPU|32768  | 90.79%    | 0:00      
+        majentik/gemma-4-12B-it-TurboQuant-GGUF-Q4_K_M|GPU|32768 | 93.57%    | 0:00      
+        majentik/gemma-4-12B-it-RotorQuant-GGUF-Q4_K_M|GPU|32768 | 93.63%    | 0:00      
+        ==========================================================================================
+        '''
     else:
         prompt_files = []
         test_models = []
     return prompt_files, test_models
-
 
 def run_model_benchmark_json():
     """Benchmark models on JSON extraction from vacancy texts."""
