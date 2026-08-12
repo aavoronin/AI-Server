@@ -138,7 +138,7 @@ def run_model_benchmark():
         "NikolayKozloff/gemma-3-4b-it-Q8_0-GGUF|GPU|131072",
         "Bhuvneesh/gemma-3-4b-it-Q8_0-GGUF|GPU|131072",
         #"google/gemma-4-12B-it-qat-q4_0-unquantized-assistant|GPU|32768",
-        #"majentik/gemma-4-12B-it-TurboQuant-GGUF-Q4_K_M|GPU|32768",
+        "majentik/gemma-4-12B-it-TurboQuant-GGUF-Q4_K_M|GPU|32768",
         "majentik/gemma-4-12B-it-RotorQuant-GGUF-Q4_K_M|GPU|32768",
         "majentik/gemma-4-12B-it-TurboQuant-GGUF-Q5_K_M|GPU|32768",
         "majentik/gemma-4-12B-it-RotorQuant-GGUF-Q5_K_M|GPU|32768",
@@ -148,22 +148,22 @@ def run_model_benchmark():
         "majentik/gemma-4-12B-it-RotorQuant-GGUF-Q4_K_M|GPU|98304",
         "majentik/gemma-4-12B-it-TurboQuant-GGUF-Q5_K_M|GPU|98304",
         "majentik/gemma-4-12B-it-RotorQuant-GGUF-Q5_K_M|GPU|98304",
-        "majentik/gemma-4-12B-it-RotorQuant-GGUF-Q4_K_M|GPU|131072",
-        "majentik/gemma-4-12B-it-TurboQuant-GGUF-Q5_K_M|GPU|131072",
-        "majentik/gemma-4-12B-it-RotorQuant-GGUF-Q5_K_M|GPU|131072",
+        #"majentik/gemma-4-12B-it-RotorQuant-GGUF-Q4_K_M|GPU|131072",
+        #"majentik/gemma-4-12B-it-TurboQuant-GGUF-Q5_K_M|GPU|131072",
+        #"majentik/gemma-4-12B-it-RotorQuant-GGUF-Q5_K_M|GPU|131072",
 
+        "soob3123/GrayLine-Gemma3-12B-Q4_K_M-GGUF|GPU|32768",
+        "Medvedko/gemma-3-12b-it-heretic-v2-Q4_K_M-GGUF|GPU|32768",
+        "ilya-chak/gemma-4-12B-it-qat-GGUF-UD-Q4_K_XL-layers|GPU|32768",
+        "nocturne23/gemma-3-12b-it-Q4_K_M-GGUF|GPU|32768",
 
         "NikolayKozloff/amoral-gemma3-12B-Q5_K_M-GGUF|GPU|32768",
         "NikolayKozloff/amoral-gemma3-12B-Q5_K_M-GGUF|GPU|32768",
         "NikolayKozloff/amoral-gemma3-12B-Q6_K-GGUF|GPU|32768",
         "WesPro/amoral-gemma3-12B-Q6_K-GGUF|GPU|32768",
         "tg-rising/gemma-3-12b-it-heretic-v2-MLX-Q6|GPU|32768",
-        "soob3123/GrayLine-Gemma3-12B-Q4_K_M-GGUF|GPU|32768",
-        "Medvedko/gemma-3-12b-it-heretic-v2-Q4_K_M-GGUF|GPU|32768",
-        "ilya-chak/gemma-4-12B-it-qat-GGUF-UD-Q4_K_XL-layers|GPU|32768",
         "Fazmin/solus_v1_gemma-4-12b-uncensored-q4|GPU|32768",
         "Bhuvneesh/gemma-4-E4B-it-Q5_K_M-GGUF|GPU|32768",
-        "nocturne23/gemma-3-12b-it-Q4_K_M-GGUF|GPU|32768",
         #"sjoe1244/gemma-4-12B-it-abliterated-uncensored-exl3-4bpw|GPU|32768",
         "Bhuvneesh/gemma-4-E4B-it-Q8_0-GGUF|GPU|32768",
         "Bhuvneesh/gemma-3-12b-it-Q5_K_M-GGUF",
@@ -251,7 +251,7 @@ nakue/SmolLM2-1.7B-W4A16-instruct   | fail fail fail fail fail |   0.0%    | 0:0
 ==========================================================================================
     """
 
-    for model_slice in [4, 15,
+    for model_slice in [17,
         #10, 14,
         9999999]:
         print("=== CACHING MODELS ===")
@@ -526,25 +526,15 @@ def shorten_vacancy_text(v_name: str, v_text: str) -> str:
             return v_text[start_idx:end_idx].strip()
     return v_text
 
-def run_models_on_vacancies(vacancies_dir: str):
+def run_models_on_vacancies(version, vacancies_dir: str):
     """Benchmark models on real vacancy text files against ground truth JSONs."""
     client = TextToTextClient()
     vacancies_path = Path(vacancies_dir)
 
     VACANCY_TIMEOUT = 60 * 20
-    prompt_files7 = [
-        "PROMPT_01.txt",
-        "PROMPT_02.txt",
-        "PROMPT_03.txt",
-        "PROMPT_04.txt",
-        "PROMPT_05.txt",
-        "PROMPT_06.txt",
-        "PROMPT_07.txt"
-    ]
+    VACANCY_TIMEOUT_0 = 3600
 
-    prompt_files1 = [
-        "PROMPT.txt"
-    ]
+    prompt_files, test_models = get_prompt_and_model(version)
 
     # Find all vacancy txt files and their corresponding result jsons
     vacancies = []
@@ -556,19 +546,6 @@ def run_models_on_vacancies(vacancies_dir: str):
     if not vacancies:
         print(f"No matching vacancy/result pairs found in {vacancies_dir}")
         return
-
-    test_models = [
-        "Bhuvneesh/gemma-3-4b-it-Q8_0-GGUF",
-        "Bhuvneesh/gemma-3-12b-it-Q5_K_M-GGUF",
-        "lynnea1517/huihui-ai_gemma-3-27b-it-abliterated-Q8_0-GGUF",
-        "paultimothymooney/gemma-3-27b-it-Q8_0-GGUF",
-        "aminlouhichi/gemma-3-merged-GGUF-Q16",
-        "Bhuvneesh/gemma-3-27b-it-Q5_K_M-GGUF",
-        "NikolayKozloff/gemma-3-1b-it-Q8_0-GGUF",
-        "NikolayKozloff/gemma-3-4b-it-Q8_0-GGUF",
-        #"NikolayKozloff/gemma-3-12b-it-Q5_K_S-GGUF",
-        "NikolayKozloff/gemma-3-12b-it-Q8_0-GGUF",
-    ]
 
 
     print("=== RUNNING VACANCIES BENCHMARK ===")
@@ -587,7 +564,7 @@ def run_models_on_vacancies(vacancies_dir: str):
         total_time = 0.0
         vacancy_scores = []
 
-        for txt_file, result_json_file in vacancies:
+        for i, (txt_file, result_json_file) in enumerate(vacancies):
             vacancy_name = txt_file.stem
             vacancy_text = txt_file.read_text(encoding='utf-8')
             vacancy_text = shorten_vacancy_text(vacancy_name, vacancy_text)
@@ -604,7 +581,6 @@ def run_models_on_vacancies(vacancies_dir: str):
 
             combined_parsed_dict = {}
             total_vacancy_time = 0.0
-            prompt_files = prompt_files7 if "-1b-" in model_id else prompt_files1
 
             for p_file in prompt_files:
                 prompt_path = vacancies_path.parent / p_file
@@ -614,11 +590,25 @@ def run_models_on_vacancies(vacancies_dir: str):
                 full_prompt = prompt_text + "\n" + vacancy_text
 
                 print(
-                    f"  [{p_file}] Vacancy Length: {len(vacancy_text)} chars | Total Prompt Length: {len(full_prompt)} chars")
+                    f"  [{p_file}] Vacancy Length: {len(vacancy_text)} chars | "
+                    f"Total Prompt Length: {len(full_prompt)} chars")
+
+                if i == 0:
+                    start_time = time.time()
+                    start_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    print(f"{start_timestamp} Starting ping -- {model_id}")
+                    response = client.generate(model_id, "2+2",
+                                               model_limit_seconds=VACANCY_TIMEOUT_0)
+                    duration = time.time() - start_time
+                    end_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    print(f"{end_timestamp} Ping time: {duration:.2f}s -- {model_id}")
 
                 start_time = time.time()
+                start_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 try:
-                    response = client.generate(model_id, full_prompt, model_limit_seconds=VACANCY_TIMEOUT)
+                    print(f"{start_timestamp} Starting generate -- {model_id}")
+                    response = client.generate(model_id, full_prompt,
+                                               model_limit_seconds=VACANCY_TIMEOUT)
                     duration = time.time() - start_time
                     total_vacancy_time += duration
 
@@ -632,8 +622,10 @@ def run_models_on_vacancies(vacancies_dir: str):
                             if key not in combined_parsed_dict:
                                 combined_parsed_dict[key] = value
 
+                    valid_json = 'Yes' if parsed_dict is not None else 'No'
+
                     print(
-                        f"  [{p_file}] Time: {duration:.2f}s | Valid JSON: {'Yes' if parsed_dict is not None else 'No'}")
+                        f"{end_timestamp}  [{p_file}] Time: {duration:.2f}s | Valid JSON: {valid_json}")
 
                 except Exception as e:
                     duration = time.time() - start_time
@@ -690,6 +682,76 @@ def run_models_on_vacancies(vacancies_dir: str):
     for ms in model_summaries:
         print(f"{ms['model_id']:<50} | {ms['avg_score']:>6.2%}    | {ms['time_str']:<10}")
     print("=" * 90)
+
+
+def get_prompt_and_model(version) -> tuple[list[str], list[str]]:
+    test_models = [
+        "NikolayKozloff/gemma-3-1b-it-Q8_0-GGUF|GPU|32768",
+        "NikolayKozloff/gemma-3-4b-it-Q8_0-GGUF|GPU|32768",
+        # "NikolayKozloff/gemma-3-12b-it-Q5_K_S-GGUF|GPU|32768",
+        # "NikolayKozloff/gemma-3-12b-it-Q6_K-GGUF|GPU|32768",
+        # "majentik/gemma-4-12B-it-RotorQuant-GGUF-Q4_K_M|GPU|16384",
+        # "Bhuvneesh/gemma-3-12b-it-Q5_K_M-GGUF|GPU|16384",
+        # "majentik/gemma-4-12B-it-TurboQuant-GGUF-Q5_K_M|GPU|16384",
+        # "majentik/gemma-4-12B-it-RotorQuant-GGUF-Q5_K_M|GPU|16384",
+        # "Bhuvneesh/gemma-4-E4B-it-Q5_K_M-GGUF|GPU|16384",
+        # "Bhuvneesh/gemma-4-E4B-it-Q8_0-GGUF|GPU|16384",
+        # "Bhuvneesh/gemma-3-4b-it-Q8_0-GGUF|GPU|32768",
+
+    ]
+
+    '''
+        "Bhuvneesh/gemma-3-4b-it-Q8_0-GGUF",
+        "lynnea1517/huihui-ai_gemma-3-27b-it-abliterated-Q8_0-GGUF",
+        "paultimothymooney/gemma-3-27b-it-Q8_0-GGUF",
+        "aminlouhichi/gemma-3-merged-GGUF-Q16",
+        "Bhuvneesh/gemma-3-27b-it-Q5_K_M-GGUF",
+        #"NikolayKozloff/gemma-3-12b-it-Q5_K_S-GGUF",
+        "NikolayKozloff/gemma-3-12b-it-Q8_0-GGUF",
+    '''
+
+    if version == 1:
+        prompt_files = [
+            "PROMPT.txt"
+        ]
+        test_models = [
+            "NikolayKozloff/gemma-3-1b-it-Q8_0-GGUF|GPU|32768",
+            "NikolayKozloff/gemma-3-4b-it-Q8_0-GGUF|GPU|32768",
+        ]
+
+    elif version == 2:
+        prompt_files = [
+            "PROMPT_01.txt",
+            "PROMPT_02.txt",
+            "PROMPT_03.txt",
+            "PROMPT_04.txt",
+            "PROMPT_05.txt",
+            "PROMPT_06.txt",
+            "PROMPT_07.txt"
+        ]
+        test_models = [
+            "majentik/gemma-4-12B-it-TurboQuant-GGUF-Q4_K_M|GPU|32768",
+            "majentik/gemma-4-12B-it-RotorQuant-GGUF-Q4_K_M|GPU|32768",
+        ]
+    elif version == 3:
+        prompt_files = [
+            "PROMPT_SIMPLE.txt"
+        ]
+        test_models = [
+            "NikolayKozloff/gemma-3-1b-it-Q8_0-GGUF|GPU|32768",
+            "NikolayKozloff/gemma-3-4b-it-Q8_0-GGUF|GPU|32768",
+            "NikolayKozloff/gemma-3-12b-it-Q6_K-GGUF|CPU|32768",
+            "majentik/gemma-4-12B-it-TurboQuant-GGUF-Q4_K_M|GPU|32768",
+            "majentik/gemma-4-12B-it-RotorQuant-GGUF-Q4_K_M|GPU|32768",
+            # "soob3123/GrayLine-Gemma3-12B-Q4_K_M-GGUF|GPU|32768",
+            # "Medvedko/gemma-3-12b-it-heretic-v2-Q4_K_M-GGUF|GPU|32768",
+            # "nocturne23/gemma-3-12b-it-Q4_K_M-GGUF|GPU|32768",
+            # "ilya-chak/gemma-4-12B-it-qat-GGUF-UD-Q4_K_XL-layers|GPU|32768",
+        ]
+    else:
+        prompt_files = []
+        test_models = []
+    return prompt_files, test_models
 
 
 def run_model_benchmark_json():

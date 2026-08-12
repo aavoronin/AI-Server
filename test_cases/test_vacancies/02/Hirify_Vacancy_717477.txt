@@ -1,0 +1,121 @@
+Vacancy URL: https://hirify.me/jobs/717477-lead-data-engineer
+
+Lead Data Engineer | Hirify
+Jobs
+Guides
+How to configure filters
+How to recognize scams
+For employers
+CV roasting
+Matches
+Applications
+Plus
+Enable Plus
+AV
+Alexey Voronin
+aavoronin@gmail.com
+Settings
+Upgrade to Hirify Plus
+Profiles
+Show all
+Unnamed
+Dashboard
+Favorites
+Hidden vacancies
+Saved filters
+Sign Out
+Feed
+Jobs
+Filters
+Services
+Menu
+88
+Cool job
+expand
+A high-scale product role with a modern data stack and clear leadership expectations, ideal for those who want to balance team management with technical architecture.
+Click for details
+Salary not specified
+Modern stack
+Huge scale
+Global remote
+Clear scope
+Score by Hirify AI
+Back
+Save application
+Company hidden
+updated
+2 days ago
+Lead Data Engineer
+Show contacts
+Work format
+remote (Global)
+Work type
+fulltime
+Grade
+lead
+English
+b2
+python
+sql
+kafka
+data engineering
+clickhouse
+dbt
+s3
+apache airflow
+apache spark
+data lakes
+Vacancy from Hirify RU Global, list of companies with eastern-european roots
+Plus is required to make matches and apply
+Report
+88
+Cool job
+expand
+A high-scale product role with a modern data stack and clear leadership expectations, ideal for those who want to balance team management with technical architecture.
+Click for details
+Salary not specified
+Modern stack
+Huge scale
+Global remote
+Clear scope
+Score by Hirify AI
+Match & Cover letter
+Plus required for matching with this vacancy
+Get Plus
+Job description
+Text:
+Hirify AI
+/
+Original
+TL;DR
+Lead Data Engineer (Data Engineering): Lead the development of end-to-end data engineering initiatives by managing a team of data engineers and coordinating closely with analytics and product stakeholders with an accent on architecture design, production-grade pipelines, and workflow optimization. Focus on building and extending large-scale data systems using Apache Airflow, Spark, ClickHouse, dbt, Kafka, and production Python/SQL.
+Location: Work remotely from all around the world
+Company
+hirify.global
+is a European game developer and publisher with an internationally distributed team.
+What you will do
+Lead a team of data engineers and drive the development process end-to-end
+Run team rituals (Weekly Planning, Daily Standups, Planning Poker)
+Coordinate with analytics and product teams to deliver cross-functional outcomes
+Design architecture for new data projects and support/extend existing systems
+Optimize and automate development workflows
+Requirements
+Hands-on experience with Apache Airflow, Apache Spark, ClickHouse, dbt, Kafka
+Production-level Python and SQL
+Experience with object storage / data lakes (S3; Apache Iceberg is a plus)
+Experience leading a team of 3–5 people or working as a tech lead with real ownership of deadlines
+Ability to provide and maintain time estimates, plus strong communication and documentation/knowledge transfer skills
+Understanding of product analytics and attribution (AppsFlyer, MyTracker, ad network trackers) is a strong plus
+Culture & Benefits
+Work remotely from all around the world
+Collaborative internal game dev community across multiple studios
+Access to specialists and expertise across different areas
+Opportunity to experiment and work on ambitious tasks with strong resources
+Hiring process
+Not specified in the provided posting
+Be careful: if the employer asks you to log into their system using iCloud/Google, send codes/passwords, or run code/software, don't do it - these are scammers. Always click "Report" or contact support.
+More in guide →
+Categories
+Data Analyst jobs
+Python jobs
+SQL jobs

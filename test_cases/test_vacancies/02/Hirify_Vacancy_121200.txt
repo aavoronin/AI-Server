@@ -1,0 +1,145 @@
+Vacancy URL: https://hirify.me/jobs/121200-senior-data-engineer-pipeline
+
+Senior Data Engineer | Hirify
+Jobs
+Guides
+How to configure filters
+How to recognize scams
+For employers
+CV roasting
+Matches
+Applications
+Plus
+Enable Plus
+AV
+Alexey Voronin
+aavoronin@gmail.com
+Settings
+Upgrade to Hirify Plus
+Profiles
+Show all
+Unnamed
+Dashboard
+Favorites
+Hidden vacancies
+Saved filters
+Sign Out
+Feed
+Jobs
+Filters
+Services
+Menu
+85
+Good job
+expand
+The role is well-defined with a strong focus on modern data engineering practices and a supportive remote culture, but the extensive technical requirements may limit the candidate pool.
+Click for details
+Extensive requirements
+Cutting-edge projects
+Remote flexibility
+Strong company culture
+Score by Hirify AI
+Back
+Save application
+Company hidden
+updated
+3 days ago
+Senior Data Engineer
+Show contacts
+Work format
+remote (Global)
+Work type
+fulltime
+Grade
+senior
+English
+b2
+Country
+US
+python
+sql
+pandas
+mysql
+mongodb
+azure
+etl
+aws
+gcp
+ci cd
+spark
+dynamodb
+opensearch
+Vacancy from Hirify Global, list of international tech companies
+Plus is required to make matches and apply
+Report
+Salary & Market
+No salary
+Similar roles on the market
+$68k
+$102k
+median
+$187k
+20 in sample
+On CIS market:
+$4.7k/mo
+($3.5k - $6.2k)
+85
+Good job
+expand
+The role is well-defined with a strong focus on modern data engineering practices and a supportive remote culture, but the extensive technical requirements may limit the candidate pool.
+Click for details
+Extensive requirements
+Cutting-edge projects
+Remote flexibility
+Strong company culture
+Score by Hirify AI
+Match & Cover letter
+Plus required for matching with this vacancy
+Get Plus
+Job description
+Text:
+Hirify AI
+/
+Original
+TL;DR
+Senior Data Engineer (Data Pipeline): Design, implement, and scale data solutions from batch to streaming for low-latency requirements. Focus on building scalable production-grade data pipelines, real-time data streams, and collaborating with various teams to triage data or ETL issues.
+Location: Remote
+Company
+hirify.global
+is a globally distributed tech consultancy based in Silicon Valley.
+What you will do
+Build scalable production-grade data pipelines and real-time data streams.
+Write and design scalable, cloud-ready applications.
+Lead technical projects through architecture, design, and implementation phases.
+Collaborate with Machine Learning, Data Science, Design, Software Engineering and Business teams to triage data or ETL issues.
+Build tests and health checks to maintain code and data quality.
+Monitor and analyze data flowing through various systems by adding appropriate visualizations and dashboards.
+Requirements
+Advanced Python and SQL
+Experience in ETL design, implementation, and maintenance.
+Experience in AWS, GCP or Azure delivering data-centric product experiences
+5+ years experience in related role
+Experience with in-memory and disk-based databases, relational and non-relational databases, full-text search engines, database design, development, and maintenance.
+Working knowledge in Data Lake, Data warehouse and massive parallel processing
+Nice to have
+Working knowledge in IAM, Federated Authentication, SSO, SAML, Encryption, Security, APIs, Disaster Recovery or Backup
+Strong ability in distributed systems for large-scale data processing
+Experience with Spark and Pandas
+Experience with Open Tables (Hudi, Delta Lake, DataBricks, Iceberg as related to Data Lakehouse)
+Experience with Infrastructure as Code and CI/CD Pipelines
+Culture & Benefits
+Every other Friday off (26 extra days off a year)
+Remote-first and flexible schedule
+Explorer and Relocate programs (three months abroad or full relocation)
+Paid sick days and local holidays
+Business English classes
+Continuous learning support
+Be careful: if the employer asks you to log into their system using iCloud/Google, send codes/passwords, or run code/software, don't do it - these are scammers. Always click "Report" or contact support.
+More in guide →
+Categories
+Data Scientist / ML Engineer jobs
+Senior Data Scientist / ML Engineer jobs
+Jobs in the USA
+Python jobs
+SQL jobs
+MySQL jobs
