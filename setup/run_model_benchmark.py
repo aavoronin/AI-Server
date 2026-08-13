@@ -687,7 +687,12 @@ def run_models_on_vacancies(version, vacancies_dir: str):
             "total_time": total_time,
             "time_str": time_str
         })
+        print_vacancies_model_summary(model_summaries)
 
+    print_vacancies_model_summary(model_summaries)
+
+
+def print_vacancies_model_summary(model_summaries: list[Any]):
     # Final Overall Summary
     print("\n" + "=" * 90)
     print(f"{'Model ID':<50} | {'Avg Score':<12} | {'Total Time':<10}")
