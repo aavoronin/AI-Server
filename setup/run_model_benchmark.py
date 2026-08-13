@@ -5,7 +5,7 @@ from typing import Any
 from collections import defaultdict
 from pathlib import Path
 
-from ai_clients.model_client_base import TextToTextClient
+from ai_clients.TextToTextClient import TextToTextClient
 from setup.start_server import print_model_debug_info
 from setup.questions_helper import QuestionsHelper
 
@@ -263,50 +263,6 @@ def run_model_benchmark():
         # "nakue/SmolLM2-1.7B-W4A16-instruct",
 
     ]
-    """
-    ==========================================================================================
-Model ID                            | Results              | Accuracy   | Total Time
-------------------------------------------------------------------------------------------
-Bhuvneesh/gemma-3-27b-it-Q5_K_M-GGUF | ok ok ok ok ok       | 100.0%    | 9:51      
-NikolayKozloff/gemma-3-1b-it-Q8_0-GGUF | ok ok ok ok fail     |  80.0%    | 2:50      
-NikolayKozloff/gemma-3-4b-it-Q8_0-GGUF | ok ok ok ok ok       | 100.0%    | 5:02      
-NikolayKozloff/gemma-3-12b-it-Q8_0-GGUF | ok ok ok ok ok       | 100.0%    | 5:57      
-NikolayKozloff/gemma-3-12b-it-Q5_K_S-GGUF | ok ok ok ok ok       | 100.0%    | 5:44      
-NikolayKozloff/gemma-3-12b-it-Q6_K-GGUF | ok ok ok ok ok       | 100.0%    | 2:25      
-NikolayKozloff/Mistral-Nemo-Instruct-2407-Q8_0-GGUF | fail fail fail fail fail |   0.0%    | 0:09      
-Bhuvneesh/gemma-4-E4B-it-Q8_0-GGUF  | ok fail ok fail ok   |  60.0%    | 2:02      
-Bhuvneesh/gemma-4-E4B-it-Q5_K_M-GGUF | ok ok ok ok ok       | 100.0%    | 1:31      
-Bhuvneesh/gemma-3-4b-it-Q8_0-GGUF   | ok ok ok ok ok       | 100.0%    | 1:04      
-Bhuvneesh/gemma-3-12b-it-Q5_K_M-GGUF | ok ok ok ok ok       | 100.0%    | 1:54      
-unsloth/gemma-3-1b-it-unsloth-bnb-4bit | fail fail fail fail fail |   0.0%    | 0:07      
-unsloth/gemma-3-1b-pt-unsloth-bnb-4bit | fail fail fail fail fail |   0.0%    | 0:01      
-mlx-community/gemma-3-1b-it-4bit    | fail fail fail fail fail |   0.0%    | 0:00      
-google/gemma-3n-E4B-it-litert-lm    | fail fail fail fail fail |   0.0%    | 0:00      
-deepseek-ai/deepseek-coder-7b-instruct-v1.5 | fail fail fail fail fail |   0.0%    | 0:01      
-lynnea1517/huihui-ai_gemma-3-27b-it-abliterated-Q8_0-GGUF | ok ok ok ok ok       | 100.0%    | 7:35      
-paultimothymooney/gemma-3-27b-it-Q8_0-GGUF | ok ok ok ok ok       | 100.0%    | 8:19      
-aminlouhichi/gemma-3-merged-GGUF-Q16 | ok ok ok ok ok       | 100.0%    | 2:19      
-mergekit-community/Qwen3-7B-Instruct | fail fail fail fail fail |   0.0%    | 47:19     
-Ygz-08123/Qwen3-7B-Instruct-Q2_K-GGUF | fail fail fail fail fail |   0.0%    | 10:44     
-Ygz-08123/Qwen3-7B-Instruct-Q4_K_M-GGUF | fail fail fail fail fail |   0.0%    | 0:00      
-goodgooodboy/Qwen3-7B-Instruct-Q4_K_M-GGUF | fail fail fail fail fail |   0.0%    | 0:00      
-HuggingFaceTB/SmolLM2-135M-Instruct | fail fail fail fail fail |   0.0%    | 0:00      
-unsloth/SmolLM2-135M-Instruct       | fail fail fail fail fail |   0.0%    | 0:00      
-unsloth/SmolLM2-360M-Instruct       | fail fail fail fail fail |   0.0%    | 0:00      
-unsloth/SmolLM2-1.7B-Instruct       | fail fail fail fail fail |   0.0%    | 0:00      
-LiquidAI/LFM2.5-1.2B-Instruct       | fail fail fail fail fail |   0.0%    | 0:00      
-TinyLlama/TinyLlama-1.1B-Chat-v1.0  | fail fail fail fail fail |   0.0%    | 0:00      
-OpenLLM-France/Luciole-1B-Instruct-1.1 | fail fail fail fail fail |   0.0%    | 0:00      
-tencent/Hunyuan-1.8B-Instruct       | fail fail fail fail fail |   0.0%    | 0:00      
-microsoft/Phi-4-mini-instruct       | fail fail fail fail fail |   0.0%    | 0:00      
-unsloth/Llama-3.2-3B-Instruct       | fail fail fail fail fail |   0.0%    | 0:00      
-TheBloke/TinyLlama-1.1B-Chat-v0.3-GPTQ | fail fail fail fail fail |   0.0%    | 0:00      
-TheBlokeAI/Mixtral-tiny-GPTQ        | fail fail fail fail fail |   0.0%    | 0:00      
-mlx-community/SmolLM3-3B-4bit       | fail fail fail fail fail |   0.0%    | 0:00      
-unsloth/SmolLM2-1.7B-Instruct-bnb-4bit | fail fail fail fail fail |   0.0%    | 0:00      
-nakue/SmolLM2-1.7B-W4A16-instruct   | fail fail fail fail fail |   0.0%    | 0:00      
-==========================================================================================
-    """
 
     for model_slice in [17,
                         # 10, 14,
@@ -800,22 +756,11 @@ def get_prompt_and_model(version) -> tuple[list[str], list[str]]:
             "NikolayKozloff/gemma-3-12b-it-Q6_K-GGUF|CPU|32768",
             "majentik/gemma-4-12B-it-TurboQuant-GGUF-Q4_K_M|GPU|32768",
             "majentik/gemma-4-12B-it-RotorQuant-GGUF-Q4_K_M|GPU|32768",
-            # "soob3123/GrayLine-Gemma3-12B-Q4_K_M-GGUF|GPU|32768",
-            # "Medvedko/gemma-3-12b-it-heretic-v2-Q4_K_M-GGUF|GPU|32768",
-            # "nocturne23/gemma-3-12b-it-Q4_K_M-GGUF|GPU|32768",
-            # "ilya-chak/gemma-4-12B-it-qat-GGUF-UD-Q4_K_XL-layers|GPU|32768",
+            "Medvedko/gemma-3-12b-it-heretic-v2-Q4_K_M-GGUF|GPU|32768",
+            "nocturne23/gemma-3-12b-it-Q4_K_M-GGUF|GPU|32768",
+            "ilya-chak/gemma-4-12B-it-qat-GGUF-UD-Q4_K_XL-layers|GPU|32768",
+            "soob3123/GrayLine-Gemma3-12B-Q4_K_M-GGUF|GPU|32768",
         ]
-        '''
-        ==========================================================================================
-        Model ID                                           | Avg Score    | Total Time
-        ------------------------------------------------------------------------------------------
-        NikolayKozloff/gemma-3-1b-it-Q8_0-GGUF|GPU|32768   | 86.11%    | 0:00      
-        NikolayKozloff/gemma-3-4b-it-Q8_0-GGUF|GPU|32768   | 86.90%    | 0:00      
-        NikolayKozloff/gemma-3-12b-it-Q6_K-GGUF|CPU|32768  | 90.79%    | 0:00      
-        majentik/gemma-4-12B-it-TurboQuant-GGUF-Q4_K_M|GPU|32768 | 93.57%    | 0:00      
-        majentik/gemma-4-12B-it-RotorQuant-GGUF-Q4_K_M|GPU|32768 | 93.63%    | 0:00      
-        ==========================================================================================
-        '''
     else:
         prompt_files = []
         test_models = []
