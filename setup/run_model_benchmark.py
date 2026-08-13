@@ -753,13 +753,16 @@ def get_prompt_and_model(version) -> tuple[list[str], list[str]]:
         test_models = [
             "NikolayKozloff/gemma-3-1b-it-Q8_0-GGUF|GPU|32768",
             "NikolayKozloff/gemma-3-4b-it-Q8_0-GGUF|GPU|32768",
+            "soob3123/GrayLine-Gemma3-12B-Q4_K_M-GGUF|GPU|32768",
+            "aminlouhichi/gemma-3-merged-GGUF-Q16|GPU|32768",
             "NikolayKozloff/gemma-3-12b-it-Q6_K-GGUF|CPU|32768",
-            "majentik/gemma-4-12B-it-TurboQuant-GGUF-Q4_K_M|GPU|32768",
-            "majentik/gemma-4-12B-it-RotorQuant-GGUF-Q4_K_M|GPU|32768",
+            "aminlouhichi/gemma-3-merged-GGUF-Q16|CPU|32768",
             "Medvedko/gemma-3-12b-it-heretic-v2-Q4_K_M-GGUF|GPU|32768",
             "nocturne23/gemma-3-12b-it-Q4_K_M-GGUF|GPU|32768",
-            "ilya-chak/gemma-4-12B-it-qat-GGUF-UD-Q4_K_XL-layers|GPU|32768",
-            "soob3123/GrayLine-Gemma3-12B-Q4_K_M-GGUF|GPU|32768",
+            "majentik/gemma-4-12B-it-TurboQuant-GGUF-Q4_K_M|GPU|32768",
+            "majentik/gemma-4-12B-it-RotorQuant-GGUF-Q4_K_M|GPU|32768",
+            "majentik/gemma-4-12B-it-TurboQuant-GGUF-Q5_K_M|GPU|32768",
+            "majentik/gemma-4-12B-it-RotorQuant-GGUF-Q5_K_M|GPU|32768",
         ]
     else:
         prompt_files = []

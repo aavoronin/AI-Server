@@ -109,3 +109,36 @@ mlx-community/SmolLM3-3B-4bit       | fail fail fail fail fail |   0.0%    | 0:0
 unsloth/SmolLM2-1.7B-Instruct-bnb-4bit | fail fail fail fail fail |   0.0%    | 0:00
 nakue/SmolLM2-1.7B-W4A16-instruct   | fail fail fail fail fail |   0.0%    | 0:00
 ==========================================================================================
+
+
+
+==========================================================================================
+Model ID                            | Results              | Accuracy   | Total Time
+------------------------------------------------------------------------------------------
+NikolayKozloff/gemma-3-1b-it-Q8_0-GGUF | ok ok ok fail fail ok ok fail ok ok ok ok ok fail fail ok ok ok ok fail ok ok ok fail ok fail ok ok ok ok |  73.3%    | 0:01
+NikolayKozloff/gemma-3-4b-it-Q8_0-GGUF|GPU|131072 | ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok fail ok ok ok ok |  96.7%    | 0:07
+Bhuvneesh/gemma-3-4b-it-Q8_0-GGUF|GPU|131072 | ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok fail ok ok ok ok |  96.7%    | 0:07
+majentik/gemma-4-12B-it-TurboQuant-GGUF-Q4_K_M|GPU|32768 | ok ok ok ok ok ok ok ok ok ok ok ok ok fail ok ok ok ok ok ok ok ok ok fail ok fail ok ok ok ok |  90.0%    | 0:36
+majentik/gemma-4-12B-it-RotorQuant-GGUF-Q4_K_M|GPU|32768 | ok ok ok ok ok ok ok ok ok ok ok ok ok fail ok ok ok ok ok ok ok ok ok fail ok fail ok ok ok ok |  90.0%    | 0:18
+majentik/gemma-4-12B-it-TurboQuant-GGUF-Q5_K_M|GPU|32768 | ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok fail ok fail ok ok ok ok |  93.3%    | 0:17
+majentik/gemma-4-12B-it-RotorQuant-GGUF-Q5_K_M|GPU|32768 | ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok fail ok fail ok ok ok ok |  93.3%    | 0:18
+majentik/gemma-4-12B-it-RotorQuant-GGUF-Q4_K_M|GPU|65536 | ok ok ok ok ok ok ok ok ok ok ok ok ok fail ok ok ok ok ok ok ok ok ok fail ok fail ok ok ok ok |  90.0%    | 0:18
+majentik/gemma-4-12B-it-TurboQuant-GGUF-Q5_K_M|GPU|65536 | ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok fail ok fail ok ok ok ok |  93.3%    | 0:18
+majentik/gemma-4-12B-it-RotorQuant-GGUF-Q5_K_M|GPU|65536 | ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok fail ok fail ok ok ok ok |  93.3%    | 0:18
+majentik/gemma-4-12B-it-RotorQuant-GGUF-Q4_K_M|GPU|98304 | ok ok ok ok ok ok ok ok ok ok ok ok ok fail ok ok ok ok ok ok ok ok ok fail ok fail ok ok ok ok |  90.0%    | 0:18
+majentik/gemma-4-12B-it-TurboQuant-GGUF-Q5_K_M|GPU|98304 | ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok fail ok fail ok ok ok ok |  93.3%    | 0:18
+majentik/gemma-4-12B-it-RotorQuant-GGUF-Q5_K_M|GPU|98304 | ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok fail ok fail ok ok ok ok |  93.3%    | 0:18
+soob3123/GrayLine-Gemma3-12B-Q4_K_M-GGUF|GPU|32768 | ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok fail ok ok ok ok |  96.7%    | 0:15
+nocturne23/gemma-3-12b-it-Q4_K_M-GGUF|GPU|32768 | ok ok ok fail ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok fail ok ok ok ok |  93.3%    | 0:16
+NikolayKozloff/amoral-gemma3-12B-Q5_K_M-GGUF|GPU|32768 | ok ok ok fail ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok fail ok ok ok ok |  93.3%    | 0:17
+NikolayKozloff/amoral-gemma3-12B-Q6_K-GGUF|GPU|32768 | ok ok ok fail fail ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok fail ok ok ok ok |  90.0%    | 0:17
+WesPro/amoral-gemma3-12B-Q6_K-GGUF|GPU|32768 | ok ok ok fail fail ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok fail ok ok ok ok |  90.0%    | 0:17
+Bhuvneesh/gemma-4-E4B-it-Q5_K_M-GGUF|GPU|32768 | ok ok ok fail ok ok ok ok ok ok ok ok fail ok ok ok ok ok ok ok ok ok ok ok ok fail ok ok ok fail |  86.7%    | 0:02
+Bhuvneesh/gemma-4-E4B-it-Q8_0-GGUF|GPU|32768 | ok ok ok fail ok ok ok ok ok ok ok fail fail ok ok ok ok ok ok ok fail fail ok ok fail fail ok fail ok ok |  73.3%    | 0:02
+Bhuvneesh/gemma-3-12b-it-Q5_K_M-GGUF | ok ok ok fail ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok fail ok ok ok ok |  93.3%    | 1:00
+NikolayKozloff/gemma-3-12b-it-Q5_K_S-GGUF | ok ok ok fail ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok fail ok ok ok ok |  93.3%    | 1:00
+NikolayKozloff/gemma-3-12b-it-Q6_K-GGUF | ok ok ok fail ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok fail ok ok ok ok |  93.3%    | 0:54
+aminlouhichi/gemma-3-merged-GGUF-Q16 | ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok fail ok ok ok ok |  96.7%    | 0:25
+NikolayKozloff/gemma-3-12b-it-Q8_0-GGUF | ok ok ok fail ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok fail ok ok ok ok |  93.3%    | 1:01
+bartowski/google_gemma-3n-E4B-it-GGUF | ok ok ok fail fail ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok ok fail ok fail ok ok ok ok |  86.7%    | 0:37
+==========================================================================================
