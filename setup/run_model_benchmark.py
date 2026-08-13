@@ -10,10 +10,12 @@ from setup.start_server import print_model_debug_info
 from setup.questions_helper import QuestionsHelper
 
 NULL_EQUIVALENTS = {"null", "", "no", "none", "-"}
+
 PROFICIENCY_PARTIAL_MATCHES = {
     frozenset({"nice-to-have", "required"}),
     frozenset({"required", "expert"})
 }
+
 COUNTRY_SYNONYMS = {
     "us": "usa", "united states": "usa", "united states of america": "usa", "america": "usa", "usa": "usa",
     "can": "canada", "ca": "canada", "canada": "canada",
@@ -31,7 +33,11 @@ COUNTRY_SYNONYMS = {
 
 
 def format_time(total_elapsed):
-    m, s = divmod(int(total_elapsed), 60)
+    total_elapsed = int(total_elapsed)
+    h, rem = divmod(total_elapsed, 3600)
+    m, s = divmod(rem, 60)
+    if h > 0:
+        return f"{h}:{m:02d}:{s:02d}"
     return f"{m}:{s:02d}"
 
 
@@ -135,13 +141,18 @@ def record_failure(model_results, duration, is_json=False, expected_keys=0):
 def parse_json_safely(json_output: str) -> Any:
     parsed_dict = None
     try:
-        parsed_output = json_output.strip()
-        if parsed_output.startswith("```"):
-            parsed_output = parsed_output[3:].strip()
-            if parsed_output.lower().startswith("json"):
-                parsed_output = parsed_output[4:].strip()
-            if parsed_output.endswith("```"):
-                parsed_output = parsed_output[:-3].strip()
+        if not isinstance(json_output, str):
+            return None
+
+        start_idx = json_output.find('{')
+        end_idx = json_output.rfind('}')
+
+        # If no '{' or '}' are found, or '}' appears before '{', the JSON is invalid
+        if start_idx == -1 or end_idx == -1 or end_idx <= start_idx:
+            return None
+
+        # Extract only the text from the first '{' to the last '}'
+        parsed_output = json_output[start_idx:end_idx + 1]
         parsed_dict = json.loads(parsed_output)
     except Exception:
         parsed_dict = None
@@ -263,6 +274,50 @@ def run_model_benchmark():
         # "nakue/SmolLM2-1.7B-W4A16-instruct",
 
     ]
+    """
+    ==========================================================================================
+Model ID                            | Results              | Accuracy   | Total Time
+------------------------------------------------------------------------------------------
+Bhuvneesh/gemma-3-27b-it-Q5_K_M-GGUF | ok ok ok ok ok       | 100.0%    | 9:51      
+NikolayKozloff/gemma-3-1b-it-Q8_0-GGUF | ok ok ok ok fail     |  80.0%    | 2:50      
+NikolayKozloff/gemma-3-4b-it-Q8_0-GGUF | ok ok ok ok ok       | 100.0%    | 5:02      
+NikolayKozloff/gemma-3-12b-it-Q8_0-GGUF | ok ok ok ok ok       | 100.0%    | 5:57      
+NikolayKozloff/gemma-3-12b-it-Q5_K_S-GGUF | ok ok ok ok ok       | 100.0%    | 5:44      
+NikolayKozloff/gemma-3-12b-it-Q6_K-GGUF | ok ok ok ok ok       | 100.0%    | 2:25      
+NikolayKozloff/Mistral-Nemo-Instruct-2407-Q8_0-GGUF | fail fail fail fail fail |   0.0%    | 0:09      
+Bhuvneesh/gemma-4-E4B-it-Q8_0-GGUF  | ok fail ok fail ok   |  60.0%    | 2:02      
+Bhuvneesh/gemma-4-E4B-it-Q5_K_M-GGUF | ok ok ok ok ok       | 100.0%    | 1:31      
+Bhuvneesh/gemma-3-4b-it-Q8_0-GGUF   | ok ok ok ok ok       | 100.0%    | 1:04      
+Bhuvneesh/gemma-3-12b-it-Q5_K_M-GGUF | ok ok ok ok ok       | 100.0%    | 1:54      
+unsloth/gemma-3-1b-it-unsloth-bnb-4bit | fail fail fail fail fail |   0.0%    | 0:07      
+unsloth/gemma-3-1b-pt-unsloth-bnb-4bit | fail fail fail fail fail |   0.0%    | 0:01      
+mlx-community/gemma-3-1b-it-4bit    | fail fail fail fail fail |   0.0%    | 0:00      
+google/gemma-3n-E4B-it-litert-lm    | fail fail fail fail fail |   0.0%    | 0:00      
+deepseek-ai/deepseek-coder-7b-instruct-v1.5 | fail fail fail fail fail |   0.0%    | 0:01      
+lynnea1517/huihui-ai_gemma-3-27b-it-abliterated-Q8_0-GGUF | ok ok ok ok ok       | 100.0%    | 7:35      
+paultimothymooney/gemma-3-27b-it-Q8_0-GGUF | ok ok ok ok ok       | 100.0%    | 8:19      
+aminlouhichi/gemma-3-merged-GGUF-Q16 | ok ok ok ok ok       | 100.0%    | 2:19      
+mergekit-community/Qwen3-7B-Instruct | fail fail fail fail fail |   0.0%    | 47:19     
+Ygz-08123/Qwen3-7B-Instruct-Q2_K-GGUF | fail fail fail fail fail |   0.0%    | 10:44     
+Ygz-08123/Qwen3-7B-Instruct-Q4_K_M-GGUF | fail fail fail fail fail |   0.0%    | 0:00      
+goodgooodboy/Qwen3-7B-Instruct-Q4_K_M-GGUF | fail fail fail fail fail |   0.0%    | 0:00      
+HuggingFaceTB/SmolLM2-135M-Instruct | fail fail fail fail fail |   0.0%    | 0:00      
+unsloth/SmolLM2-135M-Instruct       | fail fail fail fail fail |   0.0%    | 0:00      
+unsloth/SmolLM2-360M-Instruct       | fail fail fail fail fail |   0.0%    | 0:00      
+unsloth/SmolLM2-1.7B-Instruct       | fail fail fail fail fail |   0.0%    | 0:00      
+LiquidAI/LFM2.5-1.2B-Instruct       | fail fail fail fail fail |   0.0%    | 0:00      
+TinyLlama/TinyLlama-1.1B-Chat-v1.0  | fail fail fail fail fail |   0.0%    | 0:00      
+OpenLLM-France/Luciole-1B-Instruct-1.1 | fail fail fail fail fail |   0.0%    | 0:00      
+tencent/Hunyuan-1.8B-Instruct       | fail fail fail fail fail |   0.0%    | 0:00      
+microsoft/Phi-4-mini-instruct       | fail fail fail fail fail |   0.0%    | 0:00      
+unsloth/Llama-3.2-3B-Instruct       | fail fail fail fail fail |   0.0%    | 0:00      
+TheBloke/TinyLlama-1.1B-Chat-v0.3-GPTQ | fail fail fail fail fail |   0.0%    | 0:00      
+TheBlokeAI/Mixtral-tiny-GPTQ        | fail fail fail fail fail |   0.0%    | 0:00      
+mlx-community/SmolLM3-3B-4bit       | fail fail fail fail fail |   0.0%    | 0:00      
+unsloth/SmolLM2-1.7B-Instruct-bnb-4bit | fail fail fail fail fail |   0.0%    | 0:00      
+nakue/SmolLM2-1.7B-W4A16-instruct   | fail fail fail fail fail |   0.0%    | 0:00      
+==========================================================================================
+    """
 
     for model_slice in [17,
                         # 10, 14,
@@ -518,11 +573,11 @@ def run_benchmark_json(
 
 def shorten_vacancy_text(v_name: str, v_text: str) -> str:
     vacancy_slice = [
-        ("LinkedIn_Vacancy", "About the job", "Unlock hiring insights"),
-        ("Hirify_Vacancy", "Job description", ""),
+        ("LinkedIn_Vacancy", "About the job", "Unlock hiring insights", 8),
+        ("Hirify_Vacancy", "Job description", "", 3),
     ]
 
-    for prefix, start_marker, end_marker in vacancy_slice:
+    for prefix, start_marker, end_marker, num_first_rows in vacancy_slice:
         if v_name.startswith(prefix):
             start_idx = 0
             if start_marker:
@@ -536,9 +591,16 @@ def shorten_vacancy_text(v_name: str, v_text: str) -> str:
                 if idx != -1:
                     end_idx = idx + len(end_marker)
 
-            return v_text[start_idx:end_idx].strip()
-    return v_text
+            sliced_text = v_text[start_idx:end_idx].strip()
 
+            if num_first_rows > 0:
+                original_lines = v_text.splitlines()
+                first_rows = "\n".join(original_lines[:num_first_rows])
+                return (first_rows + "\n" + sliced_text).strip()
+
+            return sliced_text
+
+    return v_text
 
 def run_models_on_vacancies(version, vacancies_dir: str):
     """Benchmark models on real vacancy text files against ground truth JSONs."""
@@ -639,6 +701,10 @@ def run_models_on_vacancies(version, vacancies_dir: str):
 
                     print(
                         f"{end_timestamp}  [{p_file}] Time: {duration:.2f}s | Valid JSON: {valid_json}")
+                    if valid_json == 'No':
+                        print('=' * 60)
+                        print(generated_text)
+                        print('=' * 60)
 
                 except Exception as e:
                     duration = time.time() - start_time
@@ -658,6 +724,7 @@ def run_models_on_vacancies(version, vacancies_dir: str):
 
             total_keys += keys_in_expected
             total_correct_keys += correct_keys
+            total_time += total_vacancy_time
 
             vacancy_scores.append({
                 "vacancy": vacancy_name,
@@ -673,8 +740,7 @@ def run_models_on_vacancies(version, vacancies_dir: str):
 
         # Model Summary
         avg_score = (total_correct_keys / total_keys) if total_keys > 0 else 0.0
-        m, s = divmod(int(total_time), 60)
-        time_str = f"{m}:{s:02d}"
+        time_str = format_time(total_time)
 
         print(f"\n--- Summary for {model_id} ---")
         for vs in vacancy_scores:
@@ -687,9 +753,8 @@ def run_models_on_vacancies(version, vacancies_dir: str):
             "total_time": total_time,
             "time_str": time_str
         })
-        print_vacancies_model_summary(model_summaries)
 
-    print_vacancies_model_summary(model_summaries)
+        print_vacancies_model_summary(model_summaries)
 
 
 def print_vacancies_model_summary(model_summaries: list[Any]):
@@ -758,10 +823,10 @@ def get_prompt_and_model(version) -> tuple[list[str], list[str]]:
         test_models = [
             "NikolayKozloff/gemma-3-1b-it-Q8_0-GGUF|GPU|32768",
             "NikolayKozloff/gemma-3-4b-it-Q8_0-GGUF|GPU|32768",
-            "soob3123/GrayLine-Gemma3-12B-Q4_K_M-GGUF|GPU|32768",
             "aminlouhichi/gemma-3-merged-GGUF-Q16|GPU|32768",
+            #"Bhuvneesh/gemma-3-4b-it-Q8_0-GGUF|GPU|32768",
+            "soob3123/GrayLine-Gemma3-12B-Q4_K_M-GGUF|GPU|32768",
             "NikolayKozloff/gemma-3-12b-it-Q6_K-GGUF|CPU|32768",
-            "aminlouhichi/gemma-3-merged-GGUF-Q16|CPU|32768",
             "Medvedko/gemma-3-12b-it-heretic-v2-Q4_K_M-GGUF|GPU|32768",
             "nocturne23/gemma-3-12b-it-Q4_K_M-GGUF|GPU|32768",
             "majentik/gemma-4-12B-it-TurboQuant-GGUF-Q4_K_M|GPU|32768",
@@ -773,6 +838,7 @@ def get_prompt_and_model(version) -> tuple[list[str], list[str]]:
         prompt_files = []
         test_models = []
     return prompt_files, test_models
+
 
 def run_model_benchmark_json():
     """Benchmark models on JSON extraction from vacancy texts."""
