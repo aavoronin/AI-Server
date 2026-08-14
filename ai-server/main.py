@@ -67,7 +67,7 @@ def ensure_model_cached(model_id: str, cache_folder: str, hf_token_path: str) ->
     usage_file = model_dir / "model_usage.json"
     is_cached = False
     usage_data = {
-        "model_id": model_id,
+        "model_id": clean_model_id,
         "is_cached": False,
         "last_used": None,
         "last_cached": None,
@@ -78,6 +78,7 @@ def ensure_model_cached(model_id: str, cache_folder: str, hf_token_path: str) ->
     if usage_file.exists():
         with open(usage_file, 'r') as f:
             usage_data = json.load(f)
+            usage_data["model_id"] = clean_model_id  # Ensure stripped ID
             is_cached = usage_data.get("is_cached", False)
 
     if not is_cached:
@@ -252,7 +253,7 @@ async def uncache_model(model_id: str):
             usage_data = json.load(f)
     else:
         usage_data = {
-            "model_id": model_id,
+            "model_id": clean_model_id,
             "is_cached": False,
             "last_used": None,
             "last_cached": None,
@@ -268,6 +269,7 @@ async def uncache_model(model_id: str):
             elif item.is_dir():
                 shutil.rmtree(item)
 
+    usage_data["model_id"] = clean_model_id
     usage_data["is_cached"] = False
     usage_data["last_uncached"] = datetime.now().isoformat()
 
@@ -310,15 +312,17 @@ async def get_model_stats(model_id: str):
         with open(usage_file, 'r') as f:
             data = json.load(f)
         return {
-            "model_id": model_id,
+            "model_id": clean_model_id,
             "num_fails": data.get("num_fails", 0),
-            "num_init_successes": data.get("num_init_successes", 0)
+            "num_init_successes": data.get("num_init_successes", 0),
+            "num_used": data.get("num_used", 0)
         }
 
     return {
-        "model_id": model_id,
+        "model_id": clean_model_id,
         "num_fails": 0,
-        "num_init_successes": 0
+        "num_init_successes": 0,
+        "num_used": 0
     }
 
 

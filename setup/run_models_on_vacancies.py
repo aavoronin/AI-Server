@@ -96,16 +96,59 @@ def get_prompt_and_model(version) -> tuple[list[str], list[str]]:
         ]
         test_models = [
             "NikolayKozloff/gemma-3-1b-it-Q8_0-GGUF|GPU|32768",
-            "unsloth/Llama-3.2-3B-Instruct|GPU|32768",
-            "unsloth/Llama-3.2-3B-Instruct|CPU|32768",
             "NikolayKozloff/gemma-3-4b-it-Q8_0-GGUF|GPU|32768",
-            "NikolayKozloff/gemma-3-12b-it-Q6_K-GGUF|CPU|32768",
-            "majentik/gemma-4-12B-it-TurboQuant-GGUF-Q4_K_M|GPU|32768",
-            "majentik/gemma-4-12B-it-RotorQuant-GGUF-Q4_K_M|GPU|32768",
+            "rktmeister/Meta-Llama-3.1-8B-Instruct-Q5_K_M-GGUF|GPU|32768",
+            "Ma7ee7/Qwen3.8_1.2B_LFM_Distillation_GGUF|GPU|32768|Q4_K_M",
+            "Ma7ee7/Qwen3.8_1.2B_LFM_Distillation_GGUF|GPU|32768|Q5_K_M",
+            "Ma7ee7/Qwen3.8_1.2B_LFM_Distillation_GGUF|GPU|32768|Q8_0",
+            "NikolayKozloff/Llama-3.3-8B-Instruct-Q8_0-GGUF|GPU|32768",
+            "matrixportalx/Llama-3.3-8B-Instruct-Q4_K_M-GGUF|GPU|32768",
+            "matrixportalx/Llama-3.3-8B-Instruct-128K-Q5_K_M-GGUF|GPU|32768",
+            # "majentik/gemma-4-12B-it-RotorQuant-GGUF-Q5_K_M|CPU|32768",
+
+
+            #"aminlouhichi/gemma-3-merged-GGUF-Q16|GPU|32768",
+            # "NikolayKozloff/gemma-3-1b-it-Q8_0-GGUF|CPU|32768",
+            # "NikolayKozloff/gemma-3-4b-it-Q8_0-GGUF|GPU|32768",
+            # "majentik/Nemotron-3-Nano-4B-RotorQuant-GGUF-Q4_K_M|GPU|32768",
+            # "majentik/Nemotron-3-Nano-4B-RotorQuant-GGUF-Q4_K_M|CPU|32768",
+            # "unsloth/Llama-3.2-3B-Instruct|GPU|32768",
+            # "rktmeister/Meta-Llama-3.1-8B-Instruct-Q5_K_M-GGUF|CPU|32768",
+            # "majentik/gemma-4-12B-it-TurboQuant-GGUF-Q5_K_M|CPU|32768",
+            # "majentik/gemma-4-12B-it-RotorQuant-GGUF-Q5_K_M|CPU|32768",
+
+            "Ma7ee7/Qwen3.8_4B_Distilled_GGUF|GPU|32768|Q4_K_M",
+            "Ma7ee7/Qwen3.8_4B_Distilled_GGUF|GPU|32768|Q5_K_M",
+            "Ma7ee7/Qwen3.8_4B_Distilled_GGUF|GPU|32768|Q8_0",
+
+            #"Disya/Huihui-Qwen3-4B-Thinking-2507-abliterated-Q8_0-GGUF",
+            "majentik/gemma-4-26B-A4B-it-RotorQuant-GGUF-Q4_K_M|CPU|32768",
+            "majentik/gemma-4-26B-A4B-it-RotorQuant-GGUF-Q5_K_M|CPU|32768",
+            "majentik/gemma-4-26B-A4B-it-RotorQuant-GGUF-Q8_0|CPU|32768",
+
+            #"FORNAX20/gemma-4-26B-A4B-it-uncensored-Q5_K_M-GGUF|CPU|32768"
+            #"Darkknight535/gemma-4-31B-it-abliterated-Q5_K_M-GGUF|CPU|32768"
+
+            # "unsloth/Llama-3.2-3B-Instruct|CPU|32768",
+            # "aminlouhichi/gemma-3-merged-GGUF-Q16|GPU|32768",
+            # "Bhuvneesh/gemma-3-4b-it-Q8_0-GGUF|GPU|32768",
+            #"soob3123/GrayLine-Gemma3-12B-Q4_K_M-GGUF|GPU|32768",
+            #"NikolayKozloff/gemma-3-12b-it-Q6_K-GGUF|CPU|32768",
+            #"Medvedko/gemma-3-12b-it-heretic-v2-Q4_K_M-GGUF|GPU|32768",
+            #"nocturne23/gemma-3-12b-it-Q4_K_M-GGUF|GPU|32768",
+            #"majentik/gemma-4-12B-it-TurboQuant-GGUF-Q4_K_M|GPU|32768",
+            #"majentik/gemma-4-12B-it-RotorQuant-GGUF-Q4_K_M|GPU|32768",
+            #"majentik/gemma-4-12B-it-TurboQuant-GGUF-Q5_K_M|GPU|32768",
+            #"majentik/gemma-4-12B-it-RotorQuant-GGUF-Q5_K_M|GPU|32768",
             # "soob3123/GrayLine-Gemma3-12B-Q4_K_M-GGUF|GPU|32768",
             # "Medvedko/gemma-3-12b-it-heretic-v2-Q4_K_M-GGUF|GPU|32768",
             # "nocturne23/gemma-3-12b-it-Q4_K_M-GGUF|GPU|32768",
-            # "ilya-chak/gemma-4-12B-it-qat-GGUF-UD-Q4_K_XL-layers|GPU|32768",
+            # "NikolayKozloff/gemma-3-12b-it-Q6_K-GGUF|GPU|24576",
+            # "NikolayKozloff/gemma-3-12b-it-Q6_K-GGUF|CPU|24576",
+            # "majentik/gemma-4-12B-it-TurboQuant-GGUF-Q5_K_M|GPU|24576",
+            # "majentik/gemma-4-12B-it-RotorQuant-GGUF-Q5_K_M|GPU|24576",
+            # "majentik/gemma-4-12B-it-RotorQuant-GGUF-Q4_K_M|GPU|24576",
+            # "majentik/gemma-4-12B-it-TurboQuant-GGUF-Q4_K_M|GPU|24576",
         ]
     else:
         prompt_files = []
@@ -261,7 +304,7 @@ def run_models_on_vacancies(version, vacancies_dir: str):
             "time_str": time_str
         })
 
-    print_vacancies_model_summary(model_summaries)
+        print_vacancies_model_summary(model_summaries)
 
 
 def print_vacancies_model_summary(model_summaries: list[Any]):

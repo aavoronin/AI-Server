@@ -11,11 +11,11 @@ class GGUFTextToTextModel(TextToTextModel):
         self.tokenizer = None
         self.llm = None
         self.use_llama_cpp = False
-        self.llama_verbose = False
 
-        # Parse model_id for device and context preferences
+        # Parse model_id for device, context, and quantization preferences
         self.device_preference = "CPU"  # Default
         self.context_size = 32768  # Default
+        self.quant_preference = None
 
         if "|" in model_id:
             parts = model_id.split("|")
@@ -26,6 +26,8 @@ class GGUFTextToTextModel(TextToTextModel):
                     self.context_size = int(parts[2].strip())
                 except ValueError:
                     logger.warning(f"Invalid context size in model_id: {model_id}")
+            if len(parts) >= 4:
+                self.quant_preference = parts[3].strip()
 
     def load(self):
         # 1. Try using llama-cpp-python first (Recommended for GGUF)
@@ -36,7 +38,17 @@ class GGUFTextToTextModel(TextToTextModel):
             if not gguf_files:
                 raise FileNotFoundError(f"No .gguf file found in {self.model_path}")
 
-            gguf_path = str(gguf_files[0])
+            # Filter by quantization preference if provided
+            if self.quant_preference:
+                preferred_files = [f for f in gguf_files if self.quant_preference.lower() in f.name.lower()]
+                if preferred_files:
+                    gguf_path = str(preferred_files[0])
+                else:
+                    logger.warning(
+                        f"Preferred quantization '{self.quant_preference}' not found. Falling back to first available.")
+                    gguf_path = str(gguf_files[0])
+            else:
+                gguf_path = str(gguf_files[0])
 
             # Determine n_gpu_layers based on device preference
             model_id_lower = self.clean_model_id.lower()
@@ -52,10 +64,12 @@ class GGUFTextToTextModel(TextToTextModel):
                 model_path=gguf_path,
                 n_gpu_layers=n_gpu_layers,
                 n_ctx=self.context_size,
-                verbose=self.llama_verbose
+                flash_attn=True,
+                verbose=False
             )
             self.use_llama_cpp = True
             self.is_loaded = True
+            self.increment_used()
             logger.info(f"Successfully loaded GGUF {self.model_id} with llama-cpp-python")
             return
         except ImportError:
@@ -71,7 +85,18 @@ class GGUFTextToTextModel(TextToTextModel):
             if not gguf_files:
                 raise FileNotFoundError(f"No .gguf file found in {self.model_path}")
 
-            gguf_file = gguf_files[0].name
+            # Filter by quantization preference if provided
+            if self.quant_preference:
+                preferred_files = [f for f in gguf_files if self.quant_preference.lower() in f.name.lower()]
+                if preferred_files:
+                    gguf_file = preferred_files[0].name
+                else:
+                    logger.warning(
+                        f"Preferred quantization '{self.quant_preference}' not found. Falling back to first available.")
+                    gguf_file = gguf_files[0].name
+            else:
+                gguf_file = gguf_files[0].name
+
             logger.info(f"Found GGUF file: {gguf_file}")
 
             # Try loading tokenizer from the original model ID first
@@ -120,6 +145,7 @@ class GGUFTextToTextModel(TextToTextModel):
             )
             self.use_llama_cpp = False
             self.is_loaded = True
+            self.increment_used()
             logger.info(f"Successfully loaded GGUF {self.model_id} with Transformers")
         except ImportError as e:
             logger.error(f"Failed to load GGUF model {self.model_id}: {e}")

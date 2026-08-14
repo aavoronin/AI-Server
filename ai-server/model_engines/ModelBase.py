@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 from abc import ABC, abstractmethod
 import logging
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -71,8 +72,9 @@ class ModelBase(ABC):
                 with open(self.usage_file, 'r') as f:
                     data = json.load(f)
             else:
-                data = {"num_fails": 0}
+                data = {"model_id": self.clean_model_id, "num_fails": 0}
 
+            data["model_id"] = self.clean_model_id
             data["num_fails"] = data.get("num_fails", 0) + 1
 
             with open(self.usage_file, 'w') as f:
@@ -87,11 +89,30 @@ class ModelBase(ABC):
                 with open(self.usage_file, 'r') as f:
                     data = json.load(f)
             else:
-                data = {}
+                data = {"model_id": self.clean_model_id}
 
+            data["model_id"] = self.clean_model_id
             data["num_init_successes"] = data.get("num_init_successes", 0) + 1
 
             with open(self.usage_file, 'w') as f:
                 json.dump(data, f, indent=2)
         except Exception as e:
             logger.error(f"Failed to increment init successes: {e}")
+
+    def increment_used(self):
+        """Increment num_used in model_usage.json when model is successfully loaded."""
+        try:
+            if self.usage_file.exists():
+                with open(self.usage_file, 'r') as f:
+                    data = json.load(f)
+            else:
+                data = {"model_id": self.clean_model_id, "num_used": 0}
+
+            data["model_id"] = self.clean_model_id
+            data["num_used"] = data.get("num_used", 0) + 1
+            data["last_used"] = datetime.now().isoformat()
+
+            with open(self.usage_file, 'w') as f:
+                json.dump(data, f, indent=2)
+        except Exception as e:
+            logger.error(f"Failed to increment used: {e}")

@@ -1,6 +1,25 @@
 ==========================================================================================
 Model ID                                           | Avg Score    | Total Time
 ------------------------------------------------------------------------------------------
+NikolayKozloff/gemma-3-1b-it-Q8_0-GGUF|GPU|32768   | 86.44%    | 0:27
+NikolayKozloff/gemma-3-4b-it-Q8_0-GGUF|GPU|32768   | 89.19%    | 3:19
+rktmeister/Meta-Llama-3.1-8B-Instruct-Q5_K_M-GGUF|GPU|32768 | 93.12%    | 2:42
+Ma7ee7/Qwen3.8_1.2B_LFM_Distillation_GGUF|GPU|32768|Q4_K_M | 84.81%    | 0:42
+Ma7ee7/Qwen3.8_1.2B_LFM_Distillation_GGUF|GPU|32768|Q5_K_M | 85.45%    | 0:44
+Ma7ee7/Qwen3.8_1.2B_LFM_Distillation_GGUF|GPU|32768|Q8_0 | 85.51%    | 0:52
+
+==========================================================================================
+Model ID                                           | Avg Score    | Total Time
+------------------------------------------------------------------------------------------
+NikolayKozloff/gemma-3-1b-it-Q8_0-GGUF|GPU|32768   | 86.44%    | 0:25
+NikolayKozloff/gemma-3-4b-it-Q8_0-GGUF|GPU|32768   | 89.19%    | 3:02
+rktmeister/Meta-Llama-3.1-8B-Instruct-Q5_K_M-GGUF|GPU|32768 | 93.12%    | 2:36
+Ma7ee7/Qwen3.8_4B_Distilled_GGUF|GPU|32768|Q5_K_M  | 91.18%    | 2:31
+==========================================================================================
+
+==========================================================================================
+Model ID                                           | Avg Score    | Total Time
+------------------------------------------------------------------------------------------
 NikolayKozloff/gemma-3-1b-it-Q8_0-GGUF|GPU|32768   | 86.93%    | 0:26
 rktmeister/Meta-Llama-3.1-8B-Instruct-Q5_K_M-GGUF|GPU|32768 | 92.57%    | 2:46
 rktmeister/Meta-Llama-3.1-8B-Instruct-Q5_K_M-GGUF|CPU|32768 | 93.06%    | 21:48
