@@ -3,194 +3,14 @@ import json
 from datetime import datetime
 from typing import Any
 from collections import defaultdict
-from pathlib import Path
 
 from ai_clients.TextToTextClient import TextToTextClient
 from setup.start_server import print_model_debug_info
 from setup.questions_helper import QuestionsHelper
-
-NULL_EQUIVALENTS = {"null", "", "no", "none", "-"}
-
-PROFICIENCY_PARTIAL_MATCHES = {
-    frozenset({"nice-to-have", "required"}),
-    frozenset({"required", "expert"})
-}
-
-COUNTRY_SYNONYMS = {
-    "us": "usa", "united states": "usa", "united states of america": "usa", "america": "usa", "usa": "usa",
-    "can": "canada", "ca": "canada", "canada": "canada",
-    "uk": "uk", "united kingdom": "uk", "great britain": "uk", "britain": "uk", "gb": "uk", "england": "uk",
-    "de": "germany", "deutschland": "germany", "germany": "germany",
-    "fr": "france", "france": "france",
-    "in": "india", "bharat": "india", "india": "india",
-    "au": "australia", "aussie": "australia", "australia": "australia",
-    "jp": "japan", "japan": "japan",
-    "cn": "china", "prc": "china", "china": "china",
-    "ru": "russia", "russian federation": "russia", "russia": "russia",
-    "ir": "iran", "iran": "iran",
-    "worldwide": "global", "world": "global", "anywhere": "global", "remote": "global", "global": "global",
-}
-
-
-def format_time(total_elapsed):
-    total_elapsed = int(total_elapsed)
-    h, rem = divmod(total_elapsed, 3600)
-    m, s = divmod(rem, 60)
-    if h > 0:
-        return f"{h}:{m:02d}:{s:02d}"
-    return f"{m}:{s:02d}"
-
-
-def format_value(val):
-    return str(val).replace('\n', ' ').replace('"', "'") if val is not None else ""
-
-
-def compare_values(actual_value, expected_value):
-    if isinstance(expected_value, list):
-        if not isinstance(actual_value, list):
-            actual_value = [actual_value] if actual_value is not None else []
-
-        act_list = [str(v).strip().lower() for v in actual_value]
-        exp_list = [str(v).strip().lower() for v in expected_value]
-
-        act_syn = sorted([COUNTRY_SYNONYMS.get(v, v) for v in act_list])
-        exp_syn = sorted([COUNTRY_SYNONYMS.get(v, v) for v in exp_list])
-
-        if act_syn == exp_syn:
-            return 1.0
-
-        act_nulls = all(v in NULL_EQUIVALENTS for v in act_list) if act_list else True
-        exp_nulls = all(v in NULL_EQUIVALENTS for v in exp_list) if exp_list else True
-        if act_nulls and exp_nulls:
-            return 1.0
-
-        return 0.0
-    else:
-        actual_str = str(actual_value).strip().lower() if actual_value is not None else ""
-        expected_str = str(expected_value).strip().lower()
-
-        if actual_str == expected_str:
-            return 1.0
-
-        if actual_str in NULL_EQUIVALENTS and expected_str in NULL_EQUIVALENTS:
-            return 1.0
-
-        actual_syn = COUNTRY_SYNONYMS.get(actual_str, actual_str)
-        expected_syn = COUNTRY_SYNONYMS.get(expected_str, expected_str)
-        if actual_syn == expected_syn:
-            return 1.0
-
-        if frozenset({actual_str, expected_str}) in PROFICIENCY_PARTIAL_MATCHES:
-            return 0.5
-
-        return 0.0
-
-
-def compare_json_with_expected(expected_json, parsed_dict):
-    for key, expected_value in expected_json.items():
-        expected_disp = format_value(expected_value)
-        if parsed_dict is not None and key in parsed_dict:
-            actual_value = parsed_dict[key]
-            actual_disp = format_value(actual_value)
-            score = compare_values(actual_value, expected_value)
-            if score == 1.0:
-                print(f'    "{key}": ok ("{actual_disp}")')
-            elif score == 0.5:
-                print(f'    "{key}": partial ("{actual_disp}"|"{expected_disp}")')
-            else:
-                print(f'    "{key}": fail ("{actual_disp}"|"{expected_disp}")')
-        else:
-            score = compare_values(None, expected_value)
-            if score == 1.0:
-                print(f'    "{key}": ok (|"{expected_disp}")')
-            elif score == 0.5:
-                print(f'    "{key}": partial (|"{expected_disp}")')
-            else:
-                print(f'    "{key}": fail (|"{expected_disp}")')
-
-
-def print_json_failures(expected_json, parsed_dict):
-    for key, expected_value in expected_json.items():
-        expected_disp = format_value(expected_value)
-        if parsed_dict is not None and key in parsed_dict:
-            actual_value = parsed_dict[key]
-            actual_disp = format_value(actual_value)
-            score = compare_values(actual_value, expected_value)
-            if score < 1.0:
-                if score == 0.5:
-                    print(f'    "{key}": partial ("{actual_disp}"|"{expected_disp}")')
-                else:
-                    print(f'    "{key}": fail ("{actual_disp}"|"{expected_disp}")')
-        else:
-            score = compare_values(None, expected_value)
-            if score < 1.0:
-                if score == 0.5:
-                    print(f'    "{key}": partial (|"{expected_disp}")')
-                else:
-                    print(f'    "{key}": fail (|"{expected_disp}")')
-
-
-def record_failure(model_results, duration, is_json=False, expected_keys=0):
-    model_results["scores"].append(0.0 if is_json else "fail")
-    model_results["times"].append(duration)
-    model_results["total_time"] += duration
-    if is_json:
-        model_results["total_expected_keys"] += expected_keys
-
-
-def parse_json_safely(json_output: str) -> Any:
-    parsed_dict = None
-    try:
-        if not isinstance(json_output, str):
-            return None
-
-        start_idx = json_output.find('{')
-        end_idx = json_output.rfind('}')
-
-        # If no '{' or '}' are found, or '}' appears before '{', the JSON is invalid
-        if start_idx == -1 or end_idx == -1 or end_idx <= start_idx:
-            return None
-
-        # Extract only the text from the first '{' to the last '}'
-        parsed_output = json_output[start_idx:end_idx + 1]
-        parsed_dict = json.loads(parsed_output)
-    except Exception:
-        parsed_dict = None
-    return parsed_dict
-
-
-def evaluate_json_response(output_text: str, expected_json: dict) -> float:
-    """Evaluates if the model's output is valid JSON and matches expected keys/values."""
-    output_text = output_text.strip()
-
-    if output_text.startswith("```"):
-        output_text = output_text[3:].strip()
-        if output_text.lower().startswith("json"):
-            output_text = output_text[4:].strip()
-        if output_text.endswith("```"):
-            output_text = output_text[:-3].strip()
-
-    output_text = output_text.strip()
-
-    if not (output_text.startswith('{') and output_text.endswith('}')):
-        return 0.0
-
-    try:
-        parsed = json.loads(output_text)
-    except json.JSONDecodeError:
-        return 0.0
-
-    if not isinstance(parsed, dict):
-        return 0.0
-
-    correct_keys = 0.0
-    total_keys = len(expected_json)
-    for key, expected_value in expected_json.items():
-        actual_value = parsed.get(key)
-        score = compare_values(actual_value, expected_value)
-        correct_keys += score
-
-    return correct_keys / total_keys if total_keys > 0 else 0.0
+from setup.running_model_utils import (
+    format_time, record_failure, evaluate_json_response,
+    parse_json_safely, print_json_failures, compare_json_with_expected
+)
 
 
 def run_model_benchmark():
@@ -203,7 +23,7 @@ def run_model_benchmark():
         "NikolayKozloff/gemma-3-1b-it-Q8_0-GGUF",
         "NikolayKozloff/gemma-3-4b-it-Q8_0-GGUF|GPU|131072",
         "Bhuvneesh/gemma-3-4b-it-Q8_0-GGUF|GPU|131072",
-        # "google/gemma-4-12B-it-qat-q4_0-unquantized-assistant|GPU|32768",
+        #"google/gemma-4-12B-it-qat-q4_0-unquantized-assistant|GPU|32768",
         "majentik/gemma-4-12B-it-TurboQuant-GGUF-Q4_K_M|GPU|32768",
         "majentik/gemma-4-12B-it-RotorQuant-GGUF-Q4_K_M|GPU|32768",
         "majentik/gemma-4-12B-it-TurboQuant-GGUF-Q5_K_M|GPU|32768",
@@ -214,9 +34,9 @@ def run_model_benchmark():
         "majentik/gemma-4-12B-it-RotorQuant-GGUF-Q4_K_M|GPU|98304",
         "majentik/gemma-4-12B-it-TurboQuant-GGUF-Q5_K_M|GPU|98304",
         "majentik/gemma-4-12B-it-RotorQuant-GGUF-Q5_K_M|GPU|98304",
-        # "majentik/gemma-4-12B-it-RotorQuant-GGUF-Q4_K_M|GPU|131072",
-        # "majentik/gemma-4-12B-it-TurboQuant-GGUF-Q5_K_M|GPU|131072",
-        # "majentik/gemma-4-12B-it-RotorQuant-GGUF-Q5_K_M|GPU|131072",
+        #"majentik/gemma-4-12B-it-RotorQuant-GGUF-Q4_K_M|GPU|131072",
+        #"majentik/gemma-4-12B-it-TurboQuant-GGUF-Q5_K_M|GPU|131072",
+        #"majentik/gemma-4-12B-it-RotorQuant-GGUF-Q5_K_M|GPU|131072",
 
         "soob3123/GrayLine-Gemma3-12B-Q4_K_M-GGUF|GPU|32768",
         "Medvedko/gemma-3-12b-it-heretic-v2-Q4_K_M-GGUF|GPU|32768",
@@ -230,7 +50,7 @@ def run_model_benchmark():
         "tg-rising/gemma-3-12b-it-heretic-v2-MLX-Q6|GPU|32768",
         "Fazmin/solus_v1_gemma-4-12b-uncensored-q4|GPU|32768",
         "Bhuvneesh/gemma-4-E4B-it-Q5_K_M-GGUF|GPU|32768",
-        # "sjoe1244/gemma-4-12B-it-abliterated-uncensored-exl3-4bpw|GPU|32768",
+        #"sjoe1244/gemma-4-12B-it-abliterated-uncensored-exl3-4bpw|GPU|32768",
         "Bhuvneesh/gemma-4-E4B-it-Q8_0-GGUF|GPU|32768",
         "Bhuvneesh/gemma-3-12b-it-Q5_K_M-GGUF",
         "NikolayKozloff/gemma-3-12b-it-Q5_K_S-GGUF",
@@ -242,36 +62,37 @@ def run_model_benchmark():
         "bartowski/google_gemma-3n-E4B-it-GGUF",
 
         # 27B
-        # "Bhuvneesh/gemma-3-27b-it-Q5_K_M-GGUF",
-        # "Bhuvneesh/gemma-3-27b-it-Q5_K_M-GGUF",
-        # "lynnea1517/huihui-ai_gemma-3-27b-it-abliterated-Q8_0-GGUF",
-        # "paultimothymooney/gemma-3-27b-it-Q8_0-GGUF",
+        #"Bhuvneesh/gemma-3-27b-it-Q5_K_M-GGUF",
+        #"Bhuvneesh/gemma-3-27b-it-Q5_K_M-GGUF",
+        #"lynnea1517/huihui-ai_gemma-3-27b-it-abliterated-Q8_0-GGUF",
+        #"paultimothymooney/gemma-3-27b-it-Q8_0-GGUF",
 
-        # "NikolayKozloff/Mistral-Nemo-Instruct-2407-Q8_0-GGUF",
-        # "unsloth/gemma-3-1b-it-unsloth-bnb-4bit",
-        # "unsloth/gemma-3-1b-pt-unsloth-bnb-4bit",
-        # "mlx-community/gemma-3-1b-it-4bit",
-        # "google/gemma-3n-E4B-it-litert-lm",
-        # "deepseek-ai/deepseek-coder-7b-instruct-v1.5",
-        # "mergekit-community/Qwen3-7B-Instruct",
-        # "Ygz-08123/Qwen3-7B-Instruct-Q2_K-GGUF",
-        # "Ygz-08123/Qwen3-7B-Instruct-Q4_K_M-GGUF",
-        # "goodgooodboy/Qwen3-7B-Instruct-Q4_K_M-GGUF",
-        # "HuggingFaceTB/SmolLM2-135M-Instruct",
-        # "unsloth/SmolLM2-135M-Instruct",
-        # "unsloth/SmolLM2-360M-Instruct",
-        # "unsloth/SmolLM2-1.7B-Instruct",
-        # "LiquidAI/LFM2.5-1.2B-Instruct",
-        # "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
-        # "OpenLLM-France/Luciole-1B-Instruct-1.1",
-        # "tencent/Hunyuan-1.8B-Instruct",
-        # "microsoft/Phi-4-mini-instruct",
-        # "unsloth/Llama-3.2-3B-Instruct",
-        # "TheBloke/TinyLlama-1.1B-Chat-v0.3-GPTQ",
-        # "TheBlokeAI/Mixtral-tiny-GPTQ",
-        # "mlx-community/SmolLM3-3B-4bit",
-        # "unsloth/SmolLM2-1.7B-Instruct-bnb-4bit",
-        # "nakue/SmolLM2-1.7B-W4A16-instruct",
+        #"NikolayKozloff/Mistral-Nemo-Instruct-2407-Q8_0-GGUF",
+        #"unsloth/gemma-3-1b-it-unsloth-bnb-4bit",
+        #"unsloth/gemma-3-1b-pt-unsloth-bnb-4bit",
+        #"mlx-community/gemma-3-1b-it-4bit",
+        #"google/gemma-3n-E4B-it-litert-lm",
+        #"deepseek-ai/deepseek-coder-7b-instruct-v1.5",
+        #"mergekit-community/Qwen3-7B-Instruct",
+        #"Ygz-08123/Qwen3-7B-Instruct-Q2_K-GGUF",
+        #"Ygz-08123/Qwen3-7B-Instruct-Q4_K_M-GGUF",
+        #"goodgooodboy/Qwen3-7B-Instruct-Q4_K_M-GGUF",
+        #"HuggingFaceTB/SmolLM2-135M-Instruct",
+        #"unsloth/SmolLM2-135M-Instruct",
+        #"unsloth/SmolLM2-360M-Instruct",
+        #"unsloth/SmolLM2-1.7B-Instruct",
+        #"LiquidAI/LFM2.5-1.2B-Instruct",
+        #"TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+        #"OpenLLM-France/Luciole-1B-Instruct-1.1",
+        #"tencent/Hunyuan-1.8B-Instruct",
+        #"microsoft/Phi-4-mini-instruct",
+        #"unsloth/Llama-3.2-3B-Instruct",
+        #"TheBloke/TinyLlama-1.1B-Chat-v0.3-GPTQ",
+        #"TheBlokeAI/Mixtral-tiny-GPTQ",
+        #"mlx-community/SmolLM3-3B-4bit",
+        #"unsloth/SmolLM2-1.7B-Instruct-bnb-4bit",
+        #"nakue/SmolLM2-1.7B-W4A16-instruct",
+
 
     ]
     """
@@ -320,8 +141,8 @@ nakue/SmolLM2-1.7B-W4A16-instruct   | fail fail fail fail fail |   0.0%    | 0:0
     """
 
     for model_slice in [17,
-                        # 10, 14,
-                        9999999]:
+        #10, 14,
+        9999999]:
         print("=== CACHING MODELS ===")
         if True:
             run_benchmark(client, questions1,
@@ -569,292 +390,6 @@ def run_benchmark_json(
     print(f"Total Benchmark Time: {total_time_str}")
 
     return results
-
-
-def shorten_vacancy_text(v_name: str, v_text: str) -> str:
-    vacancy_slice = [
-        ("LinkedIn_Vacancy", "About the job", "Unlock hiring insights", 8),
-        ("Hirify_Vacancy", "Job description", "", 3),
-    ]
-
-    for prefix, start_marker, end_marker, num_first_rows in vacancy_slice:
-        if v_name.startswith(prefix):
-            start_idx = 0
-            if start_marker:
-                idx = v_text.find(start_marker)
-                if idx != -1:
-                    start_idx = idx
-
-            end_idx = len(v_text)
-            if end_marker:
-                idx = v_text.rfind(end_marker)
-                if idx != -1:
-                    end_idx = idx + len(end_marker)
-
-            sliced_text = v_text[start_idx:end_idx].strip()
-
-            if num_first_rows > 0:
-                original_lines = v_text.splitlines()
-                first_rows = "\n".join(original_lines[:num_first_rows])
-                return (first_rows + "\n" + sliced_text).strip()
-
-            return sliced_text
-
-    return v_text
-
-def run_models_on_vacancies(version, vacancies_dir: str):
-    """Benchmark models on real vacancy text files against ground truth JSONs."""
-    client = TextToTextClient()
-    vacancies_path = Path(vacancies_dir)
-
-    VACANCY_TIMEOUT = 60 * 40
-    VACANCY_TIMEOUT_0 = 3600
-
-    prompt_files, test_models = get_prompt_and_model(version)
-
-    # Find all vacancy txt files and their corresponding result jsons
-    vacancies = []
-    for txt_file in sorted(vacancies_path.glob("*.txt")):
-        result_json_file = txt_file.with_name(txt_file.stem + "_result.json")
-        if result_json_file.exists():
-            vacancies.append((txt_file, result_json_file))
-
-    if not vacancies:
-        print(f"No matching vacancy/result pairs found in {vacancies_dir}")
-        return
-
-    print("=== RUNNING VACANCIES BENCHMARK ===")
-    print(f"Total Models: {len(test_models)}")
-    print(f"Total Vacancies: {len(vacancies)}")
-
-    model_summaries = []
-
-    for model_id in test_models:
-        print(f"\n{'=' * 80}")
-        print(f"Testing Model: {model_id}")
-        print(f"{'=' * 80}")
-
-        total_keys = 0
-        total_correct_keys = 0.0
-        total_time = 0.0
-        vacancy_scores = []
-
-        for i, (txt_file, result_json_file) in enumerate(vacancies):
-            vacancy_name = txt_file.stem
-            vacancy_text = txt_file.read_text(encoding='utf-8')
-            vacancy_text = shorten_vacancy_text(vacancy_name, vacancy_text)
-
-            try:
-                with open(result_json_file, 'r', encoding='utf-8') as f:
-                    expected_json = json.load(f)
-            except json.JSONDecodeError:
-                print(f"\n[{vacancy_name}] ERROR: Invalid JSON in {result_json_file.name}. Scoring as 0.00")
-                expected_json = {}
-            except Exception as e:
-                print(f"\n[{vacancy_name}] ERROR: Failed to read {result_json_file.name}: {e}. Scoring as 0.00")
-                expected_json = {}
-
-            combined_parsed_dict = {}
-            total_vacancy_time = 0.0
-
-            for p_file in prompt_files:
-                prompt_path = vacancies_path.parent / p_file
-                if not prompt_path.exists():
-                    continue
-                prompt_text = prompt_path.read_text(encoding='utf-8')
-                full_prompt = prompt_text + "\n" + vacancy_text
-
-                print(
-                    f"  [{p_file}] Vacancy Length: {len(vacancy_text)} chars | "
-                    f"Total Prompt Length: {len(full_prompt)} chars")
-
-                if i == 0:
-                    start_time = time.time()
-                    start_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                    print(f"{start_timestamp} Starting ping -- {model_id}")
-                    response = client.generate(model_id, "2+2",
-                                               model_limit_seconds=VACANCY_TIMEOUT_0)
-                    duration = time.time() - start_time
-                    end_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                    print(f"{end_timestamp} Ping time: {duration:.2f}s -- {model_id}")
-
-                start_time = time.time()
-                start_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                try:
-                    print(f"{start_timestamp} Starting generate -- {model_id}")
-                    response = client.generate(model_id, full_prompt,
-                                               model_limit_seconds=VACANCY_TIMEOUT)
-                    duration = time.time() - start_time
-                    total_vacancy_time += duration
-
-                    generated_text = response.get("generated_text", "")
-                    if not isinstance(generated_text, str):
-                        generated_text = str(generated_text)
-
-                    parsed_dict = parse_json_safely(generated_text)
-                    if parsed_dict is not None:
-                        for key, value in parsed_dict.items():
-                            if key not in combined_parsed_dict:
-                                combined_parsed_dict[key] = value
-
-                    valid_json = 'Yes' if parsed_dict is not None else 'No'
-
-                    print(
-                        f"{end_timestamp}  [{p_file}] Time: {duration:.2f}s | Valid JSON: {valid_json}")
-                    if valid_json == 'No':
-                        print('=' * 60)
-                        print(generated_text)
-                        print('=' * 60)
-
-                except Exception as e:
-                    duration = time.time() - start_time
-                    total_vacancy_time += duration
-                    print(f"  [{p_file}] ERROR: {str(e)} | Time: {duration:.2f}s")
-
-            # Evaluate combined result
-            keys_in_expected = len(expected_json)
-            correct_keys = 0.0
-            if keys_in_expected > 0:
-                for key, expected_value in expected_json.items():
-                    actual_value = combined_parsed_dict.get(key)
-                    score = compare_values(actual_value, expected_value)
-                    correct_keys += score
-
-            score = correct_keys / keys_in_expected if keys_in_expected > 0 else 0.0
-
-            total_keys += keys_in_expected
-            total_correct_keys += correct_keys
-            total_time += total_vacancy_time
-
-            vacancy_scores.append({
-                "vacancy": vacancy_name,
-                "score": score,
-                "time": total_vacancy_time
-            })
-
-            print(f"\n[{vacancy_name}] Combined Time: {total_vacancy_time:.2f}s | Score: {score:.2f}")
-            if score < 1.0 and keys_in_expected > 0:
-                print_json_failures(expected_json, combined_parsed_dict)
-            elif keys_in_expected == 0:
-                print(f"  (Skipped failure details due to empty expected JSON)")
-
-        # Model Summary
-        avg_score = (total_correct_keys / total_keys) if total_keys > 0 else 0.0
-        time_str = format_time(total_time)
-
-        print(f"\n--- Summary for {model_id} ---")
-        for vs in vacancy_scores:
-            print(f"  {vs['vacancy']:<40} | Score: {vs['score']:.2f} | Time: {vs['time']:.2f}s")
-        print(f"  {'AVERAGE':<40} | Score: {avg_score:.2%} | Total Time: {time_str}")
-
-        model_summaries.append({
-            "model_id": model_id,
-            "avg_score": avg_score,
-            "total_time": total_time,
-            "time_str": time_str
-        })
-
-        print_vacancies_model_summary(model_summaries)
-
-
-def print_vacancies_model_summary(model_summaries: list[Any]):
-    # Final Overall Summary
-    print("\n" + "=" * 90)
-    print(f"{'Model ID':<50} | {'Avg Score':<12} | {'Total Time':<10}")
-    print("-" * 90)
-    for ms in model_summaries:
-        print(f"{ms['model_id']:<50} | {ms['avg_score']:>6.2%}    | {ms['time_str']:<10}")
-    print("=" * 90)
-
-
-def get_prompt_and_model(version) -> tuple[list[str], list[str]]:
-    test_models = [
-        "NikolayKozloff/gemma-3-1b-it-Q8_0-GGUF|GPU|32768",
-        "NikolayKozloff/gemma-3-4b-it-Q8_0-GGUF|GPU|32768",
-        # "NikolayKozloff/gemma-3-12b-it-Q5_K_S-GGUF|GPU|32768",
-        # "NikolayKozloff/gemma-3-12b-it-Q6_K-GGUF|GPU|32768",
-        # "majentik/gemma-4-12B-it-RotorQuant-GGUF-Q4_K_M|GPU|16384",
-        # "Bhuvneesh/gemma-3-12b-it-Q5_K_M-GGUF|GPU|16384",
-        # "majentik/gemma-4-12B-it-TurboQuant-GGUF-Q5_K_M|GPU|16384",
-        # "majentik/gemma-4-12B-it-RotorQuant-GGUF-Q5_K_M|GPU|16384",
-        # "Bhuvneesh/gemma-4-E4B-it-Q5_K_M-GGUF|GPU|16384",
-        # "Bhuvneesh/gemma-4-E4B-it-Q8_0-GGUF|GPU|16384",
-        # "Bhuvneesh/gemma-3-4b-it-Q8_0-GGUF|GPU|32768",
-
-    ]
-
-    '''
-        "Bhuvneesh/gemma-3-4b-it-Q8_0-GGUF",
-        "lynnea1517/huihui-ai_gemma-3-27b-it-abliterated-Q8_0-GGUF",
-        "paultimothymooney/gemma-3-27b-it-Q8_0-GGUF",
-        "aminlouhichi/gemma-3-merged-GGUF-Q16",
-        "Bhuvneesh/gemma-3-27b-it-Q5_K_M-GGUF",
-        #"NikolayKozloff/gemma-3-12b-it-Q5_K_S-GGUF",
-        "NikolayKozloff/gemma-3-12b-it-Q8_0-GGUF",
-    '''
-
-    if version == 1:
-        prompt_files = [
-            "PROMPT.txt"
-        ]
-        test_models = [
-            "NikolayKozloff/gemma-3-1b-it-Q8_0-GGUF|GPU|32768",
-            "NikolayKozloff/gemma-3-4b-it-Q8_0-GGUF|GPU|32768",
-        ]
-
-    elif version == 2:
-        prompt_files = [
-            "PROMPT_01.txt",
-            "PROMPT_02.txt",
-            "PROMPT_03.txt",
-            "PROMPT_04.txt",
-            "PROMPT_05.txt",
-            "PROMPT_06.txt",
-            "PROMPT_07.txt"
-        ]
-        test_models = [
-            "majentik/gemma-4-12B-it-TurboQuant-GGUF-Q4_K_M|GPU|32768",
-            "majentik/gemma-4-12B-it-RotorQuant-GGUF-Q4_K_M|GPU|32768",
-        ]
-    elif version == 3:
-        prompt_files = [
-            "PROMPT_SIMPLE.txt"
-        ]
-        test_models = [
-            "NikolayKozloff/gemma-3-1b-it-Q8_0-GGUF|GPU|32768",
-            #"NikolayKozloff/gemma-3-1b-it-Q8_0-GGUF|CPU|32768",
-            #"NikolayKozloff/gemma-3-4b-it-Q8_0-GGUF|GPU|32768",
-            #"majentik/Nemotron-3-Nano-4B-RotorQuant-GGUF-Q4_K_M|GPU|32768",
-            #"majentik/Nemotron-3-Nano-4B-RotorQuant-GGUF-Q4_K_M|CPU|32768",
-            #"unsloth/Llama-3.2-3B-Instruct|GPU|32768",
-            "rktmeister/Meta-Llama-3.1-8B-Instruct-Q5_K_M-GGUF|GPU|32768",
-            #"rktmeister/Meta-Llama-3.1-8B-Instruct-Q5_K_M-GGUF|CPU|32768",
-            #"majentik/gemma-4-12B-it-TurboQuant-GGUF-Q5_K_M|CPU|32768",
-            #"majentik/gemma-4-12B-it-RotorQuant-GGUF-Q5_K_M|CPU|32768",
-
-            "Ma7ee7/Qwen3.8_4B_Distilled_GGUF|GPU|32768",
-            "Disya/Huihui-Qwen3-4B-Thinking-2507-abliterated-Q8_0-GGUF",
-            "majentik/gemma-4-26B-A4B-it-RotorQuant-GGUF-Q5_K_M|CPU|32768"
-            "FORNAX20/gemma-4-26B-A4B-it-uncensored-Q5_K_M-GGUF|CPU|32768"
-            "Darkknight535/gemma-4-31B-it-abliterated-Q5_K_M-GGUF|CPU|32768"
-
-            #"unsloth/Llama-3.2-3B-Instruct|CPU|32768",
-            #"aminlouhichi/gemma-3-merged-GGUF-Q16|GPU|32768",
-            #"Bhuvneesh/gemma-3-4b-it-Q8_0-GGUF|GPU|32768",
-            #"soob3123/GrayLine-Gemma3-12B-Q4_K_M-GGUF|GPU|32768",
-            #"Medvedko/gemma-3-12b-it-heretic-v2-Q4_K_M-GGUF|GPU|32768",
-            #"nocturne23/gemma-3-12b-it-Q4_K_M-GGUF|GPU|32768",
-            #"NikolayKozloff/gemma-3-12b-it-Q6_K-GGUF|GPU|24576",
-            #"NikolayKozloff/gemma-3-12b-it-Q6_K-GGUF|CPU|24576",
-            #"majentik/gemma-4-12B-it-TurboQuant-GGUF-Q5_K_M|GPU|24576",
-            #"majentik/gemma-4-12B-it-RotorQuant-GGUF-Q5_K_M|GPU|24576",
-            #"majentik/gemma-4-12B-it-RotorQuant-GGUF-Q4_K_M|GPU|24576",
-            #"majentik/gemma-4-12B-it-TurboQuant-GGUF-Q4_K_M|GPU|24576",
-        ]
-    else:
-        prompt_files = []
-        test_models = []
-    return prompt_files, test_models
 
 
 def run_model_benchmark_json():

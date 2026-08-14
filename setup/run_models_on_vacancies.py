@@ -1,0 +1,274 @@
+import time
+import json
+from datetime import datetime
+from typing import Any
+from pathlib import Path
+
+from ai_clients.TextToTextClient import TextToTextClient
+from setup.running_model_utils import (
+    format_time, parse_json_safely, compare_values, print_json_failures
+)
+
+
+def shorten_vacancy_text(v_name: str, v_text: str) -> str:
+    vacancy_slice = [
+        ("LinkedIn_Vacancy", "About the job", "Unlock hiring insights", 8),
+        ("Hirify_Vacancy", "Job description", "", 3),
+    ]
+
+    for prefix, start_marker, end_marker, num_first_rows in vacancy_slice:
+        if v_name.startswith(prefix):
+            start_idx = 0
+            if start_marker:
+                idx = v_text.find(start_marker)
+                if idx != -1:
+                    start_idx = idx
+
+            end_idx = len(v_text)
+            if end_marker:
+                idx = v_text.rfind(end_marker)
+                if idx != -1:
+                    end_idx = idx + len(end_marker)
+
+            sliced_text = v_text[start_idx:end_idx].strip()
+
+            if num_first_rows > 0:
+                original_lines = v_text.splitlines()
+                first_rows = "\n".join(original_lines[:num_first_rows])
+                return (first_rows + "\n" + sliced_text).strip()
+
+            return sliced_text
+
+    return v_text
+
+
+def get_prompt_and_model(version) -> tuple[list[str], list[str]]:
+    test_models = [
+        "NikolayKozloff/gemma-3-1b-it-Q8_0-GGUF|GPU|32768",
+        "NikolayKozloff/gemma-3-4b-it-Q8_0-GGUF|GPU|32768",
+        # "NikolayKozloff/gemma-3-12b-it-Q5_K_S-GGUF|GPU|32768",
+        # "NikolayKozloff/gemma-3-12b-it-Q6_K-GGUF|GPU|32768",
+        # "majentik/gemma-4-12B-it-RotorQuant-GGUF-Q4_K_M|GPU|16384",
+        # "Bhuvneesh/gemma-3-12b-it-Q5_K_M-GGUF|GPU|16384",
+        # "majentik/gemma-4-12B-it-TurboQuant-GGUF-Q5_K_M|GPU|16384",
+        # "majentik/gemma-4-12B-it-RotorQuant-GGUF-Q5_K_M|GPU|16384",
+        # "Bhuvneesh/gemma-4-E4B-it-Q5_K_M-GGUF|GPU|16384",
+        # "Bhuvneesh/gemma-4-E4B-it-Q8_0-GGUF|GPU|16384",
+        # "Bhuvneesh/gemma-3-4b-it-Q8_0-GGUF|GPU|32768",
+    ]
+
+    '''
+        "Bhuvneesh/gemma-3-4b-it-Q8_0-GGUF",
+        "lynnea1517/huihui-ai_gemma-3-27b-it-abliterated-Q8_0-GGUF",
+        "paultimothymooney/gemma-3-27b-it-Q8_0-GGUF",
+        "aminlouhichi/gemma-3-merged-GGUF-Q16",
+        "Bhuvneesh/gemma-3-27b-it-Q5_K_M-GGUF",
+        #"NikolayKozloff/gemma-3-12b-it-Q5_K_S-GGUF",
+        "NikolayKozloff/gemma-3-12b-it-Q8_0-GGUF",
+    '''
+
+    if version == 1:
+        prompt_files = [
+            "PROMPT.txt"
+        ]
+        test_models = [
+            "NikolayKozloff/gemma-3-1b-it-Q8_0-GGUF|GPU|32768",
+            "NikolayKozloff/gemma-3-4b-it-Q8_0-GGUF|GPU|32768",
+        ]
+
+    elif version == 2:
+        prompt_files = [
+            "PROMPT_01.txt",
+            "PROMPT_02.txt",
+            "PROMPT_03.txt",
+            "PROMPT_04.txt",
+            "PROMPT_05.txt",
+            "PROMPT_06.txt",
+            "PROMPT_07.txt"
+        ]
+        test_models = [
+            "majentik/gemma-4-12B-it-TurboQuant-GGUF-Q4_K_M|GPU|32768",
+            "majentik/gemma-4-12B-it-RotorQuant-GGUF-Q4_K_M|GPU|32768",
+        ]
+    elif version == 3:
+        prompt_files = [
+            "PROMPT_SIMPLE.txt"
+        ]
+        test_models = [
+            "NikolayKozloff/gemma-3-1b-it-Q8_0-GGUF|GPU|32768",
+            "unsloth/Llama-3.2-3B-Instruct|GPU|32768",
+            "unsloth/Llama-3.2-3B-Instruct|CPU|32768",
+            "NikolayKozloff/gemma-3-4b-it-Q8_0-GGUF|GPU|32768",
+            "NikolayKozloff/gemma-3-12b-it-Q6_K-GGUF|CPU|32768",
+            "majentik/gemma-4-12B-it-TurboQuant-GGUF-Q4_K_M|GPU|32768",
+            "majentik/gemma-4-12B-it-RotorQuant-GGUF-Q4_K_M|GPU|32768",
+            # "soob3123/GrayLine-Gemma3-12B-Q4_K_M-GGUF|GPU|32768",
+            # "Medvedko/gemma-3-12b-it-heretic-v2-Q4_K_M-GGUF|GPU|32768",
+            # "nocturne23/gemma-3-12b-it-Q4_K_M-GGUF|GPU|32768",
+            # "ilya-chak/gemma-4-12B-it-qat-GGUF-UD-Q4_K_XL-layers|GPU|32768",
+        ]
+    else:
+        prompt_files = []
+        test_models = []
+    return prompt_files, test_models
+
+
+def run_models_on_vacancies(version, vacancies_dir: str):
+    """Benchmark models on real vacancy text files against ground truth JSONs."""
+    client = TextToTextClient()
+    vacancies_path = Path(vacancies_dir)
+
+    VACANCY_TIMEOUT = 60 * 20
+    VACANCY_TIMEOUT_0 = 3600
+
+    prompt_files, test_models = get_prompt_and_model(version)
+
+    # Find all vacancy txt files and their corresponding result jsons
+    vacancies = []
+    for txt_file in sorted(vacancies_path.glob("*.txt")):
+        result_json_file = txt_file.with_name(txt_file.stem + "_result.json")
+        if result_json_file.exists():
+            vacancies.append((txt_file, result_json_file))
+
+    if not vacancies:
+        print(f"No matching vacancy/result pairs found in {vacancies_dir}")
+        return
+
+    print("=== RUNNING VACANCIES BENCHMARK ===")
+    print(f"Total Models: {len(test_models)}")
+    print(f"Total Vacancies: {len(vacancies)}")
+
+    model_summaries = []
+
+    for model_id in test_models:
+        print(f"\n{'=' * 80}")
+        print(f"Testing Model: {model_id}")
+        print(f"{'=' * 80}")
+
+        total_keys = 0
+        total_correct_keys = 0.0
+        total_time = 0.0
+        vacancy_scores = []
+
+        for i, (txt_file, result_json_file) in enumerate(vacancies):
+            vacancy_name = txt_file.stem
+            vacancy_text = txt_file.read_text(encoding='utf-8')
+            vacancy_text = shorten_vacancy_text(vacancy_name, vacancy_text)
+
+            try:
+                with open(result_json_file, 'r', encoding='utf-8') as f:
+                    expected_json = json.load(f)
+            except json.JSONDecodeError:
+                print(f"\n[{vacancy_name}] ERROR: Invalid JSON in {result_json_file.name}. Scoring as 0.00")
+                expected_json = {}
+            except Exception as e:
+                print(f"\n[{vacancy_name}] ERROR: Failed to read {result_json_file.name}: {e}. Scoring as 0.00")
+                expected_json = {}
+
+            combined_parsed_dict = {}
+            total_vacancy_time = 0.0
+
+            for p_file in prompt_files:
+                prompt_path = vacancies_path.parent / p_file
+                if not prompt_path.exists():
+                    continue
+                prompt_text = prompt_path.read_text(encoding='utf-8')
+                full_prompt = prompt_text + "\n" + vacancy_text
+
+                print(
+                    f"  [{p_file}] Vacancy Length: {len(vacancy_text)} chars | "
+                    f"Total Prompt Length: {len(full_prompt)} chars")
+
+                if i == 0:
+                    start_time = time.time()
+                    start_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    print(f"{start_timestamp} Starting ping -- {model_id}")
+                    response = client.generate(model_id, "2+2",
+                                               model_limit_seconds=VACANCY_TIMEOUT_0)
+                    duration = time.time() - start_time
+                    end_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    print(f"{end_timestamp} Ping time: {duration:.2f}s -- {model_id}")
+
+                start_time = time.time()
+                start_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                try:
+                    print(f"{start_timestamp} Starting generate -- {model_id}")
+                    response = client.generate(model_id, full_prompt,
+                                               model_limit_seconds=VACANCY_TIMEOUT)
+                    duration = time.time() - start_time
+                    total_vacancy_time += duration
+
+                    generated_text = response.get("generated_text", "")
+                    if not isinstance(generated_text, str):
+                        generated_text = str(generated_text)
+
+                    parsed_dict = parse_json_safely(generated_text)
+                    if parsed_dict is not None:
+                        for key, value in parsed_dict.items():
+                            if key not in combined_parsed_dict:
+                                combined_parsed_dict[key] = value
+
+                    valid_json = 'Yes' if parsed_dict is not None else 'No'
+
+                    print(
+                        f"{end_timestamp}  [{p_file}] Time: {duration:.2f}s | Valid JSON: {valid_json}")
+
+                except Exception as e:
+                    duration = time.time() - start_time
+                    total_vacancy_time += duration
+                    print(f"  [{p_file}] ERROR: {str(e)} | Time: {duration:.2f}s")
+
+            # Evaluate combined result
+            keys_in_expected = len(expected_json)
+            correct_keys = 0.0
+            if keys_in_expected > 0:
+                for key, expected_value in expected_json.items():
+                    actual_value = combined_parsed_dict.get(key)
+                    score = compare_values(actual_value, expected_value)
+                    correct_keys += score
+
+            score = correct_keys / keys_in_expected if keys_in_expected > 0 else 0.0
+
+            total_keys += keys_in_expected
+            total_correct_keys += correct_keys
+            total_time += total_vacancy_time
+
+            vacancy_scores.append({
+                "vacancy": vacancy_name,
+                "score": score,
+                "time": total_vacancy_time
+            })
+
+            print(f"\n[{vacancy_name}] Combined Time: {total_vacancy_time:.2f}s | Score: {score:.2f}")
+            if score < 1.0 and keys_in_expected > 0:
+                print_json_failures(expected_json, combined_parsed_dict)
+            elif keys_in_expected == 0:
+                print(f"  (Skipped failure details due to empty expected JSON)")
+
+        # Model Summary
+        avg_score = (total_correct_keys / total_keys) if total_keys > 0 else 0.0
+        time_str = format_time(total_time)
+
+        print(f"\n--- Summary for {model_id} ---")
+        for vs in vacancy_scores:
+            print(f"  {vs['vacancy']:<40} | Score: {vs['score']:.2f} | Time: {vs['time']:.2f}s")
+        print(f"  {'AVERAGE':<40} | Score: {avg_score:.2%} | Total Time: {time_str}")
+
+        model_summaries.append({
+            "model_id": model_id,
+            "avg_score": avg_score,
+            "total_time": total_time,
+            "time_str": time_str
+        })
+
+    print_vacancies_model_summary(model_summaries)
+
+
+def print_vacancies_model_summary(model_summaries: list[Any]):
+    # Final Overall Summary
+    print("\n" + "=" * 90)
+    print(f"{'Model ID':<50} | {'Avg Score':<12} | {'Total Time':<10}")
+    print("-" * 90)
+    for ms in model_summaries:
+        print(f"{ms['model_id']:<50} | {ms['avg_score']:>6.2%}    | {ms['time_str']:<10}")
+    print("=" * 90)
