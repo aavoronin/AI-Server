@@ -1,0 +1,192 @@
+accelerate==1.13.0
+annotated-doc @ file:///home/task_176337172422305/conda-bld/annotated-doc_1763372656206/work
+annotated-types @ file:///home/task_fP_bV-_SS9mlR_0/croot/annotated-types_1783680970092/work
+antlr4-python3-runtime==4.9.3
+anyio @ file:///home/task_177313440367069/croot/anyio_1773134426302/work
+argon2-cffi==25.1.0
+argon2-cffi-bindings==25.1.0
+arrow==1.4.0
+asttokens==3.0.1
+async-lru==2.3.0
+attrs==26.1.0
+babel==2.18.0
+beautifulsoup4==4.14.3
+black==26.3.1
+bleach==6.3.0
+certifi==2026.2.25
+cffi==2.0.0
+charset-normalizer==3.4.6
+click==8.3.1
+colorama==0.4.6
+comm==0.2.3
+contourpy==1.3.2
+cuda-bindings==12.9.4
+cuda-pathfinder==1.2.2
+cuda-toolkit==12.8.1
+cycler==0.12.1
+debugpy==1.8.20
+decorator==5.2.1
+defusedxml==0.7.1
+diffusers==0.31.0
+diskcache==5.6.3
+dnspython @ file:///home/task_176371777174369/conda-bld/dnspython_1763718230959/work
+einops==0.8.2
+email-validator @ file:///home/task_175861018619500/conda-bld/email-validator-meta_1758610236932/work
+exceptiongroup @ file:///home/task_178047835771882/croot/exceptiongroup_1780478472551/work
+executing==2.2.1
+fastapi @ file:///home/task_178228074879845/croot/fastapi-split_1782280782993/work
+fastapi-cli @ file:///home/task_176837295597811/croot/fastapi-cli_1768373417232/work
+fastar @ file:///home/task_178220562415672/croot/fastar_1782205685497/work
+fastjsonschema==2.21.2
+filelock==3.25.2
+fonttools==4.62.1
+fqdn==1.5.1
+fsspec==2026.2.0
+gguf==0.19.0
+gitdb==4.0.12
+GitPython==3.1.46
+h11 @ file:///home/task_176193128294608/conda-bld/h11_1761931294516/work
+httpcore @ file:///croot/httpcore_1748526048470/work
+httptools @ file:///home/task_176363473954255/conda-bld/httptools_1763634753251/work
+httpx @ file:///home/task_176044729065927/conda-bld/httpx_1760447346377/work
+huggingface-hub==0.26.5
+idna==3.11
+importlib_metadata==9.0.0
+ipykernel==7.2.0
+ipython==8.38.0
+ipython-genutils==0.2.0
+ipywidgets==8.1.8
+isoduration==20.11.0
+jedi==0.19.2
+Jinja2==3.1.6
+json5==0.13.0
+jsonpointer==3.1.0
+jsonschema==4.26.0
+jsonschema-specifications==2025.9.1
+jupyter-black==0.4.0
+jupyter-events==0.12.0
+jupyter-lsp==2.3.0
+jupyter_client==8.8.0
+jupyter_core==5.9.1
+jupyter_server==2.17.0
+jupyter_server_terminals==0.5.4
+jupyterlab==4.5.6
+jupyterlab_git==0.52.0
+jupyterlab_pygments==0.3.0
+jupyterlab_server==2.28.0
+jupyterlab_widgets==3.0.16
+kiwisolver==1.5.0
+lark==1.3.1
+llama_cpp_python==0.3.34
+markdown-it-py @ file:///home/task_177754051364308/croot/markdown-it-py_1777540556128/work
+MarkupSafe @ file:///home/task_178239083592213/croot/markupsafe_1782390866578/work
+matplotlib==3.10.8
+matplotlib-inline==0.2.1
+mdurl @ file:///home/task_175855217171549/conda-bld/mdurl_1758552186399/work
+mistune==3.2.0
+mpmath==1.3.0
+mypy_extensions==1.1.0
+nbclassic==1.3.3
+nbclient==0.10.4
+nbconvert==7.17.0
+nbdime==4.0.4
+nbformat==5.10.4
+nest-asyncio==1.6.0
+networkx==3.4.2
+notebook==7.5.5
+notebook_shim==0.2.4
+numpy==2.2.6
+nvidia-cublas-cu12==12.8.4.1
+nvidia-cuda-cupti-cu12==12.8.90
+nvidia-cuda-nvrtc-cu12==12.8.93
+nvidia-cuda-runtime-cu12==12.8.90
+nvidia-cudnn-cu12==9.20.0.48
+nvidia-cufft-cu12==11.3.3.83
+nvidia-cufile-cu12==1.13.1.3
+nvidia-curand-cu12==10.3.9.90
+nvidia-cusolver-cu12==11.7.3.90
+nvidia-cusparse-cu12==12.5.8.93
+nvidia-cusparselt-cu12==0.7.1
+nvidia-nccl-cu12==2.29.7
+nvidia-nvjitlink-cu12==12.8.93
+nvidia-nvshmem-cu12==3.4.5
+nvidia-nvtx-cu12==12.8.90
+omegaconf==2.3.0
+opencv-python==4.13.0.92
+overrides==7.7.0
+packaging @ file:///home/task_176104877067765/conda-bld/packaging_1761049113113/work
+pandas==2.3.3
+pandocfilters==1.5.1
+parso==0.8.6
+pathspec==1.0.4
+pexpect==4.9.0
+pillow==12.0.0
+platformdirs==4.9.4
+prometheus_client==0.24.1
+prompt_toolkit==3.0.52
+psutil==7.2.2
+ptyprocess==0.7.0
+pure_eval==0.2.3
+pycparser==3.0
+pydantic @ file:///home/task_177868318223432/croot/pydantic_1778683871309/work
+pydantic-extra-types @ file:///home/task_176830850145875/croot/pydantic-extra-types_1768308523181/work
+pydantic-settings @ file:///home/task_178238928963694/croot/pydantic-settings_1782389328413/work
+pydantic_core @ file:///home/task_177867687083287/croot/pydantic-core_1778676924185/work
+Pygments==2.19.2
+pyparsing==3.3.2
+python-dateutil==2.9.0.post0
+python-dotenv @ file:///home/task_176855882547294/croot/python-dotenv_1768559689054/work
+python-json-logger==4.0.0
+python-multipart @ file:///home/task_178239940535240/croot/python-multipart_1782399433068/work
+pytokens==0.4.1
+pytz==2026.3.post1
+PyYAML @ file:///home/task_176346546342115/conda-bld/pyyaml_1763465494987/work
+pyzmq==27.1.0
+referencing==0.37.0
+regex==2026.2.28
+requests==2.32.5
+rfc3339-validator==0.1.4
+rfc3986-validator==0.1.1
+rfc3987-syntax==1.1.0
+rich==14.3.3
+rich-toolkit @ file:///home/task_176830855457343/croot/rich-toolkit_1768308576509/work
+rpds-py==0.30.0
+safetensors==0.7.0
+Send2Trash==2.1.0
+shellingham @ file:///home/task_176191202965262/conda-bld/shellingham_1761912203274/work
+six==1.17.0
+smmap==5.0.3
+soupsieve==2.8.3
+stack-data==0.6.3
+starlette @ file:///home/task_NGwVio3CQy6Lf_0/croot/starlette-recipe_1783948134729/work
+sympy==1.14.0
+terminado==0.18.1
+tinycss2==1.4.0
+tokenize_rt==6.2.0
+tokenizers==0.20.3
+tomli @ file:///home/task_176829635583515/croot/tomli_1768296437642/work
+torch==2.12.0.dev20260322+cu128
+torchaudio==2.11.0.dev20260322+cu128
+torchvision==0.26.0.dev20260322+cu128
+tornado==6.5.5
+tqdm==4.67.3
+traitlets==5.14.3
+transformers==4.46.3
+triton==3.6.0+git9844da95
+typer @ file:///home/task_177870102149069/croot/typer_1778701913810/work
+typing-inspection @ file:///home/task_176061351159976/conda-bld/typing-inspection_1760614166076/work
+typing_extensions @ file:///home/task_RzaU2jf7Rwecl_0/croot/typing_extensions_1784100995749/work
+tzdata==2025.3
+uri-template==1.3.0
+urllib3==2.6.3
+uvicorn @ file:///home/task_176822568703703/croot/uvicorn-split_1768226428589/work
+uvloop @ file:///home/task_176217535403751/conda-bld/uvloop_1762175503684/work
+watchfiles @ file:///home/task_178004056454843/croot/watchfiles_1780040604951/work
+wcwidth==0.6.0
+webcolors==25.10.0
+webencodings==0.5.1
+websocket-client==1.9.0
+websockets @ file:///home/task_178247734415524/croot/websockets_1782477390084/work
+widgetsnbextension==4.0.15
+xformers==0.0.35
+zipp==3.23.0
