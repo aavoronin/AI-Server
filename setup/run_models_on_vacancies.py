@@ -6,19 +6,26 @@ from pathlib import Path
 
 from ai_clients.TextToTextClient import TextToTextClient
 from setup.running_model_utils import (
-    format_time, parse_json_safely, compare_values, print_json_failures
+    format_time, format_value, parse_json_safely, compare_values, print_json_failures
 )
 
 # Scoring matrix for version >= 4
 # Rows = expected level, Columns = generated level
 PROFICIENCY_SCORE_MATRIX = {
-    "expert":       {"expert": 5, "required": 3, "nice-to_have": 1},
-    "required":     {"expert": 3, "required": 3, "nice-to_have": 1},
+    "expert":       {"expert": 6, "required": 3, "nice-to_have": 1},
+    "required":     {"expert": 3, "required": 4, "nice-to_have": 1},
     "nice-to_have": {"expert": 1, "required": 1, "nice-to_have": 2},
 }
 
 # Keys that use proficiency matrix scoring
 PROFICIENCY_LEVEL_KEYS = {"expert", "required", "nice-to_have"}
+
+# Max points per expected level
+PROFICIENCY_MAX_POINTS = {
+    "expert": 6,
+    "required": 4,
+    "nice-to_have": 2,
+}
 
 
 def shorten_vacancy_text(v_name: str, v_text: str) -> str:
@@ -57,15 +64,6 @@ def get_prompt_and_model(version) -> tuple[list[str], list[str], str]:
     test_models = [
         "NikolayKozloff/gemma-3-1b-it-Q8_0-GGUF|GPU|32768",
         "NikolayKozloff/gemma-3-4b-it-Q8_0-GGUF|GPU|32768",
-        # "NikolayKozloff/gemma-3-12b-it-Q5_K_S-GGUF|GPU|32768",
-        # "NikolayKozloff/gemma-3-12b-it-Q6_K-GGUF|GPU|32768",
-        # "majentik/gemma-4-12B-it-RotorQuant-GGUF-Q4_K_M|GPU|16384",
-        # "Bhuvneesh/gemma-3-12b-it-Q5_K_M-GGUF|GPU|16384",
-        # "majentik/gemma-4-12B-it-TurboQuant-GGUF-Q5_K_M|GPU|16384",
-        # "majentik/gemma-4-12B-it-RotorQuant-GGUF-Q5_K_M|GPU|16384",
-        # "Bhuvneesh/gemma-4-E4B-it-Q5_K_M-GGUF|GPU|16384",
-        # "Bhuvneesh/gemma-4-E4B-it-Q8_0-GGUF|GPU|16384",
-        # "Bhuvneesh/gemma-3-4b-it-Q8_0-GGUF|GPU|32768",
     ]
 
     '''
@@ -112,57 +110,7 @@ def get_prompt_and_model(version) -> tuple[list[str], list[str], str]:
             "NikolayKozloff/gemma-3-4b-it-Q8_0-GGUF|GPU|32768",
             "rktmeister/Meta-Llama-3.1-8B-Instruct-Q5_K_M-GGUF|GPU|32768",
             "matrixportalx/Llama-3.3-8B-Instruct-128K-Q5_K_M-GGUF|GPU|32768",
-            #"Medvedko/Huihui-Qwen3-8B-abliterated-v2-Q5_K_M-GGUF|GPU|32768",
-            # "majentik/gemma-4-12B-it-RotorQuant-GGUF-Q5_K_M|CPU|32768",
-
-            #"Ma7ee7/Qwen3.8_1.2B_LFM_Distillation_GGUF|GPU|32768|Q4_K_M",
-            #"Ma7ee7/Qwen3.8_1.2B_LFM_Distillation_GGUF|GPU|32768|Q5_K_M",
-            #"Ma7ee7/Qwen3.8_1.2B_LFM_Distillation_GGUF|GPU|32768|Q8_0",
-            #"NikolayKozloff/Llama-3.3-8B-Instruct-Q8_0-GGUF|GPU|32768",
-            #"matrixportalx/Llama-3.3-8B-Instruct-Q4_K_M-GGUF|GPU|32768",
-            #"majentik/gemma-4-26B-A4B-it-RotorQuant-GGUF-Q4_K_M|CPU|32768",
             "NikolayKozloff/Qwen3-8B-Q8_0-GGUF|GPU|32768",
-            #"DarkKitsune/qwen3.5-9b-qworus-Q5-imat-GGUF|GPU|32768",
-
-            #"aminlouhichi/gemma-3-merged-GGUF-Q16|GPU|32768",
-            # "NikolayKozloff/gemma-3-1b-it-Q8_0-GGUF|CPU|32768",
-            # "NikolayKozloff/gemma-3-4b-it-Q8_0-GGUF|GPU|32768",
-            # "majentik/Nemotron-3-Nano-4B-RotorQuant-GGUF-Q4_K_M|GPU|32768",
-            # "majentik/Nemotron-3-Nano-4B-RotorQuant-GGUF-Q4_K_M|CPU|32768",
-            # "unsloth/Llama-3.2-3B-Instruct|GPU|32768",
-            # "rktmeister/Meta-Llama-3.1-8B-Instruct-Q5_K_M-GGUF|CPU|32768",
-            # "majentik/gemma-4-12B-it-TurboQuant-GGUF-Q5_K_M|CPU|32768",
-            # "majentik/gemma-4-12B-it-RotorQuant-GGUF-Q5_K_M|CPU|32768",
-
-            #"Ma7ee7/Qwen3.8_4B_Distilled_GGUF|GPU|32768|Q4_K_M",
-            #"Ma7ee7/Qwen3.8_4B_Distilled_GGUF|GPU|32768|Q5_K_M",
-            #"Ma7ee7/Qwen3.8_4B_Distilled_GGUF|GPU|32768|Q8_0",
-
-            #"Disya/Huihui-Qwen3-4B-Thinking-2507-abliterated-Q8_0-GGUF",
-
-            #"FORNAX20/gemma-4-26B-A4B-it-uncensored-Q5_K_M-GGUF|CPU|32768"
-            #"Darkknight535/gemma-4-31B-it-abliterated-Q5_K_M-GGUF|CPU|32768"
-
-            # "unsloth/Llama-3.2-3B-Instruct|CPU|32768",
-            # "aminlouhichi/gemma-3-merged-GGUF-Q16|GPU|32768",
-            # "Bhuvneesh/gemma-3-4b-it-Q8_0-GGUF|GPU|32768",
-            #"soob3123/GrayLine-Gemma3-12B-Q4_K_M-GGUF|GPU|32768",
-            #"NikolayKozloff/gemma-3-12b-it-Q6_K-GGUF|CPU|32768",
-            #"Medvedko/gemma-3-12b-it-heretic-v2-Q4_K_M-GGUF|GPU|32768",
-            #"nocturne23/gemma-3-12b-it-Q4_K_M-GGUF|GPU|32768",
-            #"majentik/gemma-4-12B-it-TurboQuant-GGUF-Q4_K_M|GPU|32768",
-            #"majentik/gemma-4-12B-it-RotorQuant-GGUF-Q4_K_M|GPU|32768",
-            #"majentik/gemma-4-12B-it-TurboQuant-GGUF-Q5_K_M|GPU|32768",
-            #"majentik/gemma-4-12B-it-RotorQuant-GGUF-Q5_K_M|GPU|32768",
-            # "soob3123/GrayLine-Gemma3-12B-Q4_K_M-GGUF|GPU|32768",
-            # "Medvedko/gemma-3-12b-it-heretic-v2-Q4_K_M-GGUF|GPU|32768",
-            # "nocturne23/gemma-3-12b-it-Q4_K_M-GGUF|GPU|32768",
-            # "NikolayKozloff/gemma-3-12b-it-Q6_K-GGUF|GPU|24576",
-            # "NikolayKozloff/gemma-3-12b-it-Q6_K-GGUF|CPU|24576",
-            # "majentik/gemma-4-12B-it-TurboQuant-GGUF-Q5_K_M|GPU|24576",
-            # "majentik/gemma-4-12B-it-RotorQuant-GGUF-Q5_K_M|GPU|24576",
-            # "majentik/gemma-4-12B-it-RotorQuant-GGUF-Q4_K_M|GPU|24576",
-            # "majentik/gemma-4-12B-it-TurboQuant-GGUF-Q4_K_M|GPU|24576",
         ]
         vacancies_folder = r"C:\Py\AI-Server\test_cases\test_vacancies\02"
     elif version == 4:
@@ -170,51 +118,46 @@ def get_prompt_and_model(version) -> tuple[list[str], list[str], str]:
             "PROMPT_SIMPLE3.txt"
         ]
         test_models = [
-            "NikolayKozloff/gemma-3-1b-it-Q8_0-GGUF|GPU|32768",
-            "NikolayKozloff/gemma-3-4b-it-Q8_0-GGUF|GPU|32768",
-            "rktmeister/Meta-Llama-3.1-8B-Instruct-Q5_K_M-GGUF|GPU|32768",
-            "matrixportalx/Llama-3.3-8B-Instruct-128K-Q5_K_M-GGUF|GPU|32768",
-            "Medvedko/Huihui-Qwen3-8B-abliterated-v2-Q5_K_M-GGUF|GPU|32768",
-
-            "Ma7ee7/Qwen3.8_1.2B_LFM_Distillation_GGUF|GPU|32768|Q4_K_M",
-            "Ma7ee7/Qwen3.8_1.2B_LFM_Distillation_GGUF|GPU|32768|Q5_K_M",
-            "Ma7ee7/Qwen3.8_1.2B_LFM_Distillation_GGUF|GPU|32768|Q8_0",
-            # "NikolayKozloff/Llama-3.3-8B-Instruct-Q8_0-GGUF|GPU|32768",
-            "matrixportalx/Llama-3.3-8B-Instruct-Q4_K_M-GGUF|GPU|32768",
-            "NikolayKozloff/Qwen3-8B-Q8_0-GGUF|GPU|32768",
-
-            "neopolita/Qwen3.6-11B-A3B-Niwaki-4bit-GGUF|GPU|32768|Q4_K_M",
-            "neopolita/Qwen3.6-11B-A3B-Niwaki-4bit-GGUF|GPU|32768|UD-Q3K",
-
-            "neopolita/Qwen3.6-11B-A3B-Niwaki-4bit-GGUF|GPU|32768|Q4_K_M",
-            "neopolita/Qwen3.6-11B-A3B-Niwaki-4bit-GGUF|GPU|32768|UD-Q3K",
-
-            "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q6_K",
-            "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q8_0",
-
-            "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|IQ3_M",
-            "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|IQ3_S",
-            "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|IQ4_NL",
-            "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|IQ4_XS",
-            # "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q2_K",
-            # "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q3_K_L",
-            "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q3_K_M",
-            # "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q3_K_S",
-            # "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q4_0",
-            "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q4_K_M",
-            # "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q4_K_S",
-            # "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q5_0",
-            "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q5_K_M",
-            # "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q5_K_S",
-            "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q6_K",
-            "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q8_0",
-
-            "majentik/gemma-4-12B-it-RotorQuant-GGUF-Q5_K_M|CPU|32768",
             "majentik/gemma-4-26B-A4B-it-RotorQuant-GGUF-Q5_K_M|CPU|32768",
             "majentik/gemma-4-26B-A4B-it-RotorQuant-GGUF-Q8_0|CPU|32768",
 
-            "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|CPU|32768|Q6_K",
-            "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|CPU|32768|Q8_0",
+            "majentik/gemma-4-12B-it-RotorQuant-GGUF-Q5_K_M|CPU|32768",
+            "majentik/gemma-4-12B-RotorQuant-GGUF-Q8_0|CPU|32768",
+
+            "Jackxuanxuan/Gemma-4-31B-JANG-Q8_4M-CRACK-GGUF|CPU|32768",
+            "KikoCis/gemma-4-31b-it-Q3_K_M-GGUF|CPU|32768",
+
+            #"NikolayKozloff/gemma-3-1b-it-Q8_0-GGUF|GPU|32768",
+            "NikolayKozloff/gemma-3-4b-it-Q8_0-GGUF|GPU|32768",
+            "rktmeister/Meta-Llama-3.1-8B-Instruct-Q5_K_M-GGUF|GPU|32768",
+            "matrixportalx/Llama-3.3-8B-Instruct-128K-Q5_K_M-GGUF|GPU|32768",
+            #"NikolayKozloff/Llama-3.3-8B-Instruct-Q8_0-GGUF|GPU|32768",
+            #"Medvedko/Huihui-Qwen3-8B-abliterated-v2-Q5_K_M-GGUF|GPU|32768",
+
+            #"Ma7ee7/Qwen3.8_1.2B_LFM_Distillation_GGUF|GPU|32768|Q4_K_M",
+            #"Ma7ee7/Qwen3.8_1.2B_LFM_Distillation_GGUF|GPU|32768|Q5_K_M",
+            #"Ma7ee7/Qwen3.8_1.2B_LFM_Distillation_GGUF|GPU|32768|Q8_0",
+            #"matrixportalx/Llama-3.3-8B-Instruct-Q4_K_M-GGUF|GPU|32768",
+            #"NikolayKozloff/Qwen3-8B-Q8_0-GGUF|GPU|32768",
+
+            "neopolita/Qwen3.6-11B-A3B-Niwaki-4bit-GGUF|GPU|32768|Q4_K_M",
+            #"neopolita/Qwen3.6-11B-A3B-Niwaki-4bit-GGUF|GPU|32768|UD-Q3K",
+
+            "mradermacher/Llama-3.3-8B-Instruct-128K-Jbliterated-i1-GGUF|GPU|32768|Q6_K",
+            "mradermacher/Llama-3.3-8B-Instruct-128K-Jbliterated-i1-GGUF|GPU|32768|Q5_K_M",
+            "mradermacher/Llama-3.3-8B-Instruct-128K-Jbliterated-i1-GGUF|GPU|32768|Q4_K_M",
+
+            #"KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q6_K",
+            #"KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q8_0",
+            #"KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q5_K_M",
+            #"KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|IQ3_M",
+            #"KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|IQ3_S",
+            #"KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|IQ4_NL",
+            #KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|IQ4_XS",
+            #"KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q3_K_M",
+            #"KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q4_K_M",
+            # "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|CPU|32768|Q6_K",
+            # "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|CPU|32768|Q8_0",
 
         ]
         vacancies_folder = r"C:\Py\AI-Server\test_cases\test_vacancies\03"
@@ -302,7 +245,7 @@ def calculate_vacancy_score_matrix(expected_json, combined_parsed_dict):
     actual_points = 0.0
 
     for skill_norm, expected_level in expected_skills.items():
-        max_points = PROFICIENCY_SCORE_MATRIX[expected_level][expected_level]
+        max_points = PROFICIENCY_MAX_POINTS[expected_level]
         total_points += max_points
 
         generated_level = generated_skills.get(skill_norm)
@@ -321,6 +264,60 @@ def calculate_vacancy_score_matrix(expected_json, combined_parsed_dict):
 
     score = actual_points / total_points if total_points > 0 else 0.0
     return score, total_points, actual_points
+
+
+def print_json_failures_v4(expected_json, combined_parsed_dict):
+    """Print failures for version >= 4, showing per-skill breakdown for proficiency keys."""
+    levels = ["expert", "required", "nice-to_have"]
+
+    # Build expected skill->level mapping
+    expected_skills = {}
+    for level in levels:
+        if level in expected_json and isinstance(expected_json[level], list):
+            for skill in expected_json[level]:
+                skill_norm = skill.strip().lower()
+                expected_skills[skill_norm] = level
+
+    # Build generated skill->level mapping
+    generated_skills = {}
+    for level in levels:
+        if level in combined_parsed_dict and isinstance(combined_parsed_dict[level], list):
+            for skill in combined_parsed_dict[level]:
+                skill_norm = skill.strip().lower()
+                generated_skills[skill_norm] = level
+
+    # Print per-skill breakdown for proficiency keys
+    for skill_norm, expected_level in expected_skills.items():
+        max_points = PROFICIENCY_MAX_POINTS[expected_level]
+        generated_level = generated_skills.get(skill_norm)
+
+        if generated_level is not None and generated_level in PROFICIENCY_SCORE_MATRIX.get(expected_level, {}):
+            points = PROFICIENCY_SCORE_MATRIX[expected_level][generated_level]
+        else:
+            points = 0
+
+        if points < max_points:
+            gen_display = generated_level if generated_level else "missing"
+            print(f"    {skill_norm}: {points} of {max_points} ({expected_level}|{gen_display})")
+
+    # Print other keys as before
+    for key, expected_value in expected_json.items():
+        if key in PROFICIENCY_LEVEL_KEYS:
+            continue
+        expected_disp = format_value(expected_value)
+        if combined_parsed_dict is not None and key in combined_parsed_dict:
+            actual_value = combined_parsed_dict[key]
+            actual_disp = format_value(actual_value)
+            score = compare_values(actual_value, expected_value)
+            if score < 1.0:
+                if score == 0.5:
+                    print(f'    "{key}": partial ("{actual_disp}"|"{expected_disp}")')
+                else:
+                    print(f'    "{key}": fail ("{actual_disp}"|"{expected_disp}")')
+        else:
+            score = compare_values(None, expected_value)
+            if score < 1.0:
+                print(f'    "{key}": fail (|"{expected_disp}")')
 
 
 def update_model_summary(model_id, total_keys, total_correct_keys, total_time,
@@ -345,7 +342,7 @@ def update_model_summary(model_id, total_keys, total_correct_keys, total_time,
 def run_models_on_vacancies(version):
     """Benchmark models on real vacancy text files against ground truth JSONs."""
     VACANCY_TIMEOUT = 60 * 20
-    VACANCY_TIMEOUT_0 = 3600
+    VACANCY_TIMEOUT_0 = 3600 * 6
 
     prompt_files, test_models, vacancies_dir = get_prompt_and_model(version)
     vacancies_path = Path(vacancies_dir)
@@ -418,6 +415,8 @@ def run_models_on_vacancies(version):
                     total_vacancy_time += duration
 
                     parsed_dict = parse_and_merge_json(generated_text, combined_parsed_dict)
+                    pretty_json_string = json.dumps(parsed_dict, indent=4)
+                    print(pretty_json_string)
 
                     valid_json = 'Yes' if parsed_dict is not None else 'No'
                     print(
@@ -444,7 +443,10 @@ def run_models_on_vacancies(version):
 
             print(f"\n[{vacancy_name}] Combined Time: {total_vacancy_time:.2f}s | Score: {score:.2f}")
             if score < 1.0 and keys_in_expected > 0:
-                print_json_failures(expected_json, combined_parsed_dict)
+                if version >= 4:
+                    print_json_failures_v4(expected_json, combined_parsed_dict)
+                else:
+                    print_json_failures(expected_json, combined_parsed_dict)
             elif keys_in_expected == 0:
                 print(f"  (Skipped failure details due to empty expected JSON)")
 
@@ -452,7 +454,7 @@ def run_models_on_vacancies(version):
         update_model_summary(model_id, total_keys, total_correct_keys,
                              total_time, vacancy_scores, model_summaries)
 
-    print_vacancies_model_summary(model_summaries)
+        print_vacancies_model_summary(model_summaries)
 
 
 def print_vacancies_model_summary(model_summaries: list[Any]):

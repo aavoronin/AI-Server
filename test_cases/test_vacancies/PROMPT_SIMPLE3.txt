@@ -104,7 +104,9 @@ Fields marked as arrays MUST be JSON arrays (e.g., ["USA"], never "USA").
 Missing Values Rule: If a general value (like Title, Salary, or yes/no fields) is not found use null without quotes.
 If a technical proficiency is not found, do not include it in any list.
 
-Expected JSON Structure:
+Expected JSON Structure.
+The values here are given as an example ad not to copied to output.
+The keys should be copied:
 {
 "Title": "Data Engineer",
 "Level": "Senior",
