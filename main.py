@@ -21,8 +21,8 @@ if __name__ == '__main__':
     tester.run_all()
 
     if True:
-        run_models_on_vacancies(3)
-        #run_models_on_vacancies(4)
+        run_models_on_vacancies(4)
+        #run_models_on_vacancies(3)
         #run_models_on_vacancies(1, r"C:\Py\AI-Server\test_cases\test_vacancies\01")
         #run_models_on_vacancies(2, r"C:\Py\AI-Server\test_cases\test_vacancies\01")
         stop_wsl_server()

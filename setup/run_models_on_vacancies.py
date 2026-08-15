@@ -9,6 +9,17 @@ from setup.running_model_utils import (
     format_time, parse_json_safely, compare_values, print_json_failures
 )
 
+# Scoring matrix for version >= 4
+# Rows = expected level, Columns = generated level
+PROFICIENCY_SCORE_MATRIX = {
+    "expert":       {"expert": 5, "required": 3, "nice-to_have": 1},
+    "required":     {"expert": 3, "required": 3, "nice-to_have": 1},
+    "nice-to_have": {"expert": 1, "required": 1, "nice-to_have": 2},
+}
+
+# Keys that use proficiency matrix scoring
+PROFICIENCY_LEVEL_KEYS = {"expert", "required", "nice-to_have"}
+
 
 def shorten_vacancy_text(v_name: str, v_text: str) -> str:
     vacancy_slice = [
@@ -156,7 +167,7 @@ def get_prompt_and_model(version) -> tuple[list[str], list[str], str]:
         vacancies_folder = r"C:\Py\AI-Server\test_cases\test_vacancies\02"
     elif version == 4:
         prompt_files = [
-            "PROMPT_SIMPLE.txt"
+            "PROMPT_SIMPLE3.txt"
         ]
         test_models = [
             "NikolayKozloff/gemma-3-1b-it-Q8_0-GGUF|GPU|32768",
@@ -248,17 +259,68 @@ def parse_and_merge_json(generated_text, combined_parsed_dict):
     return parsed_dict
 
 
-def calculate_vacancy_score(expected_json, combined_parsed_dict):
+def calculate_vacancy_score(expected_json, combined_parsed_dict, version=1):
     """4) Calculate score for a vacancy by comparing expected vs actual."""
-    keys_in_expected = len(expected_json)
-    correct_keys = 0.0
-    if keys_in_expected > 0:
-        for key, expected_value in expected_json.items():
-            actual_value = combined_parsed_dict.get(key)
-            score = compare_values(actual_value, expected_value)
-            correct_keys += score
-    score = correct_keys / keys_in_expected if keys_in_expected > 0 else 0.0
-    return score, keys_in_expected, correct_keys
+    if version <= 3:
+        keys_in_expected = len(expected_json)
+        correct_keys = 0.0
+        if keys_in_expected > 0:
+            for key, expected_value in expected_json.items():
+                actual_value = combined_parsed_dict.get(key)
+                score = compare_values(actual_value, expected_value)
+                correct_keys += score
+        score = correct_keys / keys_in_expected if keys_in_expected > 0 else 0.0
+        return score, keys_in_expected, correct_keys
+    else:
+        # version >= 4: use proficiency matrix scoring for level keys,
+        # compare_values for other keys
+        return calculate_vacancy_score_matrix(expected_json, combined_parsed_dict)
+
+
+def calculate_vacancy_score_matrix(expected_json, combined_parsed_dict):
+    """Calculate score using proficiency matrix for version >= 4."""
+    levels = ["expert", "required", "nice-to_have"]
+
+    # Build expected skill->level mapping (normalized to lowercase)
+    expected_skills = {}
+    for level in levels:
+        if level in expected_json and isinstance(expected_json[level], list):
+            for skill in expected_json[level]:
+                skill_norm = skill.strip().lower()
+                expected_skills[skill_norm] = level
+
+    # Build generated skill->level mapping (normalized to lowercase)
+    generated_skills = {}
+    for level in levels:
+        if level in combined_parsed_dict and isinstance(combined_parsed_dict[level], list):
+            for skill in combined_parsed_dict[level]:
+                skill_norm = skill.strip().lower()
+                generated_skills[skill_norm] = level
+
+    # Calculate score for proficiency matrix keys
+    total_points = 0.0
+    actual_points = 0.0
+
+    for skill_norm, expected_level in expected_skills.items():
+        max_points = PROFICIENCY_SCORE_MATRIX[expected_level][expected_level]
+        total_points += max_points
+
+        generated_level = generated_skills.get(skill_norm)
+        if generated_level is not None and generated_level in PROFICIENCY_SCORE_MATRIX.get(expected_level, {}):
+            actual_points += PROFICIENCY_SCORE_MATRIX[expected_level][generated_level]
+        # If skill is not found in generated, it gets 0 points
+
+    # Calculate score for other keys (not proficiency level keys) using compare_values
+    for key, expected_value in expected_json.items():
+        if key in PROFICIENCY_LEVEL_KEYS:
+            continue
+        total_points += 1.0
+        actual_value = combined_parsed_dict.get(key)
+        score = compare_values(actual_value, expected_value)
+        actual_points += score
+
+    score = actual_points / total_points if total_points > 0 else 0.0
+    return score, total_points, actual_points
 
 
 def update_model_summary(model_id, total_keys, total_correct_keys, total_time,
@@ -271,6 +333,14 @@ def update_model_summary(model_id, total_keys, total_correct_keys, total_time,
     for vs in vacancy_scores:
         print(f"  {vs['vacancy']:<40} | Score: {vs['score']:.2f} | Time: {vs['time']:.2f}s")
     print(f"  {'AVERAGE':<40} | Score: {avg_score:.2%} | Total Time: {time_str}")
+
+    model_summaries.append({
+        "model_id": model_id,
+        "avg_score": avg_score,
+        "total_time": total_time,
+        "time_str": time_str
+    })
+
 
 def run_models_on_vacancies(version):
     """Benchmark models on real vacancy text files against ground truth JSONs."""
@@ -360,7 +430,7 @@ def run_models_on_vacancies(version):
 
             # Evaluate combined result
             score, keys_in_expected, correct_keys = calculate_vacancy_score(
-                expected_json, combined_parsed_dict)
+                expected_json, combined_parsed_dict, version)
 
             total_keys += keys_in_expected
             total_correct_keys += correct_keys
