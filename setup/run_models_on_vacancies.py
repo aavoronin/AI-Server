@@ -98,14 +98,46 @@ def get_prompt_and_model(version) -> tuple[list[str], list[str]]:
             "NikolayKozloff/gemma-3-1b-it-Q8_0-GGUF|GPU|32768",
             "NikolayKozloff/gemma-3-4b-it-Q8_0-GGUF|GPU|32768",
             "rktmeister/Meta-Llama-3.1-8B-Instruct-Q5_K_M-GGUF|GPU|32768",
-            "Ma7ee7/Qwen3.8_1.2B_LFM_Distillation_GGUF|GPU|32768|Q4_K_M",
-            "Ma7ee7/Qwen3.8_1.2B_LFM_Distillation_GGUF|GPU|32768|Q5_K_M",
-            "Ma7ee7/Qwen3.8_1.2B_LFM_Distillation_GGUF|GPU|32768|Q8_0",
-            "NikolayKozloff/Llama-3.3-8B-Instruct-Q8_0-GGUF|GPU|32768",
-            "matrixportalx/Llama-3.3-8B-Instruct-Q4_K_M-GGUF|GPU|32768",
             "matrixportalx/Llama-3.3-8B-Instruct-128K-Q5_K_M-GGUF|GPU|32768",
+            #"Medvedko/Huihui-Qwen3-8B-abliterated-v2-Q5_K_M-GGUF|GPU|32768",
             # "majentik/gemma-4-12B-it-RotorQuant-GGUF-Q5_K_M|CPU|32768",
 
+            #"Ma7ee7/Qwen3.8_1.2B_LFM_Distillation_GGUF|GPU|32768|Q4_K_M",
+            #"Ma7ee7/Qwen3.8_1.2B_LFM_Distillation_GGUF|GPU|32768|Q5_K_M",
+            #"Ma7ee7/Qwen3.8_1.2B_LFM_Distillation_GGUF|GPU|32768|Q8_0",
+            #"NikolayKozloff/Llama-3.3-8B-Instruct-Q8_0-GGUF|GPU|32768",
+            #"matrixportalx/Llama-3.3-8B-Instruct-Q4_K_M-GGUF|GPU|32768",
+            #"majentik/gemma-4-26B-A4B-it-RotorQuant-GGUF-Q4_K_M|CPU|32768",
+            "NikolayKozloff/Qwen3-8B-Q8_0-GGUF|GPU|32768",
+            #"DarkKitsune/qwen3.5-9b-qworus-Q5-imat-GGUF|GPU|32768",
+
+            "neopolita/Qwen3.6-11B-A3B-Niwaki-4bit-GGUF|GPU|32768|Q4_K_M",
+            "neopolita/Qwen3.6-11B-A3B-Niwaki-4bit-GGUF|GPU|32768|UD-Q3K",
+
+            "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q6_K",
+            "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q8_0",
+
+            "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|IQ3_M",
+            "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|IQ3_S",
+            "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|IQ4_NL",
+            "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|IQ4_XS",
+            #"KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q2_K",
+            #"KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q3_K_L",
+            "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q3_K_M",
+            #"KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q3_K_S",
+            #"KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q4_0",
+            "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q4_K_M",
+            #"KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q4_K_S",
+            #"KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q5_0",
+            "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q5_K_M",
+            #"KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q5_K_S",
+            "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q6_K",
+            "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q8_0",
+
+            "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|CPU|32768|Q6_K",
+            "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|CPU|32768|Q8_0",
+            "majentik/gemma-4-26B-A4B-it-RotorQuant-GGUF-Q5_K_M|CPU|32768",
+            "majentik/gemma-4-26B-A4B-it-RotorQuant-GGUF-Q8_0|CPU|32768",
 
             #"aminlouhichi/gemma-3-merged-GGUF-Q16|GPU|32768",
             # "NikolayKozloff/gemma-3-1b-it-Q8_0-GGUF|CPU|32768",
@@ -117,14 +149,11 @@ def get_prompt_and_model(version) -> tuple[list[str], list[str]]:
             # "majentik/gemma-4-12B-it-TurboQuant-GGUF-Q5_K_M|CPU|32768",
             # "majentik/gemma-4-12B-it-RotorQuant-GGUF-Q5_K_M|CPU|32768",
 
-            "Ma7ee7/Qwen3.8_4B_Distilled_GGUF|GPU|32768|Q4_K_M",
-            "Ma7ee7/Qwen3.8_4B_Distilled_GGUF|GPU|32768|Q5_K_M",
-            "Ma7ee7/Qwen3.8_4B_Distilled_GGUF|GPU|32768|Q8_0",
+            #"Ma7ee7/Qwen3.8_4B_Distilled_GGUF|GPU|32768|Q4_K_M",
+            #"Ma7ee7/Qwen3.8_4B_Distilled_GGUF|GPU|32768|Q5_K_M",
+            #"Ma7ee7/Qwen3.8_4B_Distilled_GGUF|GPU|32768|Q8_0",
 
             #"Disya/Huihui-Qwen3-4B-Thinking-2507-abliterated-Q8_0-GGUF",
-            "majentik/gemma-4-26B-A4B-it-RotorQuant-GGUF-Q4_K_M|CPU|32768",
-            "majentik/gemma-4-26B-A4B-it-RotorQuant-GGUF-Q5_K_M|CPU|32768",
-            "majentik/gemma-4-26B-A4B-it-RotorQuant-GGUF-Q8_0|CPU|32768",
 
             #"FORNAX20/gemma-4-26B-A4B-it-uncensored-Q5_K_M-GGUF|CPU|32768"
             #"Darkknight535/gemma-4-31B-it-abliterated-Q5_K_M-GGUF|CPU|32768"
@@ -224,6 +253,15 @@ def run_models_on_vacancies(version, vacancies_dir: str):
 
                 if i == 0:
                     start_time = time.time()
+                    start_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    print(f"{start_timestamp} caching model {model_id}")
+                    try:
+                        client.cache_model(model_id)
+                        end_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                        print(f"{end_timestamp} model cached {model_id}")
+                    except Exception as e:
+                        print(f"Failed to cache model {model_id}: {e}")
+
                     start_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                     print(f"{start_timestamp} Starting ping -- {model_id}")
                     response = client.generate(model_id, "2+2",
