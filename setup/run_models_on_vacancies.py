@@ -214,6 +214,64 @@ def get_prompt_and_model(version) -> tuple[list[str], list[str], str]:
     return prompt_files, test_models, vacancies_folder
 
 
+def warmup_model(client, model_id, timeout):
+    """1) Cache/warm-up model by sending a simple request."""
+    start_time = time.time()
+    start_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    print(f"{start_timestamp} Starting ping -- {model_id}")
+    client.generate(model_id, "2+2", model_limit_seconds=timeout)
+    duration = time.time() - start_time
+    end_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    print(f"{end_timestamp} Ping time: {duration:.2f}s -- {model_id}")
+
+
+def make_vacancy_request(client, model_id, full_prompt, timeout, start_time):
+    """2) Make a single generation request to the model."""
+    start_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    print(f"{start_timestamp} Starting generate -- {model_id}")
+    response = client.generate(model_id, full_prompt, model_limit_seconds=timeout)
+    duration = time.time() - start_time
+    generated_text = response.get("generated_text", "")
+    if not isinstance(generated_text, str):
+        generated_text = str(generated_text)
+    end_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    return generated_text, duration, end_timestamp
+
+
+def parse_and_merge_json(generated_text, combined_parsed_dict):
+    """3) Parse JSON response and merge into combined dict."""
+    parsed_dict = parse_json_safely(generated_text)
+    if parsed_dict is not None:
+        for key, value in parsed_dict.items():
+            if key not in combined_parsed_dict:
+                combined_parsed_dict[key] = value
+    return parsed_dict
+
+
+def calculate_vacancy_score(expected_json, combined_parsed_dict):
+    """4) Calculate score for a vacancy by comparing expected vs actual."""
+    keys_in_expected = len(expected_json)
+    correct_keys = 0.0
+    if keys_in_expected > 0:
+        for key, expected_value in expected_json.items():
+            actual_value = combined_parsed_dict.get(key)
+            score = compare_values(actual_value, expected_value)
+            correct_keys += score
+    score = correct_keys / keys_in_expected if keys_in_expected > 0 else 0.0
+    return score, keys_in_expected, correct_keys
+
+
+def update_model_summary(model_id, total_keys, total_correct_keys, total_time,
+                         vacancy_scores, model_summaries):
+    """5) Update and print model summary."""
+    avg_score = (total_correct_keys / total_keys) if total_keys > 0 else 0.0
+    time_str = format_time(total_time)
+
+    print(f"\n--- Summary for {model_id} ---")
+    for vs in vacancy_scores:
+        print(f"  {vs['vacancy']:<40} | Score: {vs['score']:.2f} | Time: {vs['time']:.2f}s")
+    print(f"  {'AVERAGE':<40} | Score: {avg_score:.2%} | Total Time: {time_str}")
+
 def run_models_on_vacancies(version):
     """Benchmark models on real vacancy text files against ground truth JSONs."""
     VACANCY_TIMEOUT = 60 * 20
@@ -260,10 +318,10 @@ def run_models_on_vacancies(version):
                 with open(result_json_file, 'r', encoding='utf-8') as f:
                     expected_json = json.load(f)
             except json.JSONDecodeError:
-                print(f"\n[{vacancy_name}] ERROR: Invalid JSON in {result_json_file.name}. Scoring as 0.00")
+                print(f"[{vacancy_name}] ERROR: Invalid JSON in {result_json_file.name}. Scoring as 0.00")
                 expected_json = {}
             except Exception as e:
-                print(f"\n[{vacancy_name}] ERROR: Failed to read {result_json_file.name}: {e}. Scoring as 0.00")
+                print(f"[{vacancy_name}] ERROR: Failed to read {result_json_file.name}: {e}. Scoring as 0.00")
                 expected_json = {}
 
             combined_parsed_dict = {}
@@ -281,45 +339,17 @@ def run_models_on_vacancies(version):
                     f"Total Prompt Length: {len(full_prompt)} chars")
 
                 if i == 0:
-                    start_time = time.time()
-                    start_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                    print(f"{start_timestamp} caching model {model_id}")
-                    try:
-                        client.cache_model(model_id)
-                        end_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                        print(f"{end_timestamp} model cached {model_id}")
-                    except Exception as e:
-                        print(f"Failed to cache model {model_id}: {e}")
-
-                    start_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                    print(f"{start_timestamp} Starting ping -- {model_id}")
-                    response = client.generate(model_id, "2+2",
-                                               model_limit_seconds=VACANCY_TIMEOUT_0)
-                    duration = time.time() - start_time
-                    end_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                    print(f"{end_timestamp} Ping time: {duration:.2f}s -- {model_id}")
+                    warmup_model(client, model_id, VACANCY_TIMEOUT_0)
 
                 start_time = time.time()
-                start_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 try:
-                    print(f"{start_timestamp} Starting generate -- {model_id}")
-                    response = client.generate(model_id, full_prompt,
-                                               model_limit_seconds=VACANCY_TIMEOUT)
-                    duration = time.time() - start_time
+                    generated_text, duration, end_timestamp = make_vacancy_request(
+                        client, model_id, full_prompt, VACANCY_TIMEOUT, start_time)
                     total_vacancy_time += duration
 
-                    generated_text = response.get("generated_text", "")
-                    if not isinstance(generated_text, str):
-                        generated_text = str(generated_text)
-
-                    parsed_dict = parse_json_safely(generated_text)
-                    if parsed_dict is not None:
-                        for key, value in parsed_dict.items():
-                            if key not in combined_parsed_dict:
-                                combined_parsed_dict[key] = value
+                    parsed_dict = parse_and_merge_json(generated_text, combined_parsed_dict)
 
                     valid_json = 'Yes' if parsed_dict is not None else 'No'
-
                     print(
                         f"{end_timestamp}  [{p_file}] Time: {duration:.2f}s | Valid JSON: {valid_json}")
 
@@ -329,15 +359,8 @@ def run_models_on_vacancies(version):
                     print(f"  [{p_file}] ERROR: {str(e)} | Time: {duration:.2f}s")
 
             # Evaluate combined result
-            keys_in_expected = len(expected_json)
-            correct_keys = 0.0
-            if keys_in_expected > 0:
-                for key, expected_value in expected_json.items():
-                    actual_value = combined_parsed_dict.get(key)
-                    score = compare_values(actual_value, expected_value)
-                    correct_keys += score
-
-            score = correct_keys / keys_in_expected if keys_in_expected > 0 else 0.0
+            score, keys_in_expected, correct_keys = calculate_vacancy_score(
+                expected_json, combined_parsed_dict)
 
             total_keys += keys_in_expected
             total_correct_keys += correct_keys
@@ -356,22 +379,10 @@ def run_models_on_vacancies(version):
                 print(f"  (Skipped failure details due to empty expected JSON)")
 
         # Model Summary
-        avg_score = (total_correct_keys / total_keys) if total_keys > 0 else 0.0
-        time_str = format_time(total_time)
+        update_model_summary(model_id, total_keys, total_correct_keys,
+                             total_time, vacancy_scores, model_summaries)
 
-        print(f"\n--- Summary for {model_id} ---")
-        for vs in vacancy_scores:
-            print(f"  {vs['vacancy']:<40} | Score: {vs['score']:.2f} | Time: {vs['time']:.2f}s")
-        print(f"  {'AVERAGE':<40} | Score: {avg_score:.2%} | Total Time: {time_str}")
-
-        model_summaries.append({
-            "model_id": model_id,
-            "avg_score": avg_score,
-            "total_time": total_time,
-            "time_str": time_str
-        })
-
-        print_vacancies_model_summary(model_summaries)
+    print_vacancies_model_summary(model_summaries)
 
 
 def print_vacancies_model_summary(model_summaries: list[Any]):
