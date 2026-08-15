@@ -1,0 +1,93 @@
+JPMorganChase
+Software Engineer III - Python/PySpark/AWS https://www.linkedin.com/jobs/view/4409137394/?trackingId=SE2DH8IpBcHdkF1ACvbeSg%3D%3D&refId=MI0SKUYlkjDMUjU%2BxbQ1Uw%3D%3D&eBP=NOT_ELIGIBLE_FOR_CHARGING&alternateChannel=search&isJobSearch=false
+https://www.linkedin.com/jobs/search-results/?currentJobId=4409137394&eBP=NOT_ELIGIBLE_FOR_CHARGING&refId=MI0SKUYlkjDMUjU%2BxbQ1Uw%3D%3D&trackingId=SE2DH8IpBcHdkF1ACvbeSg%3D%3D&keywords=senior%20Data%20Engineer%20in%20USA%20Florida%20%20posted%20in%20the%20past%2015%20days&origin=SEMANTIC_SEARCH_LANDING_PAGE&start=100#
+Tampa, FL
+·
+Reposted 4 days ago
+·
+Over 100 people clicked apply
+Promoted by hirer ·
+Responses managed off LinkedIn
+On-site https://www.linkedin.com/jobs/search-results/?currentJobId=4409137394&eBP=NOT_ELIGIBLE_FOR_CHARGING&refId=MI0SKUYlkjDMUjU%2BxbQ1Uw%3D%3D&trackingId=SE2DH8IpBcHdkF1ACvbeSg%3D%3D&keywords=senior%20Data%20Engineer%20in%20USA%20Florida%20%20posted%20in%20the%20past%2015%20days&origin=SEMANTIC_SEARCH_LANDING_PAGE&start=100
+Full-time https://www.linkedin.com/jobs/search-results/?currentJobId=4409137394&eBP=NOT_ELIGIBLE_FOR_CHARGING&refId=MI0SKUYlkjDMUjU%2BxbQ1Uw%3D%3D&trackingId=SE2DH8IpBcHdkF1ACvbeSg%3D%3D&keywords=senior%20Data%20Engineer%20in%20USA%20Florida%20%20posted%20in%20the%20past%2015%20days&origin=SEMANTIC_SEARCH_LANDING_PAGE&start=100
+Apply
+Save
+Your profile and resume
+match
+the required qualifications well
+Show match details https://www.linkedin.com/preload/guideOverlay/?interop=guideOverlay&query=Show+match+details&originalThreadMailbox=urn%3Ali%3AguideJobs%3AACoAABgQ2doB7tVC8-sZfLQ9nEX5BA4jp6w3cmY&conversationUrn=urn%3Ali%3Afsu_guideConversationV2%3Aurn%3Ali%3Aguide%3Ac8767f8f883dcc3a923678b518e2f962958562d6e92a48369de1dd405d3e081c%7Eurn%3Ali%3AguideJobs%3AACoAABgQ2doB7tVC8-sZfLQ9nEX5BA4jp6w3cmY&contextUrns=urn%3Ali%3Aguide%3Ac8767f8f883dcc3a923678b518e2f962958562d6e92a48369de1dd405d3e081c&intent=GuideIntent_JOB_SEEKING_AGENT&originalIntent=GuideIntent_JOB_SEEKING_AGENT&trackingId=iKWAvoqZR0e90WRZ4NmkQg%3D%3D&customContext=jobPostingId%7E%3A4409137394%2CjobFitLevel%7E%3AMemberJobFitClassification_GOOD%2CsubIntent%7E%3AJobSeekerAgentIntent_JOB_FIT_EXPLANATION%2ChasHistory%7E%3Afalse&isZeroState=true&pageContextJobPostingUrns=urn%3Ali%3Afsd_jobPosting%3A4409137394
+BETA • Is this information helpful?
+https://www.linkedin.com/jobs/search-results/?currentJobId=4409137394&eBP=NOT_ELIGIBLE_FOR_CHARGING&refId=MI0SKUYlkjDMUjU%2BxbQ1Uw%3D%3D&trackingId=SE2DH8IpBcHdkF1ACvbeSg%3D%3D&keywords=senior%20Data%20Engineer%20in%20USA%20Florida%20%20posted%20in%20the%20past%2015%20days&origin=SEMANTIC_SEARCH_LANDING_PAGE&start=100
+People you can reach out to
+School alumni from National Research Nuclear University MEPhI (Moscow Engineering Physics Institute)
+Show all https://www.linkedin.com/jobs/search-results/?currentJobId=4409137394&eBP=NOT_ELIGIBLE_FOR_CHARGING&refId=MI0SKUYlkjDMUjU%2BxbQ1Uw%3D%3D&trackingId=SE2DH8IpBcHdkF1ACvbeSg%3D%3D&keywords=senior%20Data%20Engineer%20in%20USA%20Florida%20%20posted%20in%20the%20past%2015%20days&origin=SEMANTIC_SEARCH_LANDING_PAGE&start=100
+About the job
+Job Description
+We have an exciting and rewarding opportunity for you to take your software engineering career to the next level.
+As a Software Engineer III – Python/PySpark/AWS at JPMorganChase within the Payments Trust and Safety organization, you serve as a seasoned member of an agile team to design and deliver trusted market-leading technology products in a secure, stable, and scalable way. You are responsible for carrying out critical technology solutions across multiple technical areas within various business functions in support of the firm's business objectives.
+Job Responsibilities
+Executes software solutions, design, development, and technical troubleshooting with ability to think beyond routine or conventional approaches to build solutions or break down technical problems
+Creates secure and high-quality production code and maintains algorithms that run synchronously with appropriate systems
+Produces architecture and design artifacts for complex applications while being accountable for ensuring design constraints are met by software code development
+Gathers, analyzes, synthesizes, and develops visualizations and reporting from large, diverse data sets in service of continuous improvement of software applications and systems
+Proactively identifies hidden problems and patterns in data and uses these insights to drive improvements to coding hygiene and system architecture
+Contributes to software engineering communities of practice and events that explore new and emerging technologies
+Adds to team culture of diversity, opportunity, inclusion, and respect
+Required Qualifications, Capabilities, And Skills
+3+ years of Software Development experience with enterprise applications
+Writes secure and high-quality code using the syntax of at least one programming language with limited guidance – Python 3, PySpark
+Designs, develops, codes, and troubleshoots with consideration of upstream and downstream systems and technical implications
+Hands-on practical experience in system design, application development, testing, and operational stability
+Experience in developing, debugging, and maintaining code in a large corporate environment with one or more modern programming languages and database querying languages
+Gathers, analyzes, and draws conclusions from large, diverse data sets to identify problems and contribute to decision-making in service of secure, stable application development
+Overall knowledge of the Software Development Life Cycle
+Solid understanding of agile methodologies such as CI/CD, Application Resiliency, and Security
+Demonstrated knowledge of software applications and technical processes within a technical discipline (e.g., cloud, artificial intelligence, machine learning, mobile, etc.)
+Preferred Qualifications, Capabilities, And Skills
+Exposure to cloud technologies – AWS EC2, EKS, RDS, S3, Lambdas
+Big Data Technologies such as PySpark, Hadoop, Databricks, ETL, Snowflake
+ABOUT US
+JPMorganChase, one of the oldest financial institutions, offers innovative financial solutions to millions of consumers, small businesses and many of the world's most prominent corporate, institutional and government clients under the J.P. Morgan and Chase brands. Our history spans over 200 years and today we are a leader in investment banking, consumer and small business banking, commercial banking, financial transaction processing and asset management.
+We offer a competitive total rewards package including base salary determined based on the role, experience, skill set and location. Those in eligible roles may receive commission-based pay and/or discretionary incentive compensation, paid in the form of cash and/or forfeitable equity, awarded in recognition of individual achievements and contributions. We also offer a range of benefits and programs to meet employee needs, based on eligibility. These benefits include comprehensive health care coverage, on-site health and wellness centers, a retirement savings plan, backup childcare, tuition reimbursement, mental health support, financial coaching and more. Additional details about total compensation and benefits will be provided during the hiring process.
+We recognize that our people are our strength and the diverse talents they bring to our global workforce are directly linked to our success. We are an equal opportunity employer and place a high value on diversity and inclusion at our company. We do not discriminate on the basis of any protected attribute, including race, religion, color, national origin, gender, sexual orientation, gender identity, gender expression, age, marital or veteran status, pregnancy or disability, or any other basis protected under applicable law. We also make reasonable accommodations for applicants' and employees' religious practices and beliefs, as well as mental health or physical disability needs. Visit our
+FAQs
+for more information about requesting an accommodation.
+JPMorgan Chase & Co. is an Equal Opportunity Employer, including Disability/Veterans
+About The Team
+J.P. Morgan's Commercial & Investment Bank is a global leader across banking, markets, securities services and payments. Corporations, governments and institutions throughout the world entrust us with their business in more than 100 countries. The Commercial & Investment Bank provides strategic advice, raises capital, manages risk and extends liquidity in markets around the world.
+…
+more
+Unlock hiring insights on JPMorganChase
+15%
+employee growth
+Chart
+Chart with 25 data points.
+The chart has 1 X axis displaying Time. Data ranges from 2024-07-01 00:00:00 to 2026-07-01 00:00:00.
+The chart has 1 Y axis displaying values. Data ranges from 204145 to 236909.
+End of interactive chart.
+Applicant education level
+38%
+have a Master's Degree
+Applicant seniority level
+72%
+Entry level applicants
+Try Premium for AED 0 https://www.linkedin.com/premium/products/?upsellOrderOrigin=Tracking%3Av1%3Ajob_details_page_insights_upsell%3AJob+Seeker%3AIn-Product&utype=job&referenceId=8p4HLv2gTk%2BszUxiC788Yw%3D%3D&isSS=false&upsellSlotId=JOB_DETAILS_COMPANY_AIQ_INSIGHTS
+1-month free trial. Easy to cancel. We’ll remind you 7 days before your trial ends.
+About the company
+JPMorganChase7,523,829 followers
+Follow
+Financial Services
+•
+10001+ employees
+•
+206,290 on LinkedIn
+With a history tracing its roots to 1799 in New York City, JPMorganChase is one of the world's oldest, largest, and best-known financial institutions—carrying forth the innovative spirit of our heritage firms in global operations across 100 markets.
+We serve millions of customers and many of the world’s most prominent corporate, institutional, and government clients daily, managing assets and investments, offering business advice and strategies, and providing innovative banking solutions and services.
+Social Media Terms and Conditions: https://bit.ly/JPMCSocialTerms
+JPMorgan Chase & Co. is an Equal Opportunity Employer. All qualified applicants will receive consideration for employment without regard to race, color, religion, sex, sexual orientation, gender identity, national origin, disability, or status as a protected veteran.
+…
+more
+Interested in working with us in the future?
+Members who share that they’re interested in a company may be 2x as likely to get a message from a recruiter than those who don’t.Learn more
+I’m interested
+Show more

@@ -1,0 +1,58 @@
+{
+  "Title": "Software Engineer",
+  "Level": "Middle",
+  "SalaryMin": null,
+  "SalaryMax": null,
+  "SalaryCurrency": null,
+  "SalaryPeriod": null,
+  "EmploymentType": "office",
+  "FullTime": "yes",
+  "EmployerCountry": [
+    "USA"
+  ],
+  "EmployerCity": "Tampa",
+  "EmployerState": "FL",
+  "EmployerTimezone": null,
+  "CandidateCountry": [
+    "USA"
+  ],
+  "CandidateNoCountry": [],
+  "RelocationOffered": null,
+  "RelocationBudget": null,
+  "RelocationBudgetCurrency": null,
+  "VisaSponsorship": null,
+  "ContractType": "permanent",
+  "WorkingHoursPerWeek": null,
+  "CompanyName": "JPMorganChase",
+  "CompanyIndustry": "Financial Services",
+  "CompanySize": "10001+",
+  "MinYearsExperience": 3,
+  "MaxYearsExperience": null,
+  "EducationLevel": null,
+  "CertificationsRequired": [],
+  "SecurityClearance": "none",
+  "HealthInsurance": "yes",
+  "Urgency": null,
+  "HiringManagerName": null,
+  "RequiredLanguages": [
+    "English"
+  ],
+  "JobId": "4409137394",
+  "VacancySite": "LinkedIn",
+  "VacancyURL": "https://www.linkedin.com/jobs/view/4409137394/",
+  "ApplyURL": null,
+  "PublicationDate": "4 days ago",
+  "ApplicantsCount": 100,
+  "expert": [
+    "Python",
+    "Spark"
+  ],
+  "required": [
+    "SQL"
+  ],
+  "nice-to_have": [
+    "AWS",
+    "ETL",
+    "Snowflake SQL"
+  ]
+}

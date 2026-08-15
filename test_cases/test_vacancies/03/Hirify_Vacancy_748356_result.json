@@ -1,0 +1,61 @@
+{
+  "Title": "Data Engineer",
+  "Level": "Senior",
+  "SalaryMin": 30,
+  "SalaryMax": 40,
+  "SalaryCurrency": "EUR",
+  "SalaryPeriod": "hour",
+  "EmploymentType": "remote",
+  "FullTime": "yes",
+  "EmployerCountry": [
+    "Lithuania"
+  ],
+  "EmployerCity": "Vilnius",
+  "EmployerState": null,
+  "EmployerTimezone": null,
+  "CandidateCountry": [
+    "Lithuania"
+  ],
+  "CandidateNoCountry": [],
+  "RelocationOffered": null,
+  "RelocationBudget": null,
+  "RelocationBudgetCurrency": null,
+  "VisaSponsorship": null,
+  "ContractType": "freelance",
+  "WorkingHoursPerWeek": null,
+  "CompanyName": "hirify.global",
+  "CompanyIndustry": "Software Development",
+  "CompanySize": null,
+  "MinYearsExperience": 3,
+  "MaxYearsExperience": null,
+  "EducationLevel": null,
+  "CertificationsRequired": [],
+  "SecurityClearance": "none",
+  "HealthInsurance": null,
+  "Urgency": null,
+  "HiringManagerName": null,
+  "RequiredLanguages": [
+    "English"
+  ],
+  "JobId": "748356",
+  "VacancySite": "Hirify",
+  "VacancyURL": "https://hirify.me/jobs/748356-senior-data-engineer-fintech",
+  "ApplyURL": null,
+  "PublicationDate": "5 days ago",
+  "ApplicantsCount": null,
+  "expert": [
+    "Python",
+    "SQL",
+    "GCP",
+    "BigQuery SQL",
+    "dbt",
+    "ETL",
+    "ELT"
+  ],
+  "required": [
+    "Superset",
+    "Data Quality",
+    "Data Governance"
+  ],
+  "nice-to_have": []
+}

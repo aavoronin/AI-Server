@@ -1,0 +1,61 @@
+{
+  "Title": "Data Engineer",
+  "Level": "Senior",
+  "SalaryMin": null,
+  "SalaryMax": null,
+  "SalaryCurrency": null,
+  "SalaryPeriod": null,
+  "EmploymentType": "remote",
+  "FullTime": "yes",
+  "EmployerCountry": [
+    "USA"
+  ],
+  "EmployerCity": "Silicon Valley",
+  "EmployerState": "CA",
+  "EmployerTimezone": null,
+  "CandidateCountry": [
+    "USA"
+  ],
+  "CandidateNoCountry": [],
+  "RelocationOffered": "yes",
+  "RelocationBudget": null,
+  "RelocationBudgetCurrency": null,
+  "VisaSponsorship": null,
+  "ContractType": "permanent",
+  "WorkingHoursPerWeek": null,
+  "CompanyName": "Hirify Global",
+  "CompanyIndustry": "Technology Consulting",
+  "CompanySize": null,
+  "MinYearsExperience": 5,
+  "MaxYearsExperience": null,
+  "EducationLevel": null,
+  "CertificationsRequired": [],
+  "SecurityClearance": "none",
+  "HealthInsurance": null,
+  "Urgency": null,
+  "HiringManagerName": null,
+  "RequiredLanguages": [
+    "English"
+  ],
+  "JobId": "121200",
+  "VacancySite": "Hirify",
+  "VacancyURL": "https://hirify.me/jobs/121200-senior-data-engineer-pipeline",
+  "ApplyURL": null,
+  "PublicationDate": "3 days ago",
+  "ApplicantsCount": null,
+  "expert": [
+    "Python",
+    "SQL"
+  ],
+  "required": [
+    "ETL",
+    "AWS",
+    "GCP",
+    "Azure",
+    "MySQL"
+  ],
+  "nice-to_have": [
+    "Spark",
+    "Data Lakehouse"
+  ]
+}

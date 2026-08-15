@@ -1,0 +1,126 @@
+Vacancy URL: https://hirify.me/jobs/748356-senior-data-engineer-fintech
+
+Senior Data Engineer (Fintech) | Hirify
+Jobs
+Guides
+How to configure filters
+How to recognize scams
+For employers
+CV roasting
+Matches
+Applications
+Plus
+Enable Plus
+AV
+Alexey Voronin
+aavoronin@gmail.com
+Settings
+Upgrade to Hirify Plus
+Profiles
+Show all
+Unnamed
+Dashboard
+Favorites
+Hidden vacancies
+Saved filters
+Sign Out
+Feed
+Jobs
+Filters
+Services
+Menu
+75
+Good job
+expand
+The role is well-defined with a solid tech stack in fintech, but the company is an outsourcing agency, which may imply less stability and potential workload issues.
+Click for details
+Outsourcing company
+Insufficient salary
+Modern tech stack
+Clear role definition
+Score by Hirify AI
+Back
+Save application
+Company hidden
+Viewed
+5 days ago
+Senior Data Engineer (Fintech)
+Show contacts
+4 800 - 6 400
+€
+Work format
+remote (Global)/hybrid
+Work type
+fulltime
+Grade
+senior
+English
+b2
+Country
+Lithuania
+fintech
+python
+sql
+data engineering
+etl
+dbt
+gcp
+bigquery
+apache superset
+Vacancy from Hirify Global, list of international tech companies
+Plus is required to make matches and apply
+Report
+75
+Good job
+expand
+The role is well-defined with a solid tech stack in fintech, but the company is an outsourcing agency, which may imply less stability and potential workload issues.
+Click for details
+Outsourcing company
+Insufficient salary
+Modern tech stack
+Clear role definition
+Score by Hirify AI
+Match & Cover letter
+Plus required for matching with this vacancy
+Get Plus
+Job description
+Text:
+Hirify AI
+/
+Original
+TL;DR
+Senior Data Engineer (Fintech): Designing and maintaining scalable data architecture and ETL pipelines for a fintech partner with an accent on GCP, BigQuery, and dbt. Focus on building robust data infrastructure, ensuring data quality, and collaborating with stakeholders to support analytical and operational decision-making.
+Location: Remote (Global) or Hybrid in Vilnius, Lithuania.
+Salary: €30–€40 per hour.
+Company
+hirify.global
+is a software development agency providing outsourcing and staff augmentation services for clients across Lithuania and Europe.
+What you will do
+Design, build, and maintain the data warehouse and overall data architecture.
+Create and optimize ETL/ELT pipelines for analytical and operational needs.
+Implement integrations between internal platforms and third-party systems.
+Establish data quality standards, governance practices, and monitoring routines.
+Partner with data scientists and business stakeholders to ensure data availability.
+Evolve data infrastructure using GCP, BigQuery, dbt, and Apache Superset.
+Requirements
+At least 3 years of hands-on experience in a Data Engineer role.
+Solid working knowledge of GCP and BigQuery.
+Practical experience using dbt for data modeling and transformations.
+Strong Python and SQL skills.
+Proven track record of building and tuning ETL/ELT pipelines.
+Experience with Apache Superset or similar BI tools.
+Nice to have
+Previous experience in banking or fintech.
+Culture & Benefits
+Full-time, long-term engagement.
+Preferred B2B freelance contract model with permanent employment options available.
+Fully remote work flexibility.
+Laptop and work equipment provided.
+Be careful: if the employer asks you to log into their system using iCloud/Google, send codes/passwords, or run code/software, don't do it - these are scammers. Always click "Report" or contact support.
+More in guide →
+Categories
+Data Analyst jobs
+Senior Data Analyst jobs
+FinTech jobs
+Python jobs
+SQL jobs

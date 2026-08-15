@@ -42,7 +42,7 @@ def shorten_vacancy_text(v_name: str, v_text: str) -> str:
     return v_text
 
 
-def get_prompt_and_model(version) -> tuple[list[str], list[str]]:
+def get_prompt_and_model(version) -> tuple[list[str], list[str], str]:
     test_models = [
         "NikolayKozloff/gemma-3-1b-it-Q8_0-GGUF|GPU|32768",
         "NikolayKozloff/gemma-3-4b-it-Q8_0-GGUF|GPU|32768",
@@ -75,6 +75,7 @@ def get_prompt_and_model(version) -> tuple[list[str], list[str]]:
             "NikolayKozloff/gemma-3-1b-it-Q8_0-GGUF|GPU|32768",
             "NikolayKozloff/gemma-3-4b-it-Q8_0-GGUF|GPU|32768",
         ]
+        vacancies_folder = r"C:\Py\AI-Server\test_cases\test_vacancies\01"
 
     elif version == 2:
         prompt_files = [
@@ -90,6 +91,7 @@ def get_prompt_and_model(version) -> tuple[list[str], list[str]]:
             "majentik/gemma-4-12B-it-TurboQuant-GGUF-Q4_K_M|GPU|32768",
             "majentik/gemma-4-12B-it-RotorQuant-GGUF-Q4_K_M|GPU|32768",
         ]
+        vacancies_folder = r"C:\Py\AI-Server\test_cases\test_vacancies\01"
     elif version == 3:
         prompt_files = [
             "PROMPT_SIMPLE.txt"
@@ -110,34 +112,6 @@ def get_prompt_and_model(version) -> tuple[list[str], list[str]]:
             #"majentik/gemma-4-26B-A4B-it-RotorQuant-GGUF-Q4_K_M|CPU|32768",
             "NikolayKozloff/Qwen3-8B-Q8_0-GGUF|GPU|32768",
             #"DarkKitsune/qwen3.5-9b-qworus-Q5-imat-GGUF|GPU|32768",
-
-            "neopolita/Qwen3.6-11B-A3B-Niwaki-4bit-GGUF|GPU|32768|Q4_K_M",
-            "neopolita/Qwen3.6-11B-A3B-Niwaki-4bit-GGUF|GPU|32768|UD-Q3K",
-
-            "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q6_K",
-            "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q8_0",
-
-            "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|IQ3_M",
-            "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|IQ3_S",
-            "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|IQ4_NL",
-            "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|IQ4_XS",
-            #"KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q2_K",
-            #"KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q3_K_L",
-            "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q3_K_M",
-            #"KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q3_K_S",
-            #"KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q4_0",
-            "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q4_K_M",
-            #"KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q4_K_S",
-            #"KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q5_0",
-            "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q5_K_M",
-            #"KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q5_K_S",
-            "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q6_K",
-            "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q8_0",
-
-            "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|CPU|32768|Q6_K",
-            "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|CPU|32768|Q8_0",
-            "majentik/gemma-4-26B-A4B-it-RotorQuant-GGUF-Q5_K_M|CPU|32768",
-            "majentik/gemma-4-26B-A4B-it-RotorQuant-GGUF-Q8_0|CPU|32768",
 
             #"aminlouhichi/gemma-3-merged-GGUF-Q16|GPU|32768",
             # "NikolayKozloff/gemma-3-1b-it-Q8_0-GGUF|CPU|32768",
@@ -179,21 +153,76 @@ def get_prompt_and_model(version) -> tuple[list[str], list[str]]:
             # "majentik/gemma-4-12B-it-RotorQuant-GGUF-Q4_K_M|GPU|24576",
             # "majentik/gemma-4-12B-it-TurboQuant-GGUF-Q4_K_M|GPU|24576",
         ]
+        vacancies_folder = r"C:\Py\AI-Server\test_cases\test_vacancies\02"
+    elif version == 4:
+        prompt_files = [
+            "PROMPT_SIMPLE.txt"
+        ]
+        test_models = [
+            "NikolayKozloff/gemma-3-1b-it-Q8_0-GGUF|GPU|32768",
+            "NikolayKozloff/gemma-3-4b-it-Q8_0-GGUF|GPU|32768",
+            "rktmeister/Meta-Llama-3.1-8B-Instruct-Q5_K_M-GGUF|GPU|32768",
+            "matrixportalx/Llama-3.3-8B-Instruct-128K-Q5_K_M-GGUF|GPU|32768",
+            "Medvedko/Huihui-Qwen3-8B-abliterated-v2-Q5_K_M-GGUF|GPU|32768",
+
+            "Ma7ee7/Qwen3.8_1.2B_LFM_Distillation_GGUF|GPU|32768|Q4_K_M",
+            "Ma7ee7/Qwen3.8_1.2B_LFM_Distillation_GGUF|GPU|32768|Q5_K_M",
+            "Ma7ee7/Qwen3.8_1.2B_LFM_Distillation_GGUF|GPU|32768|Q8_0",
+            # "NikolayKozloff/Llama-3.3-8B-Instruct-Q8_0-GGUF|GPU|32768",
+            "matrixportalx/Llama-3.3-8B-Instruct-Q4_K_M-GGUF|GPU|32768",
+            "NikolayKozloff/Qwen3-8B-Q8_0-GGUF|GPU|32768",
+
+            "neopolita/Qwen3.6-11B-A3B-Niwaki-4bit-GGUF|GPU|32768|Q4_K_M",
+            "neopolita/Qwen3.6-11B-A3B-Niwaki-4bit-GGUF|GPU|32768|UD-Q3K",
+
+            "neopolita/Qwen3.6-11B-A3B-Niwaki-4bit-GGUF|GPU|32768|Q4_K_M",
+            "neopolita/Qwen3.6-11B-A3B-Niwaki-4bit-GGUF|GPU|32768|UD-Q3K",
+
+            "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q6_K",
+            "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q8_0",
+
+            "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|IQ3_M",
+            "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|IQ3_S",
+            "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|IQ4_NL",
+            "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|IQ4_XS",
+            # "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q2_K",
+            # "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q3_K_L",
+            "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q3_K_M",
+            # "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q3_K_S",
+            # "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q4_0",
+            "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q4_K_M",
+            # "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q4_K_S",
+            # "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q5_0",
+            "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q5_K_M",
+            # "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q5_K_S",
+            "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q6_K",
+            "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q8_0",
+
+            "majentik/gemma-4-12B-it-RotorQuant-GGUF-Q5_K_M|CPU|32768",
+            "majentik/gemma-4-26B-A4B-it-RotorQuant-GGUF-Q5_K_M|CPU|32768",
+            "majentik/gemma-4-26B-A4B-it-RotorQuant-GGUF-Q8_0|CPU|32768",
+
+            "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|CPU|32768|Q6_K",
+            "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|CPU|32768|Q8_0",
+
+        ]
+        vacancies_folder = r"C:\Py\AI-Server\test_cases\test_vacancies\03"
     else:
         prompt_files = []
         test_models = []
-    return prompt_files, test_models
+        vacancies_folder = r"C:\Py\AI-Server\test_cases\test_vacancies\01"
+    return prompt_files, test_models, vacancies_folder
 
 
-def run_models_on_vacancies(version, vacancies_dir: str):
+def run_models_on_vacancies(version):
     """Benchmark models on real vacancy text files against ground truth JSONs."""
-    client = TextToTextClient()
-    vacancies_path = Path(vacancies_dir)
-
     VACANCY_TIMEOUT = 60 * 20
     VACANCY_TIMEOUT_0 = 3600
 
-    prompt_files, test_models = get_prompt_and_model(version)
+    prompt_files, test_models, vacancies_dir = get_prompt_and_model(version)
+    vacancies_path = Path(vacancies_dir)
+
+    client = TextToTextClient()
 
     # Find all vacancy txt files and their corresponding result jsons
     vacancies = []

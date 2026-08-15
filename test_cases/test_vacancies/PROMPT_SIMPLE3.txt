@@ -96,15 +96,13 @@ Operating Systems (3):
 Linux, Windows, macOS.
 
 ⚠️ CRITICAL OUTPUT INSTRUCTIONS ⚠️
-Your response MUST contain ONLY a valid, well-formatted, and parsable JSON object.
-DO NOT wrap the JSON in markdown code blocks (no ```json ... ```).
+Output ONLY a valid, well-formatted JSON object.
+NO markdown formatting (no json or), NO introductory text, NO trailing whitespace. (no ```json ... ```)
 DO NOT include any introductory text, greetings, comments, or explanations.
-DO NOT include any trailing characters or whitespace outside the JSON.
-Ensure all keys and string values are enclosed in double quotes (").
-Ensure there are no trailing commas in arrays or objects.
-Array Rule: Fields explicitly marked as arrays (EmployerCountry, CandidateCountry, CandidateNoCountry, CertificationsRequired, RequiredLanguages) MUST be JSON arrays, even if there is only one item (e.g., ["USA"], never "USA").
+Use null (unquoted) for missing general values.
+Fields marked as arrays MUST be JSON arrays (e.g., ["USA"], never "USA").
 Missing Values Rule: If a general value (like Title, Salary, or yes/no fields) is not found use null without quotes.
-If a technical proficiency is not found, use the string "no". Do not use the string "null" or "not found".
+If a technical proficiency is not found, do not include it in any list.
 
 Expected JSON Structure:
 {
@@ -142,7 +140,7 @@ Expected JSON Structure:
 "JobId": "121200",
 "VacancySite": "IBM",
 "VacancyURL": "https://ibm.com/jobs/121200-senior-data-engineer-pipeline",
-"ApplyURL": null,
+"ApplyURL": "https://ibm.com/jobs-apply/121200-senior-data-engineer-pipeline",
 "PublicationDate": "3 days ago",
 "ApplicantsCount": 1000,
 "expert": ["SQL", "Python", "Windows"]

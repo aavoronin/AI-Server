@@ -1,0 +1,60 @@
+{
+  "Title": "Data Engineer",
+  "Level": "Senior",
+  "SalaryMin": "110400",
+  "SalaryMax": "165600",
+  "SalaryCurrency": "USD",
+  "SalaryPeriod": "year",
+  "EmploymentType": "office",
+  "FullTime": "yes",
+  "EmployerCountry": [
+    "USA"
+  ],
+  "EmployerCity": "Burbank",
+  "EmployerState": "CA",
+  "EmployerTimezone": null,
+  "CandidateCountry": null,
+  "CandidateNoCountry": null,
+  "RelocationOffered": null,
+  "RelocationBudget": null,
+  "RelocationBudgetCurrency": null,
+  "VisaSponsorship": null,
+  "ContractType": "permanent",
+  "WorkingHoursPerWeek": null,
+  "CompanyName": "Pluto TV",
+  "CompanyIndustry": "Media and Entertainment",
+  "CompanySize": null,
+  "MinYearsExperience": "4",
+  "MaxYearsExperience": null,
+  "EducationLevel": "bachelor",
+  "CertificationsRequired": null,
+  "SecurityClearance": "none",
+  "HealthInsurance": "yes",
+  "Urgency": null,
+  "HiringManagerName": null,
+  "RequiredLanguages": [
+    "English"
+  ],
+  "JobId": "4336294444",
+  "VacancySite": "LinkedIn",
+  "VacancyURL": "https://www.linkedin.com/jobs/view/4336294444/",
+  "ApplyURL": "https://careers.paramount.com/job/Burbank-Senior-Data-Engineer-CA-91505/1343190300/",
+  "PublicationDate": "2 weeks ago",
+  "ApplicantsCount": 100,
+  "expert": [
+    "Python",
+    "SQL",
+    "BigQuery SQL",
+    "ETL",
+    "ELT"
+  ],
+  "required": [
+    "Airflow",
+    "GCP"
+  ],
+  "nice-to_have": [
+    "Spark",
+    "Kafka",
+    "Salesforce"
+  ]
+}

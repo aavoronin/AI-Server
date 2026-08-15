@@ -1,0 +1,96 @@
+Pluto TV
+Senior Data Engineer https://www.linkedin.com/jobs/view/4336294444/?trackingId=FV%2FE0PM%2FAk306Pcqzfkhfg%3D%3D&refId=mo1wGsg8iQYn%2FNvSVHtjdg%3D%3D&eBP=NOT_ELIGIBLE_FOR_CHARGING&alternateChannel=search&isJobSearch=false
+https://www.linkedin.com/jobs/search-results/?currentJobId=4336294444&eBP=NOT_ELIGIBLE_FOR_CHARGING&refId=mo1wGsg8iQYn%2FNvSVHtjdg%3D%3D&trackingId=FV%2FE0PM%2FAk306Pcqzfkhfg%3D%3D&keywords=senior%20Data%20Engineer%20in%20USA%20California%20posted%20in%20the%20past%2015%20days&origin=SEMANTIC_SEARCH_LANDING_PAGE&start=50#
+Burbank, CA
+·
+Reposted 2 weeks ago
+·
+Over 100 people clicked apply
+Promoted by hirer ·
+Responses managed off LinkedIn
+On-site https://www.linkedin.com/jobs/search-results/?currentJobId=4336294444&eBP=NOT_ELIGIBLE_FOR_CHARGING&refId=mo1wGsg8iQYn%2FNvSVHtjdg%3D%3D&trackingId=FV%2FE0PM%2FAk306Pcqzfkhfg%3D%3D&keywords=senior%20Data%20Engineer%20in%20USA%20California%20posted%20in%20the%20past%2015%20days&origin=SEMANTIC_SEARCH_LANDING_PAGE&start=50
+Full-time https://www.linkedin.com/jobs/search-results/?currentJobId=4336294444&eBP=NOT_ELIGIBLE_FOR_CHARGING&refId=mo1wGsg8iQYn%2FNvSVHtjdg%3D%3D&trackingId=FV%2FE0PM%2FAk306Pcqzfkhfg%3D%3D&keywords=senior%20Data%20Engineer%20in%20USA%20California%20posted%20in%20the%20past%2015%20days&origin=SEMANTIC_SEARCH_LANDING_PAGE&start=50
+Apply https://www.linkedin.com/safety/go/?url=https%3A%2F%2Fcareers%2Eparamount%2Ecom%2Fjob%2FBurbank-Senior-Data-Engineer-CA-91505%2F1343190300%2F%3FfeedId%3D404800%26utm_source%3DLinkedInJobPostings%26utm_campaign%3DParamount_LinkedIn&urlhash=HF1O&mt=qu8y3Cw_YrK6BQeabW6gwuEA1R17NaHNE7DsgWjjkfH08le0HS-vuUUUx6Yd1EycqJGYCfj4q4nmKaDkAQw8u3ioT2E&isSdui=true
+Save
+Your profile and resume
+match some
+required qualifications
+Show match details https://www.linkedin.com/preload/guideOverlay/?interop=guideOverlay&query=Show+match+details&originalThreadMailbox=urn%3Ali%3AguideJobs%3AACoAABgQ2doB7tVC8-sZfLQ9nEX5BA4jp6w3cmY&conversationUrn=urn%3Ali%3Afsu_guideConversationV2%3Aurn%3Ali%3Aguide%3A141e52d5af58d0db971edf02bdb2886a01109233ebb559beeeeb60632f430fc1%7Eurn%3Ali%3AguideJobs%3AACoAABgQ2doB7tVC8-sZfLQ9nEX5BA4jp6w3cmY&contextUrns=urn%3Ali%3Aguide%3A141e52d5af58d0db971edf02bdb2886a01109233ebb559beeeeb60632f430fc1&intent=GuideIntent_JOB_SEEKING_AGENT&originalIntent=GuideIntent_JOB_SEEKING_AGENT&trackingId=BFd4VdHqQiCvDZ25sXY2Dg%3D%3D&customContext=subIntent%7E%3AJobSeekerAgentIntent_JOB_FIT_EXPLANATION%2CjobFitLevel%7E%3AMemberJobFitClassification_MEDIUM%2CjobPostingId%7E%3A4336294444%2ChasHistory%7E%3Afalse&isZeroState=true&pageContextJobPostingUrns=urn%3Ali%3Afsd_jobPosting%3A4336294444
+BETA • Is this information helpful?
+https://www.linkedin.com/jobs/search-results/?currentJobId=4336294444&eBP=NOT_ELIGIBLE_FOR_CHARGING&refId=mo1wGsg8iQYn%2FNvSVHtjdg%3D%3D&trackingId=FV%2FE0PM%2FAk306Pcqzfkhfg%3D%3D&keywords=senior%20Data%20Engineer%20in%20USA%20California%20posted%20in%20the%20past%2015%20days&origin=SEMANTIC_SEARCH_LANDING_PAGE&start=50
+About the job
+#WeAreParamount on a mission to unleash the power of content… you in?
+We’ve got the brands, we’ve got the stars, we’ve got the power to achieve our mission to entertain the planet – now all we’re missing is… YOU! Becoming a part of Paramount means joining a team of passionate people who not only recognize the power of content but also enjoy a touch of fun and uniqueness. Together, we co-create moments that matter – both for our audiences and our employees – and aim to leave a positive mark on culture.
+In This Role You’ll:
+The Senior Data Engineer should possess a deep sense of curiosity and a passion for building data pipelines, data structures and data products and the ability to communicate data structures and tools throughout the Paramount Digital Media organization.
+The candidate for this role will use their skills in reverse engineering, analytics, and creative, experimental solutions to devise data and BI solutions. They will have experience supporting data pipeline development, which includes machine learning algorithms using disparate data sources. They will work closely with BI, Research, Engineering, Marketing, Finance, and Product teams to implement data-driven plans that drive the business. They will also be able to lead a project from inception to completion, as well as help mentor junior members of the team on standard processes and approaches around data.
+Responsibilities Include:
+Works with large volumes of traffic data and user behaviors to build pipelines that enhance raw data.
+Able to break down and communicate highly complex data problems into simple, feasible solutions.
+Extract patterns from large datasets and transform data into an informational advantage.
+Find answers to business questions via hands-on exploration of data sets via Jupyter, SQL, dashboards, statistical analysis, and data visualizations.
+Partner with the internal product and business intelligence teams to determine the best approach around data ingestion, structure, and storage, and ensure successful implementation in partnership with the team.
+Lead initiatives to improve data quality and effectiveness by contributing ideas and collaborating with engineering, BI teams, and business units to implement changes.
+Ongoing development of technical solutions while developing and maintaining documentation, at times training impacted teams.
+Early on collaboration with the team on internal initiatives to create strategies that improve company processes.
+Look at ways of improving efficiency by staying current on the latest technology and trends and introducing team members to such.
+Develop prototypes to proof out strategies for data pipelines and products.
+Basic Qualifications You Bring:
+Bachelor's degree and 4+ years of experience in Data Engineering and Analytics fields or consulting roles with a focus on digital analytics implementations.
+Experience with large scale data warehouse management systems such as BigQuery with advanced level understanding of warehouse cost management and query optimization
+Proficient in Python.
+Experience with Airflow or equivalent tools for orchestration of pipelines.
+Experience with Data Modeling of performant table structures.
+Able to write SQL to perform common types of analysis and transformations.
+Strong problem-solving and creative-thinking skills.
+Ability to design and implement technical solutions, maintain accurate documentation, and deliver training to impacted teams as needed.
+Experience developing solutions to business requirements via hands-on discovery and exploration of data.
+Excellent written and verbal communication skills, including the ability to communicate technical concepts to non-technical audiences, as well as translating business requirements into Data Solutions
+Strong experience with ETL & ELT.
+Experience building and deploying applications on GCP cloud platform.
+Influences and applies data standards, policies, and procedures
+Builds strong commitment within the team to support the appropriate team priorities
+Knowledge of new and evolving technologies via formal training and self-directed education
+Bonus Skills:
+Experience with BigQuery and other GCP technologies.
+Experience with Docker and container deployment.
+Experience with Marketing tools like Kochava, Braze, Branch, Salesforce Marketing Cloud is a plus.
+Experience with exploratory data analysis using tools like iPython Notebook, Pandas & matplotlib, etc.
+Familiarity in Hadoop pipelines using Spark, Kafka.
+Familiar with GIT.
+Familiar with Adobe Analytics (Omniture) or Google Analytics.
+Digital marketing strategy including site, video, social media, SEM, SEO, and display advertising
+Paramount Skydance Corporation (NASDAQ: PSKY) is a leading global media and entertainment company that creates premium content and experiences for audiences worldwide. Driven by iconic studios, networks and streaming services, Paramount's portfolio of consumer brands includes CBS, Showtime Networks, Paramount Pictures, Nickelodeon, MTV, Comedy Central, BET, Paramount+, and Pluto TV, among others. Paramount delivers the largest share of the U.S. television audience and boasts one of the industry's most important and extensive libraries of TV and film titles. In addition to offering innovative streaming services and digital video products, the company provides powerful capabilities in production, distribution and advertising solutions.
+Additional Information
+Hiring Salary Range: $110,400.00 - 165,600.00.
+The hiring salary range for this position applies to New York City, California, Colorado, Washington state, and most other geographies. Starting pay for the successful applicant depends on a variety of job-related factors, including but not limited to geographic location, market demands, experience, training, and education. The benefits available for this position include medical, dental, vision, 401(k) plan, life insurance coverage, disability benefits, tuition assistance program and PTO or, if applicable, as otherwise dictated by the appropriate Collective Bargaining Agreement. This position is bonus eligible.
+What We Offer:
+Attractive compensation and comprehensive benefits packages. Check out our full list of benefits here: https://www.paramount.com/careers/benefits
+Generous paid time off.
+An exciting and fulfilling opportunity to be part of one of Paramount’s most dynamic teams.
+Opportunities for both on-site and virtual engagement events.
+Unique opportunities to make meaningful connections and build a vibrant community, both inside and outside the workplace.
+Explore life at Paramount: https://www.paramount.com/careers/life-at-paramount
+Paramount is an equal opportunity employer (EOE) including disability/vet.
+At Paramount, the spirit of inclusion feeds into everything that we do, on-screen and off. From the programming and movies we create to employee benefits/programs and social impact outreach initiatives, we believe that opportunity, access, resources and rewards should be available to and for the benefit of all. Paramount is proud to be an equal opportunity workplace. We are committed to equal employment opportunity regardless of race, color, ethnicity, ancestry, religion, creed, sex, national origin, sexual orientation, age, citizenship status, marital status, disability, gender identity, gender expression, and Veteran status.
+If you are a qualified individual with a disability or a disabled veteran, you may request a reasonable accommodation if you are unable or limited in your ability to use or access https://www.paramount.com/careers as a result of your disability. You can request reasonable accommodations by calling 212.846.5500 or by sending an email to paramountaccommodations@paramount.com. Only messages left for this purpose will be returned.
+…
+more
+Benefits found in job post
+Tuition assistance
+Unlock hiring insights on Pluto TV
+16%
+employee growth
+Chart
+Chart with 25 data points.
+The chart has 1 X axis displaying Time. Data ranges from 2024-07-01 00:00:00 to 2026-07-01 00:00:00.
+The chart has 1 Y axis displaying values. Data ranges from 659 to 795.
+End of interactive chart.
+Applicant education level
+54%
+have a Master's Degree
+Applicant seniority level
+67%
+Entry level applicants
+Try Premium for AED 0 https://www.linkedin.com/premium/products/?upsellOrderOrigin=Tracking%3Av1%3Ajob_details_page_insights_upsell%3AJob+Seeker%3AIn-Product&utype=job&referenceId=USd1%2B2M3T8CP3J3lMX8Z1w%3D%3D&isSS=false&upsellSlotId=JOB_DETAILS_COMPANY_AIQ_INSIGHTS
+1-month free trial. Easy to cancel. We’ll remind you 7 days before your trial ends.
