@@ -1,0 +1,63 @@
+{
+  "Title": "MLOps Engineer",
+  "Level": "Senior",
+  "SalaryMin": null,
+  "SalaryMax": null,
+  "SalaryCurrency": null,
+  "SalaryPeriod": null,
+  "EmploymentType": "hybrid",
+  "FullTime": "yes",
+  "EmployerCountry": [
+    "Cyprus"
+  ],
+  "EmployerCity": "Paphos",
+  "EmployerState": null,
+  "EmployerTimezone": null,
+  "CandidateCountry": null,
+  "CandidateNoCountry": null,
+  "RelocationOffered": null,
+  "RelocationBudget": null,
+  "RelocationBudgetCurrency": null,
+  "VisaSponsorship": null,
+  "ContractType": "permanent",
+  "WorkingHoursPerWeek": null,
+  "CompanyName": "JetBrains",
+  "CompanyIndustry": "Software Development",
+  "CompanySize": "1001-5000",
+  "MinYearsExperience": "3",
+  "MaxYearsExperience": null,
+  "EducationLevel": null,
+  "CertificationsRequired": null,
+  "SecurityClearance": "none",
+  "HealthInsurance": null,
+  "Urgency": null,
+  "HiringManagerName": null,
+  "RequiredLanguages": [
+    "English"
+  ],
+  "JobId": "4356579879",
+  "VacancySite": "LinkedIn",
+  "VacancyURL": "https://www.linkedin.com/jobs/view/4356579879/",
+  "ApplyURL": "https://job-boards.eu.greenhouse.io/jetbrains/jobs/4764813101?gh_src=5m87q0q2teu",
+  "PublicationDate": "2 days ago",
+  "ApplicantsCount": 23,
+  "expert": [
+    "Python",
+    "GCP",
+    "AWS",
+    "MLOps"
+  ],
+  "required": [
+    "Airflow",
+    "Dagster",
+    "Machine Learning",
+    "Fine-Tuning"
+  ],
+  "nice-to_have": [
+    "NLP",
+    "Java",
+    "Kotlin",
+    "LLMs",
+    "Transformers"
+  ]
+}

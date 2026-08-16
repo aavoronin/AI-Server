@@ -1,0 +1,59 @@
+{
+  "Title": "Data Engineer",
+  "Level": "Senior",
+  "SalaryMin": 140000,
+  "SalaryMax": 348000,
+  "SalaryCurrency": "USD",
+  "SalaryPeriod": "year",
+  "EmploymentType": "hybrid",
+  "FullTime": "yes",
+  "EmployerCountry": [
+    "USA"
+  ],
+  "EmployerCity": "New York",
+  "EmployerState": "NY",
+  "EmployerTimezone": null,
+  "CandidateCountry": [
+    "USA"
+  ],
+  "CandidateNoCountry": [],
+  "RelocationOffered": null,
+  "RelocationBudget": null,
+  "RelocationBudgetCurrency": null,
+  "VisaSponsorship": null,
+  "ContractType": "permanent",
+  "WorkingHoursPerWeek": null,
+  "CompanyName": "Figma",
+  "CompanyIndustry": "Design Services",
+  "CompanySize": "1001-5000",
+  "MinYearsExperience": 4,
+  "MaxYearsExperience": null,
+  "EducationLevel": null,
+  "CertificationsRequired": [],
+  "SecurityClearance": "none",
+  "HealthInsurance": "yes",
+  "Urgency": null,
+  "HiringManagerName": null,
+  "RequiredLanguages": [
+    "English"
+  ],
+  "JobId": "3970352584",
+  "VacancySite": "LinkedIn",
+  "VacancyURL": "https://www.linkedin.com/jobs/view/3970352584/",
+  "ApplyURL": "https://boards.greenhouse.io/figma/jobs/5220003004?gh_jid=5220003004&gh_src=28109e334us",
+  "PublicationDate": "1 week ago",
+  "ApplicantsCount": 100,
+  "expert": [
+    "SQL",
+    "Python"
+  ],
+  "required": [
+    "Snowflake SQL",
+    "dbt",
+    "Dagster",
+    "ETL"
+  ],
+  "nice-to_have": [
+    "Salesforce"
+  ]
+}
