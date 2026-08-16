@@ -1,3 +1,52 @@
+
+==========================================================================================
+Model ID                                           | Avg Score    | Total Time
+------------------------------------------------------------------------------------------
+NikolayKozloff/gemma-3-4b-it-Q8_0-GGUF|GPU|32768   | 55.41%    | 0:08
+rktmeister/Meta-Llama-3.1-8B-Instruct-Q5_K_M-GGUF|GPU|32768 | 60.81%    | 0:08
+matrixportalx/Llama-3.3-8B-Instruct-128K-Q5_K_M-GGUF|GPU|32768 | 56.76%    | 0:08
+majentik/gemma-4-12B-it-RotorQuant-GGUF-Q5_K_M|CPU|32768 | 81.08%    | 2:17
+majentik/gemma-4-26B-A4B-it-RotorQuant-GGUF-Q5_K_M|CPU|32768 | 27.03%    | 3:47
+majentik/gemma-4-12B-RotorQuant-GGUF-Q8_0|CPU|32768 | 27.03%    | 10:41
+KikoCis/gemma-4-31b-it-Q3_K_M-GGUF|CPU|32768       | 27.03%    | 19:37
+Ma7ee7/Qwen3.8_1.2B_LFM_Distillation_GGUF|GPU|32768|Q5_K_M | 27.03%    | 0:01
+neopolita/Qwen3.6-11B-A3B-Niwaki-4bit-GGUF|GPU|32768|Q4_K_M | 27.03%    | 0:04
+mradermacher/Llama-3.3-8B-Instruct-128K-Jbliterated-i1-GGUF|GPU|32768|Q6_K | 45.95%    | 0:45
+mradermacher/Llama-3.3-8B-Instruct-128K-Jbliterated-i1-GGUF|GPU|32768|Q5_K_M | 56.76%    | 0:08
+mradermacher/Llama-3.3-8B-Instruct-128K-Jbliterated-i1-GGUF|GPU|32768|Q4_K_M | 51.35%    | 0:08
+KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q4_K_M | 27.03%    | 0:28
+==========================================================================================
+
+==========================================================================================
+Model ID                                           | Avg Score    | Total Time
+------------------------------------------------------------------------------------------
+NikolayKozloff/gemma-3-4b-it-Q8_0-GGUF|GPU|32768   | 64.86%    | 0:07
+rktmeister/Meta-Llama-3.1-8B-Instruct-Q5_K_M-GGUF|GPU|32768 | 66.22%    | 0:08
+matrixportalx/Llama-3.3-8B-Instruct-128K-Q5_K_M-GGUF|GPU|32768 | 67.57%    | 0:07
+majentik/gemma-4-12B-it-RotorQuant-GGUF-Q5_K_M|CPU|32768 | 89.19%    | 1:34
+majentik/gemma-4-26B-A4B-it-RotorQuant-GGUF-Q5_K_M|CPU|32768 | 27.03%    | 3:31
+majentik/gemma-4-12B-RotorQuant-GGUF-Q8_0|CPU|32768 | 27.03%    | 10:03
+KikoCis/gemma-4-31b-it-Q3_K_M-GGUF|CPU|32768       | 27.03%    | 20:00
+Ma7ee7/Qwen3.8_1.2B_LFM_Distillation_GGUF|GPU|32768|Q5_K_M | 36.49%    | 0:01
+neopolita/Qwen3.6-11B-A3B-Niwaki-4bit-GGUF|GPU|32768|Q4_K_M | 83.78%    | 0:06
+mradermacher/Llama-3.3-8B-Instruct-128K-Jbliterated-i1-GGUF|GPU|32768|Q6_K | 44.59%    | 0:41
+mradermacher/Llama-3.3-8B-Instruct-128K-Jbliterated-i1-GGUF|GPU|32768|Q5_K_M | 50.00%    | 0:08
+mradermacher/Llama-3.3-8B-Instruct-128K-Jbliterated-i1-GGUF|GPU|32768|Q4_K_M | 52.70%    | 0:07
+KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q4_K_M | 27.03%    | 0:55
+
+==========================================================================================
+
+
+==========================================================================================
+Model ID                                           | Avg Score    | Total Time
+------------------------------------------------------------------------------------------
+majentik/gemma-4-26B-A4B-it-RotorQuant-GGUF-Q5_K_M|CPU|32768 | 23.98%    | 23:05
+majentik/gemma-4-26B-A4B-it-RotorQuant-GGUF-Q8_0|CPU|32768 | 32.53%    | 25:29
+majentik/gemma-4-12B-it-RotorQuant-GGUF-Q5_K_M|CPU|32768 | 79.00%    | 13:53
+majentik/gemma-4-12B-RotorQuant-GGUF-Q8_0|CPU|32768 | 30.11%    | 1:07:03
+Jackxuanxuan/Gemma-4-31B-JANG-Q8_4M-CRACK-GGUF|CPU|32768 | 23.98%    | 20:56
+==========================================================================================
+
 ==========================================================================================
 Model ID                                           | Avg Score    | Total Time
 ------------------------------------------------------------------------------------------

@@ -5,6 +5,7 @@ logger = logging.getLogger(__name__)
 
 
 class GGUFTextToTextModel(TextToTextModel):
+
     def __init__(self, model_id: str, cache_dir: str):
         super().__init__(model_id, cache_dir)
         self.model = None
@@ -25,7 +26,8 @@ class GGUFTextToTextModel(TextToTextModel):
                 try:
                     self.context_size = int(parts[2].strip())
                 except ValueError:
-                    logger.warning(f"Invalid context size in model_id: {model_id}")
+                    logger.warning(
+                        f"Invalid context size in model_id: {model_id}")
             if len(parts) >= 4:
                 self.quant_preference = parts[3].strip()
 
@@ -33,32 +35,44 @@ class GGUFTextToTextModel(TextToTextModel):
         # 1. Try using llama-cpp-python first (Recommended for GGUF)
         try:
             from llama_cpp import Llama
-            logger.info(f"Loading GGUF model with llama-cpp-python: {self.model_id}")
+
+            logger.info(
+                f"Loading GGUF model with llama-cpp-python: {self.model_id}")
+
             gguf_files = list(self.model_path.glob("*.gguf"))
             if not gguf_files:
-                raise FileNotFoundError(f"No .gguf file found in {self.model_path}")
+                raise FileNotFoundError(
+                    f"No .gguf file found in {self.model_path}")
 
             # Filter by quantization preference if provided
             if self.quant_preference:
-                preferred_files = [f for f in gguf_files if self.quant_preference.lower() in f.name.lower()]
+                preferred_files = [
+                    f for f in gguf_files
+                    if self.quant_preference.lower() in f.name.lower()
+                ]
                 if preferred_files:
                     gguf_path = str(preferred_files[0])
                 else:
                     logger.warning(
-                        f"Preferred quantization '{self.quant_preference}' not found. Falling back to first available.")
+                        f"Preferred quantization '{self.quant_preference}' "
+                        f"not found. Falling back to first available.")
                     gguf_path = str(gguf_files[0])
             else:
                 gguf_path = str(gguf_files[0])
 
             # Determine n_gpu_layers based on device preference
             model_id_lower = self.clean_model_id.lower()
-            if self.device_preference == "GPU" or "gemma-3-1b" in model_id_lower or "gemma-3-4b" in model_id_lower:
+            if (self.device_preference == "GPU"
+                    or "gemma-3-1b" in model_id_lower
+                    or "gemma-3-4b" in model_id_lower):
                 n_gpu_layers = -1  # All layers on GPU
             else:
                 n_gpu_layers = 0  # All layers on CPU
 
             logger.info(
-                f"Device preference: {self.device_preference}, Context size: {self.context_size}, GPU layers: {n_gpu_layers}")
+                f"Device preference: {self.device_preference}, "
+                f"Context size: {self.context_size}, "
+                f"GPU layers: {n_gpu_layers}")
 
             self.llm = Llama(
                 model_path=gguf_path,
@@ -70,29 +84,45 @@ class GGUFTextToTextModel(TextToTextModel):
             self.use_llama_cpp = True
             self.is_loaded = True
             self.increment_used()
-            logger.info(f"Successfully loaded GGUF {self.model_id} with llama-cpp-python")
+            logger.info(
+                f"Successfully loaded GGUF {self.model_id} "
+                f"with llama-cpp-python")
             return
+
         except ImportError:
-            logger.info("llama-cpp-python not found, falling back to transformers")
+            logger.info(
+                "llama-cpp-python not found, "
+                "falling back to transformers")
         except Exception as e:
-            logger.warning(f"Failed to load with llama-cpp-python: {e}. Falling back to transformers.")
+            logger.warning(
+                f"Failed to load with llama-cpp-python: {e}. "
+                f"Falling back to transformers.")
 
         # 2. Fallback to transformers
         try:
             from transformers import AutoTokenizer, AutoModelForCausalLM
-            logger.info(f"Loading GGUF model with Transformers: {self.model_id}")
+
+            logger.info(
+                f"Loading GGUF model with Transformers: {self.model_id}")
+
             gguf_files = list(self.model_path.glob("*.gguf"))
             if not gguf_files:
-                raise FileNotFoundError(f"No .gguf file found in {self.model_path}")
+                raise FileNotFoundError(
+                    f"No .gguf file found in {self.model_path}")
 
             # Filter by quantization preference if provided
             if self.quant_preference:
-                preferred_files = [f for f in gguf_files if self.quant_preference.lower() in f.name.lower()]
+                preferred_files = [
+                    f for f in gguf_files
+                    if self.quant_preference.lower() in f.name.lower()
+                ]
                 if preferred_files:
                     gguf_file = preferred_files[0].name
                 else:
                     logger.warning(
-                        f"Preferred quantization '{self.quant_preference}' not found. Falling back to first available.")
+                        f"Preferred quantization "
+                        f"'{self.quant_preference}' not found. "
+                        f"Falling back to first available.")
                     gguf_file = gguf_files[0].name
             else:
                 gguf_file = gguf_files[0].name
@@ -111,28 +141,54 @@ class GGUFTextToTextModel(TextToTextModel):
                         self.model_path, trust_remote_code=True
                     )
                 except Exception:
-                    # Fallback for known GGUF repos that lack tokenizer files locally
+                    # Fallback for known GGUF repos that lack
+                    # tokenizer files locally
                     model_id_lower = self.clean_model_id.lower()
                     if "gemma-4-e4b" in model_id_lower:
-                        self.tokenizer = AutoTokenizer.from_pretrained("google/gemma-4-E4B-it", trust_remote_code=True)
+                        self.tokenizer = \
+                            AutoTokenizer.from_pretrained(
+                                "google/gemma-4-E4B-it",
+                                trust_remote_code=True)
                     elif "gemma-3-4b" in model_id_lower:
-                        self.tokenizer = AutoTokenizer.from_pretrained("google/gemma-3-4b-it", trust_remote_code=True)
+                        self.tokenizer = \
+                            AutoTokenizer.from_pretrained(
+                                "google/gemma-3-4b-it",
+                                trust_remote_code=True)
                     elif "gemma-3-12b" in model_id_lower:
-                        self.tokenizer = AutoTokenizer.from_pretrained("google/gemma-3-12b-it", trust_remote_code=True)
+                        self.tokenizer = \
+                            AutoTokenizer.from_pretrained(
+                                "google/gemma-3-12b-it",
+                                trust_remote_code=True)
                     elif "gemma-3-1b" in model_id_lower:
-                        self.tokenizer = AutoTokenizer.from_pretrained("google/gemma-3-1b-it", trust_remote_code=True)
+                        self.tokenizer = \
+                            AutoTokenizer.from_pretrained(
+                                "google/gemma-3-1b-it",
+                                trust_remote_code=True)
                     elif "qwen3-0.6b" in model_id_lower:
-                        self.tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen3-0.6B", trust_remote_code=True)
+                        self.tokenizer = \
+                            AutoTokenizer.from_pretrained(
+                                "Qwen/Qwen3-0.6B",
+                                trust_remote_code=True)
                     elif "qwen3-1.7b" in model_id_lower:
-                        self.tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen3-1.7B", trust_remote_code=True)
+                        self.tokenizer = \
+                            AutoTokenizer.from_pretrained(
+                                "Qwen/Qwen3-1.7B",
+                                trust_remote_code=True)
                     elif "smollm-135m-instruct" in model_id_lower:
-                        self.tokenizer = AutoTokenizer.from_pretrained("HuggingFaceTB/SmolLM2-135M-Instruct",
-                                                                       trust_remote_code=True)
+                        self.tokenizer = \
+                            AutoTokenizer.from_pretrained(
+                                "HuggingFaceTB/SmolLM2-135M-Instruct",
+                                trust_remote_code=True)
                     elif "smollm-135m" in model_id_lower:
-                        self.tokenizer = AutoTokenizer.from_pretrained("HuggingFaceTB/SmolLM2-135M",
-                                                                       trust_remote_code=True)
+                        self.tokenizer = \
+                            AutoTokenizer.from_pretrained(
+                                "HuggingFaceTB/SmolLM2-135M",
+                                trust_remote_code=True)
                     elif "bge-small-en-v1.5" in model_id_lower:
-                        self.tokenizer = AutoTokenizer.from_pretrained("BAAI/bge-small-en-v1.5", trust_remote_code=True)
+                        self.tokenizer = \
+                            AutoTokenizer.from_pretrained(
+                                "BAAI/bge-small-en-v1.5",
+                                trust_remote_code=True)
                     else:
                         raise
 
@@ -143,16 +199,24 @@ class GGUFTextToTextModel(TextToTextModel):
                 device_map="auto",
                 trust_remote_code=True
             )
+
             self.use_llama_cpp = False
             self.is_loaded = True
             self.increment_used()
-            logger.info(f"Successfully loaded GGUF {self.model_id} with Transformers")
+            logger.info(
+                f"Successfully loaded GGUF {self.model_id} "
+                f"with Transformers")
+
         except ImportError as e:
-            logger.error(f"Failed to load GGUF model {self.model_id}: {e}")
-            logger.error("Please install the 'gguf' package: pip install 'gguf>=0.10.0'")
+            logger.error(
+                f"Failed to load GGUF model {self.model_id}: {e}")
+            logger.error(
+                "Please install the 'gguf' package: "
+                "pip install 'gguf>=0.10.0'")
             raise
         except Exception as e:
-            logger.error(f"Failed to load GGUF model {self.model_id}: {e}")
+            logger.error(
+                f"Failed to load GGUF model {self.model_id}: {e}")
             raise
 
     def unload(self):
@@ -164,6 +228,7 @@ class GGUFTextToTextModel(TextToTextModel):
                 del self.model
             if self.tokenizer is not None:
                 del self.tokenizer
+
         import gc
         gc.collect()
         self.is_loaded = False
@@ -173,25 +238,36 @@ class GGUFTextToTextModel(TextToTextModel):
         if not self.is_loaded:
             raise RuntimeError("Model is not loaded")
 
-        # Set max_new_tokens to 8192 for Gemma-3 models as per specification
+        # Set max_new_tokens to 8192 for Gemma-3 models
+        # as per specification
         model_id_lower = self.clean_model_id.lower()
-        default_max_tokens = 8192 if "gemma-3" in model_id_lower else 2048
-        max_new_tokens = kwargs.get("max_new_tokens", default_max_tokens)
-        temperature = kwargs.get("temperature", 0.7)
+        default_max_tokens = (
+            8192 if "gemma-3" in model_id_lower else 2048
+        )
+        max_new_tokens = kwargs.get(
+            "max_new_tokens", default_max_tokens)
+        temperature = kwargs.get("temperature", 0.1)
+        repeat_penalty = kwargs.get("repeat_penalty", 1.1)
 
         try:
             if self.use_llama_cpp:
-                messages = [{"role": "user", "content": prompt}]
+                messages = [
+                    {"role": "user", "content": prompt}
+                ]
                 output = self.llm.create_chat_completion(
                     messages=messages,
                     max_tokens=max_new_tokens,
                     temperature=temperature,
-                    top_p=0.9,
+                    top_p=0.85,
+                    repeat_penalty=repeat_penalty,
                     stream=False
                 )
-                return output["choices"][0]["message"]["content"].strip()
+                return output["choices"][0]["message"][
+                    "content"].strip()
             else:
-                messages = [{"role": "user", "content": prompt}]
+                messages = [
+                    {"role": "user", "content": prompt}
+                ]
                 text = self.tokenizer.apply_chat_template(
                     messages,
                     tokenize=False,
@@ -205,13 +281,19 @@ class GGUFTextToTextModel(TextToTextModel):
                     **model_inputs,
                     max_new_tokens=max_new_tokens,
                     temperature=temperature,
+                    repetition_penalty=repeat_penalty,
                     do_sample=True
                 )
-                output_ids = generated_ids[0][len(model_inputs.input_ids[0]):].tolist()
+                output_ids = generated_ids[0][
+                    len(model_inputs.input_ids[0]):
+                ].tolist()
                 content = self.tokenizer.decode(
                     output_ids, skip_special_tokens=True
                 ).strip("\n")
                 return content
+
         except Exception as e:
-            logger.error(f"Generation failed for GGUF {self.model_id}: {e}")
+            logger.error(
+                f"Generation failed for GGUF "
+                f"{self.model_id}: {e}")
             raise
