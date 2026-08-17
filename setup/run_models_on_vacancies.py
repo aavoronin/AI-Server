@@ -118,6 +118,7 @@ def get_prompt_and_model(version) -> tuple[list[str], list[str], str]:
             "PROMPT_SIMPLE5.txt"
         ]
         test_models = [
+            #"LordAce9/Gemma-4-31B-it-QAT-MX46A_S-GGUF|CPU|16384|MX46A_S",
             "NikolayKozloff/gemma-3-1b-it-Q8_0-GGUF|GPU|32768",
             "NikolayKozloff/gemma-3-4b-it-Q8_0-GGUF|GPU|32768",
             "rktmeister/Meta-Llama-3.1-8B-Instruct-Q5_K_M-GGUF|GPU|32768",
@@ -137,10 +138,6 @@ def get_prompt_and_model(version) -> tuple[list[str], list[str], str]:
             #"neopolita/Qwen3.6-11B-A3B-Niwaki-4bit-GGUF|GPU|32768|Q4_K_M",
             #"neopolita/Qwen3.6-11B-A3B-Niwaki-4bit-GGUF|GPU|32768|UD-Q3K",
 
-            "mradermacher/Llama-3.3-8B-Instruct-128K-Jbliterated-i1-GGUF|GPU|32768|Q6_K",
-            "mradermacher/Llama-3.3-8B-Instruct-128K-Jbliterated-i1-GGUF|GPU|32768|Q5_K_M",
-            "mradermacher/Llama-3.3-8B-Instruct-128K-Jbliterated-i1-GGUF|GPU|32768|Q4_K_M",
-
             #"KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q6_K",
             #"KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q8_0",
             #"KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q5_K_M",
@@ -153,16 +150,28 @@ def get_prompt_and_model(version) -> tuple[list[str], list[str], str]:
             # "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|CPU|32768|Q6_K",
             # "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|CPU|32768|Q8_0",
 
-            "majentik/gemma-4-12B-it-RotorQuant-GGUF-Q5_K_M|CPU|32768",
-            "majentik/gemma-4-26B-A4B-it-RotorQuant-GGUF-Q5_K_M|CPU|32768",
-            # "majentik/gemma-4-26B-A4B-it-RotorQuant-GGUF-Q8_0|CPU|32768",
 
-            #"majentik/gemma-4-12B-RotorQuant-GGUF-Q8_0|CPU|32768",
+            "Brunobkr/OFFELLIA_Q6_K_gemma-4-26B-A4B-it-ultra-uncensored-heretic.gguf|CPU|16384",
+            "Brunobkr/OFFELLIA_Q6_K_gemma-4-26B-A4B-it-ultra-uncensored-heretic.gguf|CPU|32768",
+            "majentik/gemma-4-12B-it-RotorQuant-GGUF-Q5_K_M|CPU|32768",
             "majentik/gemma-4-12B-it-RotorQuant-GGUF-Q5_K_M|GPU|16384",
             "majentik/gemma-4-12B-it-RotorQuant-GGUF-Q5_K_M|GPU|32768",
+            "majentik/gemma-4-12B-RotorQuant-GGUF-Q8_0|GPU|16384",
+            "majentik/gemma-4-12B-RotorQuant-GGUF-Q8_0|CPU|16384",
+            "majentik/gemma-4-26B-A4B-it-RotorQuant-GGUF-Q5_K_M|CPU|16384",
+            "majentik/gemma-4-26B-A4B-it-RotorQuant-GGUF-Q5_K_M|CPU|32768",
+            "majentik/gemma-4-26B-A4B-it-RotorQuant-GGUF-Q8_0|CPU|16384",
+            "majentik/gemma-4-26B-A4B-it-RotorQuant-GGUF-Q8_0|CPU|32768",
+            "Jackxuanxuan/Gemma-4-31B-JANG-Q8_4M-CRACK-GGUF|CPU|16384",
+            "mradermacher/Llama-3.3-8B-Instruct-128K-Jbliterated-i1-GGUF|GPU|32768|Q6_K",
+            "mradermacher/Llama-3.3-8B-Instruct-128K-Jbliterated-i1-GGUF|GPU|32768|Q5_K_M",
+            "mradermacher/Llama-3.3-8B-Instruct-128K-Jbliterated-i1-GGUF|GPU|32768|Q4_K_M",
+            "mradermacher/Llama-3.3-8B-Instruct-128K-Jbliterated-i1-GGUF|GPU|16384|Q6_K",
+            "mradermacher/Llama-3.3-8B-Instruct-128K-Jbliterated-i1-GGUF|GPU|16384|Q5_K_M",
+            "mradermacher/Llama-3.3-8B-Instruct-128K-Jbliterated-i1-GGUF|GPU|16384|Q4_K_M",
 
         ]
-        vacancies_folder = r"C:\Py\AI-Server\test_cases\test_vacancies\03"
+        vacancies_folder = r"C:\Py\AI-Server\test_cases\test_vacancies\04"
     else:
         prompt_files = []
         test_models = []
