@@ -5,7 +5,7 @@
   "SalaryMax": 348000,
   "SalaryCurrency": "USD",
   "SalaryPeriod": "year",
-  "EmploymentType": "hybrid",
+  "EmploymentType": "remote",
   "FullTime": "yes",
   "EmployerCountry": [
     "USA"
@@ -21,7 +21,7 @@
   "RelocationBudget": null,
   "RelocationBudgetCurrency": null,
   "VisaSponsorship": null,
-  "ContractType": "permanent",
+  "ContractType": null,
   "WorkingHoursPerWeek": null,
   "CompanyName": "Figma",
   "CompanyIndustry": "Design Services",
@@ -30,13 +30,11 @@
   "MaxYearsExperience": null,
   "EducationLevel": null,
   "CertificationsRequired": [],
-  "SecurityClearance": "none",
+  "SecurityClearance": null,
   "HealthInsurance": "yes",
   "Urgency": null,
   "HiringManagerName": null,
-  "RequiredLanguages": [
-    "English"
-  ],
+  "RequiredLanguages": [],
   "JobId": "3970352584",
   "VacancySite": "LinkedIn",
   "VacancyURL": "https://www.linkedin.com/jobs/view/3970352584/",
@@ -48,7 +46,7 @@
     "Python"
   ],
   "required": [
-    "Snowflake SQL",
+    "Snowflake",
     "dbt",
     "Dagster",
     "ETL"

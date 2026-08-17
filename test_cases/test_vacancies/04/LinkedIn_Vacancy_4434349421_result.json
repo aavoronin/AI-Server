@@ -1,5 +1,5 @@
 {
-  "Title": "Software Engineer",
+  "Title": "Data Solutions Architect",
   "Level": "Senior",
   "SalaryMin": null,
   "SalaryMax": null,
@@ -8,10 +8,10 @@
   "EmploymentType": "office",
   "FullTime": "yes",
   "EmployerCountry": [
-    "USA"
+    "United Arab Emirates"
   ],
-  "EmployerCity": "Tampa",
-  "EmployerState": "FL",
+  "EmployerCity": "Abu Dhabi",
+  "EmployerState": "Abu Dhabi Emirate",
   "EmployerTimezone": null,
   "CandidateCountry": [],
   "CandidateNoCountry": [],
@@ -21,39 +21,30 @@
   "VisaSponsorship": null,
   "ContractType": null,
   "WorkingHoursPerWeek": null,
-  "CompanyName": "JPMorganChase",
-  "CompanyIndustry": "Financial Services",
-  "CompanySize": "10001+",
-  "MinYearsExperience": 3,
+  "CompanyName": "La Fosse",
+  "CompanyIndustry": "Business Consulting and Services",
+  "CompanySize": "201-500",
+  "MinYearsExperience": 8,
   "MaxYearsExperience": null,
   "EducationLevel": null,
   "CertificationsRequired": [],
   "SecurityClearance": null,
-  "HealthInsurance": "yes",
+  "HealthInsurance": null,
   "Urgency": null,
-  "HiringManagerName": null,
+  "HiringManagerName": "Zandelee Lombaard",
   "RequiredLanguages": [],
-  "JobId": "4409137394",
+  "JobId": "4434349421",
   "VacancySite": "LinkedIn",
-  "VacancyURL": "https://www.linkedin.com/jobs/view/4409137394/",
+  "VacancyURL": "https://www.linkedin.com/jobs/view/4434349421/",
   "ApplyURL": null,
-  "PublicationDate": "4 days ago",
+  "PublicationDate": "1 month ago",
   "ApplicantsCount": 100,
-  "expert": [],
-  "required": [
-    "Python",
-    "PySpark",
-    "AWS"
+  "expert": [
+    "Databricks"
   ],
-  "nice-to_have": [
-    "EC2",
-    "EKS",
-    "RDS",
-    "S3",
-    "Lambdas",
-    "Hadoop",
-    "Databricks",
-    "ETL",
+  "required": [
+    "Microsoft Fabric",
     "Snowflake"
-  ]
+  ],
+  "nice-to_have": []
 }

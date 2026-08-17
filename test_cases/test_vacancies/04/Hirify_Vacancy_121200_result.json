@@ -8,29 +8,27 @@
   "EmploymentType": "remote",
   "FullTime": "yes",
   "EmployerCountry": [
-    "USA"
+    "US"
   ],
-  "EmployerCity": "Silicon Valley",
-  "EmployerState": "CA",
+  "EmployerCity": null,
+  "EmployerState": null,
   "EmployerTimezone": null,
-  "CandidateCountry": [
-    "USA"
-  ],
+  "CandidateCountry": [],
   "CandidateNoCountry": [],
   "RelocationOffered": "yes",
   "RelocationBudget": null,
   "RelocationBudgetCurrency": null,
   "VisaSponsorship": null,
-  "ContractType": "permanent",
+  "ContractType": null,
   "WorkingHoursPerWeek": null,
   "CompanyName": "Hirify Global",
-  "CompanyIndustry": "Technology Consulting",
+  "CompanyIndustry": "Tech Consultancy",
   "CompanySize": null,
   "MinYearsExperience": 5,
   "MaxYearsExperience": null,
   "EducationLevel": null,
   "CertificationsRequired": [],
-  "SecurityClearance": "none",
+  "SecurityClearance": null,
   "HealthInsurance": null,
   "Urgency": null,
   "HiringManagerName": null,
@@ -45,17 +43,22 @@
   "ApplicantsCount": null,
   "expert": [
     "Python",
-    "SQL"
+    "SQL",
+    "ETL"
   ],
   "required": [
-    "ETL",
     "AWS",
     "GCP",
     "Azure",
-    "MySQL"
+    "MySQL",
+    "MongoDB",
+    "DynamoDB",
+    "OpenSearch"
   ],
   "nice-to_have": [
     "Spark",
-    "Data Lakehouse"
+    "Pandas",
+    "Data Lakehouse",
+    "CI/CD"
   ]
 }

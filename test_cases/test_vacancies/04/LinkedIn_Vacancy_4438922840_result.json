@@ -1,14 +1,16 @@
 {
-  "Title": "Data Engineer",
+  "Title": "Data Engineering and Machine Learning",
   "Level": "Senior",
   "SalaryMin": null,
   "SalaryMax": null,
   "SalaryCurrency": null,
   "SalaryPeriod": null,
-  "EmploymentType": "remote",
+  "EmploymentType": "hybrid",
   "FullTime": "yes",
-  "EmployerCountry": [],
-  "EmployerCity": null,
+  "EmployerCountry": [
+    "United Kingdom"
+  ],
+  "EmployerCity": "London",
   "EmployerState": null,
   "EmployerTimezone": null,
   "CandidateCountry": [],
@@ -19,40 +21,29 @@
   "VisaSponsorship": null,
   "ContractType": null,
   "WorkingHoursPerWeek": null,
-  "CompanyName": "hirify.global",
-  "CompanyIndustry": "Gaming",
-  "CompanySize": null,
+  "CompanyName": "Quantum",
+  "CompanyIndustry": "Advertising Services",
+  "CompanySize": "51-200",
   "MinYearsExperience": null,
   "MaxYearsExperience": null,
   "EducationLevel": null,
   "CertificationsRequired": [],
   "SecurityClearance": null,
-  "HealthInsurance": null,
+  "HealthInsurance": "yes",
   "Urgency": null,
   "HiringManagerName": null,
   "RequiredLanguages": [
     "English"
   ],
-  "JobId": "717477",
-  "VacancySite": "Hirify",
-  "VacancyURL": "https://hirify.me/jobs/717477-lead-data-engineer",
-  "ApplyURL": null,
-  "PublicationDate": "2 days ago",
-  "ApplicantsCount": null,
-  "expert": [],
-  "required": [
-    "Apache Airflow",
-    "Apache Spark",
-    "ClickHouse",
-    "dbt",
-    "Kafka",
-    "Python",
-    "SQL",
-    "S3"
+  "JobId": "4438922840",
+  "VacancySite": "LinkedIn",
+  "VacancyURL": "https://www.linkedin.com/jobs/view/4438922840/",
+  "ApplyURL": "https://jobs.ashbyhq.com/quantum/edcf1cd9-c60c-4820-8775-3fc1b6a286ce/application",
+  "PublicationDate": "Reposted 1 week ago",
+  "ApplicantsCount": 98,
+  "expert": [
+    "Machine Learning"
   ],
-  "nice-to_have": [
-    "Apache Iceberg",
-    "AppsFlyer",
-    "MyTracker"
-  ]
+  "required": [],
+  "nice-to_have": []
 }

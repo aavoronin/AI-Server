@@ -1,0 +1,133 @@
+Vacancy URL: https://hirify.me/jobs/822371-senior-frontend-vanilla-javascript
+
+(1) Frontend-разработчик (Vanilla JavaScript) в NDA | Hirify
+Jobs
+Guides
+How to configure filters
+How to recognize scams
+For employers
+CV roasting
+Matches
+Applications
+Plus
+Enable Plus
+1
+AV
+Alexey Voronin
+aavoronin@gmail.com
+Settings
+Upgrade to Hirify Plus
+Profiles
+Show all
+Unnamed
+Dashboard
+Favorites
+Hidden vacancies
+Saved filters
+Sign Out
+Feed
+Jobs
+Filters
+Services
+Menu
+82
+Good job
+expand
+The role is crystal clear with great perks and a strong product focus. The salary is slightly below the market median, and the strict 'no-framework' approach is a niche choice that will appeal to those who love deep-diving into the browser API.
+Click for details
+Insufficient salary
+Modern but niche stack
+Strong domain
+Great perks
+Clear role scope
+Score by Hirify AI
+Back
+Save application
+NDA
+5 minutes ago
+Frontend-разработчик (Vanilla JavaScript)
+Show contacts
+250 000
+₽
+Work format
+remote
+Work type
+fulltime
+Grade
+senior
+git
+javascript
+html
+css
+bootstrap
+cross browser development
+frontend optimization
+video player
+Report
+Salary & Market
+Below
+250k ₽/mo
+190k ₽
+260k ₽
+median
+330k ₽
+Similar roles
+(28)
+~
+260k ₽/mo
+On international market:
+$127k/yr
+($85k - $187k)
+82
+Good job
+expand
+The role is crystal clear with great perks and a strong product focus. The salary is slightly below the market median, and the strict 'no-framework' approach is a niche choice that will appeal to those who love deep-diving into the browser API.
+Click for details
+Insufficient salary
+Modern but niche stack
+Strong domain
+Great perks
+Clear role scope
+Score by Hirify AI
+Match & Cover letter
+Will show your compatibility and write a letter
+Configure letter
+Match me
+Job description
+Кратко
+Frontend-разработчик (Vanilla JavaScript): разработка и оптимизация интерфейсов, дашбордов и кастомного видеоплеера для системы доставки видеоконтента с акцентом на скорость, интерактивность и точность. Фокус на создании кросс-браузерных UI-компонентов, аккуратном улучшении существующего кода и оптимизации работы фронтенда без избыточных фреймворков.
+Локация:
+удалённый формат работы
+Зарплата: от 250 000 ₽
+Компания
+NDA разрабатывает мультипетабайтное хранилище и систему доставки видеоконтента для международных медийных брендов.
+Что делать
+Разрабатывать и поддерживать UI-компоненты и интерфейсы.
+Создавать дашборды для работы с видеоконтентом.
+Разрабатывать кастомный видеоплеер со встроенным редактором.
+Аккуратно улучшать существующий код без необоснованного перехода на React.
+Оптимизировать скорость, интерактивность и стабильность фронтенда.
+Работать в команде над крупными цифровыми продуктами.
+Требования
+Опыт работы frontend-разработчиком на уровне Senior.
+Отличное знание современного JavaScript, HTML и CSS, включая понимание работы технологий «под капотом».
+Опыт точной и кросс-браузерной вёрстки и внимание к деталям.
+Понимание принципов HTTP/HTTPS, запросов и оптимизации фронтенда.
+Опыт работы с vanilla JavaScript, Bootstrap и Git.
+Опыт командной работы над крупными продуктами.
+Культура и преимущества
+Удалённая работа.
+Выплаты в рублях, долларах или криптовалюте.
+Квартальные премии и оплачиваемые отпуска.
+Performance review дважды в год.
+Ежегодные тимбилдинги в Турции, Таиланде и других странах.
+Опционная программа и профессиональное обучение за счёт компании.
+Be careful: if the employer asks you to log into their system using iCloud/Google, send codes/passwords, or run code/software, don't do it - these are scammers. Always click "Report" or contact support.
+More in guide →
+Категории
+Frontend-разработчик вакансии
+Senior Frontend-разработчик вакансии
+Git вакансии
+JavaScript вакансии
+HTML вакансии
+CSS вакансии

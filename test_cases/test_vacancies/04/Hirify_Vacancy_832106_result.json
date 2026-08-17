@@ -1,13 +1,15 @@
 {
-  "Title": "Data Engineer",
-  "Level": "Senior",
+  "Title": "Device Architect",
+  "Level": "Architect",
   "SalaryMin": null,
-  "SalaryMax": null,
-  "SalaryCurrency": null,
+  "SalaryMax": 10000,
+  "SalaryCurrency": "USD",
   "SalaryPeriod": null,
   "EmploymentType": "remote",
   "FullTime": "yes",
-  "EmployerCountry": [],
+  "EmployerCountry": [
+    "USA"
+  ],
   "EmployerCity": null,
   "EmployerState": null,
   "EmployerTimezone": null,
@@ -19,10 +21,10 @@
   "VisaSponsorship": null,
   "ContractType": null,
   "WorkingHoursPerWeek": null,
-  "CompanyName": "hirify.global",
-  "CompanyIndustry": "Gaming",
+  "CompanyName": "Unimatch Lab",
+  "CompanyIndustry": "Artificial Intelligence",
   "CompanySize": null,
-  "MinYearsExperience": null,
+  "MinYearsExperience": 7,
   "MaxYearsExperience": null,
   "EducationLevel": null,
   "CertificationsRequired": [],
@@ -33,26 +35,32 @@
   "RequiredLanguages": [
     "English"
   ],
-  "JobId": "717477",
+  "JobId": "832106",
   "VacancySite": "Hirify",
-  "VacancyURL": "https://hirify.me/jobs/717477-lead-data-engineer",
+  "VacancyURL": "https://hirify.me/jobs/832106-hardware-lead-device-architect",
   "ApplyURL": null,
-  "PublicationDate": "2 days ago",
+  "PublicationDate": "46 minutes ago",
   "ApplicantsCount": null,
   "expert": [],
   "required": [
-    "Apache Airflow",
-    "Apache Spark",
-    "ClickHouse",
-    "dbt",
-    "Kafka",
-    "Python",
-    "SQL",
-    "S3"
+    "Altium Designer",
+    "Allegro",
+    "Cadence",
+    "PCB",
+    "MCU",
+    "SoC",
+    "EMC",
+    "ESD",
+    "DFM",
+    "NPI",
+    "EVT",
+    "DVT",
+    "BOM",
+    "Gerber",
+    "AI"
   ],
   "nice-to_have": [
-    "Apache Iceberg",
-    "AppsFlyer",
-    "MyTracker"
+    "FCC",
+    "CE"
   ]
 }
