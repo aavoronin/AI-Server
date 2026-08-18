@@ -119,7 +119,7 @@ def get_prompt_and_model(version) -> tuple[list[str], list[str], str]:
         ]
         test_models = [
             #"LordAce9/Gemma-4-31B-it-QAT-MX46A_S-GGUF|CPU|16384|MX46A_S",
-            "NikolayKozloff/gemma-3-1b-it-Q8_0-GGUF|GPU|32768",
+            #"NikolayKozloff/gemma-3-1b-it-Q8_0-GGUF|GPU|32768",
             "NikolayKozloff/gemma-3-4b-it-Q8_0-GGUF|GPU|32768",
             "rktmeister/Meta-Llama-3.1-8B-Instruct-Q5_K_M-GGUF|GPU|32768",
             "matrixportalx/Llama-3.3-8B-Instruct-128K-Q5_K_M-GGUF|GPU|32768",

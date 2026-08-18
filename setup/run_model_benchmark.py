@@ -5,7 +5,7 @@ from typing import Any
 from collections import defaultdict
 
 from ai_clients.TextToTextClient import TextToTextClient
-from setup.start_server import print_model_debug_info
+from setup.print_model_debug_info import print_model_debug_info
 from setup.questions_helper import QuestionsHelper
 from setup.running_model_utils import (
     format_time, record_failure, evaluate_json_response,

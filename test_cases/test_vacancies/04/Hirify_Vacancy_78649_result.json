@@ -1,10 +1,10 @@
 {
-  "Title": "Frontend Developer",
-  "Level": "Senior",
-  "SalaryMin": 250000,
+  "Title": "Data Architect",
+  "Level": "Architect",
+  "SalaryMin": null,
   "SalaryMax": null,
-  "SalaryCurrency": "RUB",
-  "SalaryPeriod": "month",
+  "SalaryCurrency": null,
+  "SalaryPeriod": null,
   "EmploymentType": "remote",
   "FullTime": "yes",
   "EmployerCountry": [],
@@ -27,24 +27,30 @@
   "EducationLevel": null,
   "CertificationsRequired": [],
   "SecurityClearance": null,
-  "HealthInsurance": null,
+  "HealthInsurance": "yes",
   "Urgency": null,
   "HiringManagerName": null,
-  "RequiredLanguages": [],
-  "JobId": "822371",
+  "RequiredLanguages": [
+    "English"
+  ],
+  "JobId": "78649",
   "VacancySite": "Hirify",
-  "VacancyURL": "https://hirify.me/jobs/822371-senior-frontend-vanilla-javascript",
+  "VacancyURL": "https://hirify.me/jobs/78649-data-architect-solution-design-etl",
   "ApplyURL": null,
-  "PublicationDate": "5 minutes ago",
+  "PublicationDate": "6 months ago",
   "ApplicantsCount": null,
-  "expert": [
-    "JavaScript",
-    "HTML",
-    "CSS"
-  ],
+  "expert": [],
   "required": [
-    "Bootstrap",
-    "Git"
+    "SQL",
+    "Python",
+    "ETL",
+    "ELT",
+    "DWH",
+    "AWS",
+    "Spark"
   ],
-  "nice-to_have": []
+  "nice-to_have": [
+    "Azure",
+    "GCP"
+  ]
 }

@@ -1,10 +1,10 @@
 {
-  "Title": "Data Engineering and Machine Learning",
+  "Title": "Data Engineer",
   "Level": "Senior",
-  "SalaryMin": null,
-  "SalaryMax": null,
-  "SalaryCurrency": null,
-  "SalaryPeriod": null,
+  "SalaryMin": 100000,
+  "SalaryMax": 130000,
+  "SalaryCurrency": "GBP",
+  "SalaryPeriod": "year",
   "EmploymentType": "hybrid",
   "FullTime": "yes",
   "EmployerCountry": [

@@ -1,0 +1,118 @@
+Vacancy URL: https://hirify.me/jobs/78649-data-architect-solution-design-etl
+
+(1) Data Architect at NDA | Hirify
+Jobs
+Guides
+How to configure filters
+How to recognize scams
+For employers
+CV roasting
+Matches
+Applications
+Plus
+Enable Plus
+1
+AV
+Alexey Voronin
+aavoronin@gmail.com
+Settings
+Upgrade to Hirify Plus
+Profiles
+Show all
+Unnamed
+Dashboard
+Favorites
+Hidden vacancies
+Saved filters
+Sign Out
+Feed
+Jobs
+Filters
+Services
+Menu
+75
+Good job
+expand
+The role is well-defined with clear responsibilities and a modern tech stack, but the lack of salary information is a downside.
+Click for details
+Salary not specified
+Modern tech stack
+Clear responsibilities
+Flexible working hours
+Score by Hirify AI
+Back
+Save application
+NDA
+updated
+6 months ago
+Data Architect
+Show contacts
+Work format
+remote (Global)
+Work type
+fulltime
+Grade
+lead
+English
+b2
+python
+sql
+azure
+dwh
+etl
+aws
+gcp
+spark
+elt
+data lake
+Vacancy from Hirify Global, list of international tech companies
+Plus is required to make matches and apply
+Report
+75
+Good job
+expand
+The role is well-defined with clear responsibilities and a modern tech stack, but the lack of salary information is a downside.
+Click for details
+Salary not specified
+Modern tech stack
+Clear responsibilities
+Flexible working hours
+Score by Hirify AI
+Match & Cover letter
+Plus required for matching with this vacancy
+Get Plus
+Job description
+TL;DR
+Data Architect: Designing data engineering solutions and overall data architecture with an accent on ETL/ELT strategy, data pipe mappings and leading the discovery process. Focus on creating high-level Data Architecture, explaining every part of it for more than one project at a time, and conducting all required interviews and choosing the right project data team members.
+Location: Remote
+Company
+NDA is an international team: we have colleagues who work not only from the office but also remotely from all over the world.
+What you will do
+Planning the most proper solution design, partially designing Data Solution Architecture.
+Designing data engineering solutions and writing high-quality documentation related to every project in each phase.
+Designing ETL/ELT strategy: batch, streaming.
+Creating data pipe mappings.
+Leading overall discovery process related to data architecture for more than one project at a time.
+Conducting all required interviews and choosing the right project data team members.
+Requirements
+Experience in SQL, Python, ETL/ELT, Data/Delta Lakes, DWH.
+Knowledge of cloud platforms: AWS.
+Good expertise in Spark and AWS data Services.
+English: B2+
+Analytical and problem-solving skills.
+Nice to have
+Knowledge of Azure, GCP.
+Culture & Benefits
+Competitive compensation.
+Remote or office work and flexible working hours.
+Healthcare benefits: medical insurance and paid sick leave.
+Continuous education, mentoring, and professional development programs.
+A team with excellent tech expertise.
+Certifications paid by the company.
+Be careful: if the employer asks you to log into their system using iCloud/Google, send codes/passwords, or run code/software, don't do it - these are scammers. Always click "Report" or contact support.
+More in guide →
+Categories
+Software Architect jobs
+Python jobs
+SQL jobs
+AWS jobs
