@@ -1,0 +1,531 @@
+ROLE & TASK
+You are an expert technical recruiter and data extraction AI. Your task is to analyze a job description and extract specific details regarding the role's requirements, compensation, location, technical stack, and vacancy metadata.
+
+CRITICAL RULES — READ BEFORE PROCEEDING:
+1. Extract ONLY information explicitly stated in the vacancy text below.
+2. NEVER invent, guess, or copy values from the example JSON structure.
+3. If a value is not mentioned in the vacancy text, output null (without quotes).
+4. The example JSON shows KEYS ONLY. Every value in it is null. You must replace each null with the real value found in the text, or leave it as null if absent.
+5. Do NOT wrap output in markdown code blocks. Output raw JSON only.
+
+⛔ ANTI-HALLUCINATION RULES ⛔
+- If the vacancy text does not EXPLICITLY state a value, output null. Period.
+- Do NOT infer values from the company type, role description, or what seems "typical".
+- Do NOT assume a value is present because it would be "reasonable" for this kind of role.
+- The following fields MUST be null unless the vacancy text explicitly states them:
+  Urgency, EducationLevel, HealthInsurance, ContractType, SecurityClearance,
+  VisaSponsorship, ApplicantsCount, HiringManagerName, WorkingHoursPerWeek,
+  CompanySize, EmployerTimezone, EmployerState, MaxYearsExperience.
+- Example: "Business English classes" in benefits does NOT mean EducationLevel or HealthInsurance.
+- Example: "Remote-first and flexible schedule" does NOT mean Urgency or ContractType.
+
+QUESTIONS TO ANSWER
+1. General Vacancy Details
+Core Details:
+Title: What is the Job Title/Role for this vacancy?
+  IMPORTANT — STRIP seniority, technology names, and codes from the Title.
+  Examples:
+    "Senior Data Engineer (SQL, Python)" → "Data Engineer"
+    "Software Engineer III"              → "Software Engineer"
+    "Lead ML Ops Engineer"               → "ML Ops Engineer"
+    "Junior Backend Developer (Java)"     → "Backend Developer"
+  The seniority goes into the "Level" field instead.
+Level: What is the Seniority/Experience Level? (Options: Junior, Middle, Middle+, Senior, Architect)
+SalaryMin: What is the minimum salary/compensation? (e.g., 50000 for "50k-75k USD", 30 for "30-40 Euro per hour")
+SalaryMax: What is the maximum salary/compensation? (e.g., 75000 for "50k-75k USD", 40 for "30-40 Euro per hour")
+SalaryCurrency: What is the currency? (e.g., USD, EUR)
+SalaryPeriod: What is the pay period? (Options: year, month, week, hour)
+EmploymentType: What is the work arrangement? (Options: remote, hybrid, office)
+FullTime: Is this a full-time vacancy? (Options: yes, no)
+Location & Geography:
+EmployerCountry: What country or countries is the employer located in? MUST be an array of strings (e.g., ["USA"]).
+EmployerCity: City where the office is located (e.g., "Tampa", "London"). For several offices select headquarters or the first office.
+EmployerState: State/Region/Province (e.g., "FL", "Bavaria")
+EmployerTimezone: Timezone of the team (e.g., "EST", "CET")
+CandidateCountry: What countries must the candidate be located in? MUST be an array of strings (e.g., ["USA", "Canada"]).
+CandidateNoCountry: What countries is the candidate explicitly forbidden from being located in? MUST be an array of strings (e.g., ["Russia", "Iran"]).
+RelocationOffered: Is relocation assistance available? (Options: yes, no)
+RelocationBudget: Relocation budget amount if specified (e.g., "5000" for "5K EUR")
+RelocationBudgetCurrency: Relocation budget currency if specified (e.g., "EUR" for "5K EUR")
+VisaSponsorship: Will the company sponsor a work visa? (Options: yes, no)
+Employment & Contract:
+ContractType: Type of employment contract (Options: permanent, contract, freelance, internship, temp-to-perm)
+WorkingHoursPerWeek: Expected weekly hours (e.g., 40, 37.5)
+Company & Team:
+CompanyName: Name of the hiring company (e.g., "JPMorganChase")
+CompanyIndustry: Industry sector (e.g., "Financial Services", "Healthcare")
+CompanySize: Number of employees (e.g., "1-50", "51-200", "10001+")
+Experience & Education:
+MinYearsExperience: Minimum years of experience required (e.g., 3, 5)
+MaxYearsExperience: Maximum years of experience expected, if any (e.g., 7, 10)
+EducationLevel: Minimum education required (Options: high-school, bachelor, master, phd)
+CertificationsRequired: Required professional certifications (MUST be an array of strings, e.g., ["AWS Solutions Architect"])
+SecurityClearance: Required clearance level (Options: none, secret, top-secret, TS/SCI)
+Other questions:
+HealthInsurance: Health insurance offered? (Options: yes, no)
+Urgency: How fast they need to fill the role (Options: immediate, within-1-month, within-3-months, flexible)
+HiringManagerName: Name of the hiring manager (string)
+RequiredLanguages: Human languages required (MUST be an array of SINGLE WORD strings, e.g., ["English"], ["English", "German"]).
+Vacancy Metadata:
+JobId: The unique identifier for the job posting (e.g., "123456789").
+VacancySite: The platform or website where the job is posted (e.g., "LinkedIn", "Indeed", "HireHive").
+VacancyURL: The primary URL of the published job posting (string).
+ApplyURL: The specific URL for the application action, if different from VacancyURL (string).
+PublicationDate: When the job was posted or reposted (e.g., "2023-10-15", "4 days ago").
+ApplicantsCount: The number of applicants mentioned (e.g., 100, 200). If vacancy says "Over 100" or "100+" then answer "100".
+
+2. Technical Proficiencies — EXTRACTION RULES
+Scan the vacancy text for technologies. Classify ONLY the ones actually mentioned into these exact array keys:
+"expert": Mandatory, "must have", or heavy experience required. If it is included in vacancy title, it is expert.
+"required": simply listed as required without significant stress on expert knowledge
+"nice-to-have": listed as optional, bonus, or "nice-to-have"
+
+⛔ TECHNOLOGY EXTRACTION RULES ⛔
+- List ONLY technologies whose EXACT NAME appears in the vacancy text.
+- The taxonomy lists below are for CLASSIFICATION REFERENCE ONLY.
+- Do NOT list technologies from the taxonomy that are NOT mentioned in the vacancy text.
+- Each array element must be a SINGLE technology name (e.g., "Python", "AWS", "ETL").
+- Do NOT put phrases, descriptions, or multiple technologies in one array element.
+  WRONG: "required": ["ETL design, implementation, and maintenance"]
+  RIGHT: "required": ["ETL"]
+  WRONG: "required": ["AWS, GCP or Azure delivering data-centric product experiences"]
+  RIGHT: "required": ["AWS", "GCP", "Azure"]
+- Do NOT infer technologies from context. Only extract explicitly named ones.
+
+Technical Proficiency Taxonomy (REFERENCE ONLY — extract only what is in the text):
+Programming Languages (30):
+Python, SQL, Java, JavaScript, C++, Bash, C#, TypeScript, R, Go, PHP, Kotlin, Swift, Ruby, Rust, Scala, Dart, MATLAB, Perl, Objective-C, Julia, Lua, PowerShell, Solidity, Elixir, F#, C, GDScript, Ada, Haskell.
+SQL Dialects (15):
+PostgreSQL, MySQL, T-SQL, PL/SQL, Snowflake SQL, BigQuery SQL, PL/pgSQL, Redshift SQL, SQLite, Spark SQL, MariaDB, HiveQL, Teradata SQL, DB2 SQL, Trino SQL.
+BI Platforms (15):
+Power BI, Tableau, Looker, Qlik, QuickSight, MicroStrategy, SAP Analytics Cloud, Cognos, TIBCO Spotfire, Domo, Sisense, ThoughtSpot, Oracle Analytics, Metabase, Superset.
+ETL Tools (20):
+Airflow, dbt, Informatica, Spark, Glue, Azure Data Factory, Talend, DataStage, SSIS, Fivetran, Matillion, NiFi, Dagster, Airbyte, Alteryx, Apache Beam, Google Cloud Dataflow, Prefect, Pentaho, Flink.
+DWH Concepts (25):
+Star Schema, Snowflake Schema, 3NF, Data Vault, Columnstore, SCD, Fact Table, Dimension Table, Surrogate Key, Conformed Dimension, Data Mart, Data Lakehouse, OLAP, OLTP, ELT, ETL, CDC, Table Partitioning, Sharding, Materialized View, Data Lineage, Data Governance, Kimball Methodology, Data Mesh, Data Quality.
+AI/ML/Data Science Concepts (30):
+Machine Learning, Deep Learning, Neural Networks, NLP, Computer Vision, Reinforcement Learning, Supervised Learning, Unsupervised Learning, Transfer Learning, Generative AI, LLMs, Prompt Engineering, RAG, Fine-Tuning, Regression, Classification, Clustering, Random Forest, Gradient Boosting, K-Means, CNN, RNN, Transformers, Attention Mechanism, Tokenization, Embeddings, BERT, GPT, Model Evaluation, MLOps.
+Cloud Platforms (10):
+AWS, Azure, GCP, IBM Cloud, Oracle Cloud, Alibaba Cloud, Salesforce, DigitalOcean, VMware, Rackspace.
+Message Brokers & Streaming (6):
+Kafka, RabbitMQ, Redis, Pulsar, NATS, Redis Streams.
+Testing Frameworks (8):
+PyTest, Jest, Mocha, Cypress, Selenium, JUnit, Playwright, Postman.
+Collaboration & Project Management (6):
+Jira, Confluence, Notion, Slack, Microsoft Teams, Asana.
+Operating Systems (3):
+Linux, Windows, macOS.
+
+⚠️ CRITICAL OUTPUT INSTRUCTIONS ⚠️
+Output ONLY a valid, well-formatted JSON object.
+NO markdown formatting (no ```json or ```), NO introductory text, NO trailing whitespace.
+DO NOT include any introductory text, greetings, comments, or explanations.
+Use null (unquoted) for missing general values.
+Fields marked as arrays MUST be JSON arrays (e.g., ["USA"], never "USA").
+Missing Values Rule: If a general value (like Title, Salary, or yes/no fields) is not found use null without quotes.
+If a technical proficiency is not found, do not include it in any list.
+DO NOT copy any values from the example below. Extract every value ONLY from the vacancy text.
+DO NOT invent values. If the text does not say it, output null.
+
+Expected JSON Structure (KEYS ONLY — all values are null placeholders):
+{
+  "Title": null,
+  "Level": null,
+  "SalaryMin": null,
+  "SalaryMax": null,
+  "SalaryCurrency": null,
+  "SalaryPeriod": null,
+  "EmploymentType": null,
+  "FullTime": null,
+  "EmployerCountry": [],
+  "EmployerCity": null,
+  "EmployerState": null,
+  "EmployerTimezone": null,
+  "CandidateCountry": [],
+  "CandidateNoCountry": [],
+  "RelocationOffered": null,
+  "RelocationBudget": null,
+  "RelocationBudgetCurrency": null,
+  "VisaSponsorship": null,
+  "ContractType": null,
+  "WorkingHoursPerWeek": null,
+  "CompanyName": null,
+  "CompanyIndustry": null,
+  "CompanySize": null,
+  "MinYearsExperience": null,
+  "MaxYearsExperience": null,
+  "EducationLevel": null,
+  "CertificationsRequired": [],
+  "SecurityClearance": null,
+  "HealthInsurance": null,
+  "Urgency": null,
+  "HiringManagerName": null,
+  "RequiredLanguages": [],
+  "JobId": null,
+  "VacancySite": null,
+  "VacancyURL": null,
+  "ApplyURL": null,
+  "PublicationDate": null,
+  "ApplicantsCount": null,
+  "expert": [],
+  "required": [],
+  "nice-to-have": []
+}
+Senior Data Engineer | Hack The Box | LinkedIn
+Jobs | LinkedIn
+Jobs | LinkedIn
+Jobs | LinkedIn
+0 notifications
+Skip to main content
+Home
+My Network
+Jobs https://www.linkedin.com/jobs/
+Messaging
+3Notifications
+Me
+For Business
+Try Premium for AED 0 Jobs
+Date posted
+Remote
+Azure
+LLM
+Gen AI
+Cloud
+Easy Apply
+Experience level
+Employment type
+Company
+Under 10 applicants
+In my network
+Jobs
+Date posted
+Remote
+Azure
+LLM
+Gen AI
+Cloud
+Easy Apply
+Experience level
+Employment type
+Company
+Under 10 applicants
+In my network
+99+ results
+Select a location
+How promoted jobs are ranked
+Principal Data Architect (Verified job)
+Principal Data Architect
+Zühlke Group
+Schlieren
+Viewed
+·
+Posted 1 week ago
+1 week ago
+AI Solution Architect (Staff) (Verified job)
+AI Solution Architect (Staff)
+Norrin
+Espoo
+Viewed
+·
+Posted 3 days ago
+3 days ago
+Senior Data Architect (Verified job)
+Senior Data Architect
+BBVA
+Zurich (On-site)
+1 school alumni works here
+Viewed
+·
+Posted 5 days ago
+5 days ago
+Senior Data Engineer / Data Warehouse Architect
+Senior Data Engineer / Data Warehouse Architect
+Zuger Kantonalbank
+Baar
+Viewed
+·
+Posted 1 week ago
+1 week ago
+Senior Data Engineer, Agentic Systems
+Senior Data Engineer, Agentic Systems
+Fountain
+Lisbon (Remote)
+Viewed
+·
+Be an early applicant
+·
+Posted 10 hours ago
+10 hours ago
+AI Architect (Verified job)
+AI Architect
+Grid Dynamics
+Portugal (Remote)
+Actively reviewing applicants
+Viewed
+·
+Posted 3 days ago
+3 days ago
+·
+Easy Apply
+AI Solution Architect
+AI Solution Architect
+Qualco Group
+Athens (Hybrid)
+Viewed
+·
+Be an early applicant
+·
+Posted 1 week ago
+1 week ago
+·
+Easy Apply
+Senior Data Engineer
+Senior Data Engineer
+Dreamix
+Greece (Remote)
+Posted 1 month ago
+1 month ago
+·
+Easy Apply
+Senior AI Architect (Verified job)
+Senior AI Architect
+PartnerRe
+Dublin (Hybrid)
+Posted 2 weeks ago
+2 weeks ago
+Senior Data AI Engineer (Verified job)
+Senior Data AI Engineer
+Tech Rise
+Amsterdam (Hybrid)
+Actively reviewing applicants
+Viewed
+·
+Posted 3 weeks ago
+3 weeks ago
+·
+Easy Apply
+Senior Data Engineer (Verified job)
+Senior Data Engineer
+Hack The Box
+Palaión Fáliron (Hybrid)
+Viewed
+·
+Posted 3 months ago
+3 months ago
+·
+Easy Apply
+Tech Lead - Data, Integrations & AI Engineering (w/m/d)
+Tech Lead - Data, Integrations & AI Engineering (w/m/d)
+enua
+Cologne (On-site)
+Be an early applicant
+·
+Posted 6 days ago
+6 days ago
+Data Engineer
+Data Engineer
+Accelerate Norge
+Oslo (Hybrid)
+Posted 1 week ago
+1 week ago
+Senior Data Engineer
+Senior Data Engineer
+Netum
+Helsinki (Remote)
+Be an early applicant
+·
+Posted 1 month ago
+1 month ago
+Senior Data and AI Engineer (Verified job)
+Senior Data and AI Engineer
+RES
+Larne (Hybrid)
+Posted 2 days ago
+2 days ago
+Analytics Engineer
+Novibet
+Athens (On-site)
+Actively reviewing applicants
+Posted 4 days ago
+4 days ago
+·
+Easy Apply
+Data Engineer (Senior-Lead)
+Netcompany
+Athens
+1 school alumni works here
+Posted 4 days ago
+4 days ago
+We found more results related to your search that may not be exact matches, but could still be a great fit.
+Data Architect (IR-541)
+Intellectsoft
+Poland (Remote)
+Be an early applicant
+·
+Posted 3 weeks ago
+3 weeks ago
+Data Engineering Consultant
+Twoday
+Turku (Hybrid)
+Be an early applicant
+·
+Posted 3 weeks ago
+3 weeks ago
+Senior AI Engineer
+VENZO
+Copenhagen (On-site)
+Posted 1 week ago
+1 week ago
+Data Engineer
+OneJar
+Limassol, Cyprus (On-site)
+Viewed
+·
+Posted 1 week ago
+1 week ago
+Big Data Engineer
+Satori Analytics
+Greece (Remote)
+Actively reviewing applicants
+Posted 2 months ago
+2 months ago
+·
+Easy Apply
+Data Engineer (Senior)
+Prospera AI
+Fully
+Be an early applicant
+·
+Posted 1 week ago
+1 week ago
+Databricks Data Engineer
+Agilyti
+North Macedonia (Remote)
+Actively reviewing applicants
+Posted 1 week ago
+1 week ago
+·
+Easy Apply
+Senior Data Engineer
+Netum
+Jyväskylä (Remote)
+Be an early applicant
+·
+Posted 3 months ago
+3 months ago
+See jobs where you’re a top applicant
+Try Premium for AED 0 https://www.linkedin.com/premium/products/?upsellOrderOrigin=Tracking%3Av1%3Apremium_semantic_job_search_bottom_upsell%3AJob+Seeker%3AIn-Product&utype=job&referenceId=3Cw0lbuDRu6Wn8AhYLbjxA%3D%3D&isSS=false&upsellSlotId=SEMANTIC_JOB_SEARCH_BOTTOM
+Previous
+8
+9
+10
+Next
+AboutAccessibilityHelp Center
+Privacy & Terms
+Ad ChoicesAdvertising
+Business Services
+Get the LinkedIn appMore LinkedIn Corporation © 2026
+Hack The Box
+Senior Data Engineer https://www.linkedin.com/jobs/view/4410803114/?trackingId=d2IlSFuklI6R9D7nqAf0%2Bg%3D%3D&refId=4VORwfkYl7kWHVDswUT2Qw%3D%3D&eBP=NOT_ELIGIBLE_FOR_CHARGING&alternateChannel=search&isJobSearch=false
+Palaión Fáliron, Attiki, Greece
+·
+3 months ago
+·
+54 applicants
+No response insights available yet
+Hybrid Full-time Easy Apply https://www.linkedin.com/jobs/view/4410803114/apply/?openSDUIApplyFlow=true&refId=4VORwfkYl7kWHVDswUT2Qw%3D%3D&trackingId=d2IlSFuklI6R9D7nqAf0%2Bg%3D%3D&eBP=NOT_ELIGIBLE_FOR_CHARGING
+Save
+Your profile and resume
+match some
+required qualifications
+Show match details BETA • Is this information helpful?
+About the job
+Welcome! Super excited you dropped by 🥳
+Let's redefine cyber security expertise standards and connect business - community through highly engaging hacking experiences. (Find out more insights about Hack The Box culture in our career site).
+✨The core mission of the Senior Data Engineer:
+You will own and evolve our data pipelines on GCP — building new ones, hardening existing ones, improving data quality, and making clean, trustworthy data available across the organisation. You'll work end-to-end on streaming and batch pipelines, from CDC and event ingestion through transformation, serving, and the feature layer that powers our ML and AI products.
+Your day-to-day will include designing ELT/ETL processes on BigQuery and ClickHouse, building real-time pipelines on Pub/Sub and Kafka with Dataflow (and where it fits, Flink/Spark), orchestrating workflows with Airflow, and ensuring data is properly cleaned, modelled, and served for analytics, ML training, and online inference. You'll partner with ML engineers on feature pipelines, monitoring data drift, and keeping models well-fed and retrained as needed. You'll consume and build REST APIs, integrate with third-party SaaS sources, and treat infrastructure as code.
+🏢 Location & Work Mode:
+Europe/Greece
+Choose between fully remote work across Europe or relocating to our Athens Tech Hub with relocation support
+Fully Remote / Hybrid (2 days in the office, 3 days remote, plus one month of work from anywhere) - If only in Greece: When hiring in Greece, we're open to candidates from all locations. Those based within 55 km of our Athens office will follow a hybrid work model. For candidates located beyond that radius, a fully remote arrangement is available.
+✈️ Relocation
+We offer a 10% relocation bonus on the annual salary to support your move
+In addition, you would benefit from a 50% tax reduction on your income as part of the relocation
+We'll support you with accommodation during the first few weeks
+🍺 The fellowship you'll be joining:
+You will be part of the Data, Analytics & AI team, collaborating closely with Infrastructure, Software Engineering, Product, and ML/AI engineers. We're in the middle of a GCP-native modernisation — migrating away from Snowflake toward BigQuery, Bigtable, Pub/Sub, and Dataflow — so we're looking for someone who's opinionated about clean architecture, allergic to over-engineering, and comfortable owning systems end-to-end. If retiring a legacy warehouse and standing up its replacement sounds like a good time, you'll fit right in.
+⚔️ Technology tools & weapons you'll be using:
+Cloud & warehouse: GCP, BigQuery, Bigtable, Cloud Storage
+Streaming & messaging: Pub/Sub, Kafka
+Processing: Dataflow (Apache Beam), with Flink/Spark where appropriate
+Orchestration: Airflow (Cloud Composer)
+Analytical store: ClickHouse
+Languages: Python, SQL
+Modelling & quality: dbt, data quality gates
+Containers & CI/CD: Docker, Kubernetes, GitHub Actions / equivalent
+Legacy (being retired): Snowflake
+🚀 The adventures that await you after becoming Senior Data Engineer at Hack The Box:
+Design and build batch and streaming pipelines on Dataflow, Pub/Sub, and Kafka feeding BigQuery, Bigtable, and ClickHouse
+Help drive the migration off Snowflake onto our GCP-native stack — and retire shadow pipelines along the way
+Own the orchestration layer in Airflow, including SLAs, retries, and data quality gates
+Model data for analytics and for ML — including feature pipelines that serve both training and low-latency online inference
+Partner with ML engineers on feature stores, drift monitoring, and retraining workflows
+Capture requirements from stakeholders and translate them into pragmatic, well-scoped data products
+Continuously improve data quality, reliability, observability, and cost efficiency
+Identify new data sources worth acquiring and integrate them cleanly
+🏆 Skills, knowledge, and experience points required to unlock the role of the Senior Data Engineer at Hack The Box:
+Strong data modelling and warehouse architecture skills (dimensional modelling, event-driven, lakehouse patterns)
+Hands-on experience with GCP data services — BigQuery is a must; Pub/Sub, Dataflow, Bigtable, Cloud Composer are strong pluses
+Production experience with streaming pipelines on Dataflow/Beam, Flink, or Spark Structured Streaming, ingesting from Kafka and/or Pub/Sub
+Solid SQL and strong Python — you write production-quality code, not just notebooks
+Experience with ClickHouse or another columnar OLAP engine in production
+Workflow orchestration experience with Airflow (or Prefect/Dagster)
+Comfortable with dbt or equivalent transformation frameworks
+Experience migrating off legacy warehouses (Snowflake, Redshift, Synapse) onto cloud-native stacks is a plus
+Working knowledge of ML in production — feature engineering, feature stores, model deployment, drift monitoring, retraining
+Docker & Kubernetes experience
+CI/CD mindset, infrastructure-as-code sensibility, and a bias for simple, observable systems
+Bonus: CDC tooling (Datastream, Debezium), Vertex AI / Feature Store
+What your Hack The Box adventure will have in store:
+🎯You'll have the exhilarating opportunity to contribute to a product that is highly appreciated by users and the cybersecurity community at large
+🎯 You'll experience a highly supportive and caring environment, fostering growth, flexibility, and autonomy
+🎯 You'll embark on an exciting journey of continuous learning and problem-solving, leveling up as our organization grows
+🎯 Most importantly, you'll have a blast at HTB 🥳 because fun is an essential ingredient in our recipe for success! Just wait until you see our global meet-ups!
+💰
+The gems you'll be enjoying as a Senior Data Engineer:
+Private health care
+Paid paternity leave
+25 annual leave days
+Free lunch & snacks at the office
+120€ Ticket Restaurant by Edenred
+Dedicated budget for training and professional development, participation in conferences
+Full access to the Hack The Box lab offerings; so you can learn how to hack 😉
+State-of-the-art equipment (mac, iPhone, and mobile plan)
+Flexible WFH (Hybrid Model) - Fully Remote is also an option if you're not an Attica resident
+Our benefits package is designed to provide strong support to our team, but it may vary depending on location and type of employment (e.g., UK, Greece, or engagement through an Employer of Record).
+🗺️ The Quest of Becoming Hack The Box's
+Senior Data Engineer:
+Level 1: To complete level one's objective, submit your application.
+Level 2: Meet the Talent Acquisition team. Level's objective: highlight your past achievements, ambitions, and values
+Level 3: Meet the hiring team. Level's objective: connect with the hiring team and share with them your achievements.
+Level 4: Complete 2 assignments that align with day-to-day job-related tasks and responsibilities. Part of the assignment is discussing it with the hiring team in a debriefing session, in order to walk the team through your thinking process.
+Level 5: Congratulations! Not many reach this level 💪. Level's objective: have a constructive, final conversation with senior leadership to explore the role and your future at HTB.
+Level 6: You've officially received an offer from HTB! To complete the last level and the Quest, all you need to do is accept the offer.
+Quest complete. Congratulations, you're officially one of us 🥳🎉🎇Your next quest: complete the onboarding.
+Hack Your Career, Today. Join us in this epic adventure of cybersecurity at Hack The Box! 🚀🔒💻
+At Hack The Box, we are on a quest to find the most exceptional and enthusiastic talent to join our team. Whether or not you consider yourself a gamer, we value what makes you unique and want to know more about you. This job post provides just a glimpse of the incredible gamified experience our business and consumer customers enjoy through our platforms. So, if you're ready to embark on a journey of growth and adventure, we can't wait to meet you!
+About Hack The Box
+Hack The Box is the Cyber Performance Center with the mission to provide a human-first platform to create and maintain high-performing cybersecurity individuals and organizations.
+Hack The Box is the only platform that unites upskilling, workforce development, and the human focus in the cybersecurity industry, and it's trusted by organizations worldwide for driving their teams to peak performance. Offering an all-in-one environment for continuous growth, assessment, and recruitment, Hack The Box provides solutions for all cybersecurity domains.
+Launched in 2017, Hack The Box brings together the largest global cybersecurity community of more than 3 million platform members. Rapidly growing its international footprint and reach, Hack The Box is headquartered in the UK, with additional offices in the US, Australia, and Greece.
+🚨 Exciting News:
+Get the most important updates on HTB's latest year!
+We are super proud to share that HTB's all three entities across the UK, US, and Greece have been Certified as a Great Place to Work (Oct 2023-Oct 2024).
+Furthermore, in 2024 the HTB's Greek entity has been listed by the Great Place to Work Institute as the #2 Best Workplace in Greece and #10 Best Workplace in Europe (among Small & Medium Workplaces💪)
+Take a sneak peek at how it is to be part of HTB and our 2023 Global Retreat. Get more insights about our HTB culture and employee experience by visiting the "about us" section of our site, our career site, and Glassdoor
+At Hack The Box, we are committed to fostering a diverse, inclusive, and equitable workplace. We believe that diversity enriches our performance, services, and the communities we serve. As such, we ensure that all job applications are considered solely based on merit, skills, and qualifications. We do not discriminate on grounds of race, color, religion, gender, gender identity or expression, sexual orientation, national origin, genetics, disability, age, or veteran status. We are dedicated to providing a fair and respectful work environment that reflects our values.
+…
+more
+Benefits found in job post
+Paid paternity leave

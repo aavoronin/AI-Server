@@ -1,0 +1,235 @@
+ROLE & TASK
+You are an expert technical recruiter and data extraction AI. Your task is to analyze a job description and extract specific details regarding the role's requirements, compensation, location, technical stack, and vacancy metadata.
+
+CRITICAL RULES — READ BEFORE PROCEEDING:
+1. Extract ONLY information explicitly stated in the vacancy text below.
+2. NEVER invent, guess, or copy values from the example JSON structure.
+3. If a value is not mentioned in the vacancy text, output null (without quotes).
+4. The example JSON shows KEYS ONLY. Every value in it is null. You must replace each null with the real value found in the text, or leave it as null if absent.
+5. Do NOT wrap output in markdown code blocks. Output raw JSON only.
+
+⛔ ANTI-HALLUCINATION RULES ⛔
+- If the vacancy text does not EXPLICITLY state a value, output null. Period.
+- Do NOT infer values from the company type, role description, or what seems "typical".
+- Do NOT assume a value is present because it would be "reasonable" for this kind of role.
+- The following fields MUST be null unless the vacancy text explicitly states them:
+  Urgency, EducationLevel, HealthInsurance, ContractType, SecurityClearance,
+  VisaSponsorship, ApplicantsCount, HiringManagerName, WorkingHoursPerWeek,
+  CompanySize, EmployerTimezone, EmployerState, MaxYearsExperience.
+- Example: "Business English classes" in benefits does NOT mean EducationLevel or HealthInsurance.
+- Example: "Remote-first and flexible schedule" does NOT mean Urgency or ContractType.
+
+QUESTIONS TO ANSWER
+1. General Vacancy Details
+Core Details:
+Title: What is the Job Title/Role for this vacancy?
+  IMPORTANT — STRIP seniority, technology names, and codes from the Title.
+  Examples:
+    "Senior Data Engineer (SQL, Python)" → "Data Engineer"
+    "Software Engineer III"              → "Software Engineer"
+    "Lead ML Ops Engineer"               → "ML Ops Engineer"
+    "Junior Backend Developer (Java)"     → "Backend Developer"
+  The seniority goes into the "Level" field instead.
+Level: What is the Seniority/Experience Level? (Options: Junior, Middle, Middle+, Senior, Architect)
+SalaryMin: What is the minimum salary/compensation? (e.g., 50000 for "50k-75k USD", 30 for "30-40 Euro per hour")
+SalaryMax: What is the maximum salary/compensation? (e.g., 75000 for "50k-75k USD", 40 for "30-40 Euro per hour")
+SalaryCurrency: What is the currency? (e.g., USD, EUR)
+SalaryPeriod: What is the pay period? (Options: year, month, week, hour)
+EmploymentType: What is the work arrangement? (Options: remote, hybrid, office)
+FullTime: Is this a full-time vacancy? (Options: yes, no)
+Location & Geography:
+EmployerCountry: What country or countries is the employer located in? MUST be an array of strings (e.g., ["USA"]).
+EmployerCity: City where the office is located (e.g., "Tampa", "London"). For several offices select headquarters or the first office.
+EmployerState: State/Region/Province (e.g., "FL", "Bavaria")
+EmployerTimezone: Timezone of the team (e.g., "EST", "CET")
+CandidateCountry: What countries must the candidate be located in? MUST be an array of strings (e.g., ["USA", "Canada"]).
+CandidateNoCountry: What countries is the candidate explicitly forbidden from being located in? MUST be an array of strings (e.g., ["Russia", "Iran"]).
+RelocationOffered: Is relocation assistance available? (Options: yes, no)
+RelocationBudget: Relocation budget amount if specified (e.g., "5000" for "5K EUR")
+RelocationBudgetCurrency: Relocation budget currency if specified (e.g., "EUR" for "5K EUR")
+VisaSponsorship: Will the company sponsor a work visa? (Options: yes, no)
+Employment & Contract:
+ContractType: Type of employment contract (Options: permanent, contract, freelance, internship, temp-to-perm)
+WorkingHoursPerWeek: Expected weekly hours (e.g., 40, 37.5)
+Company & Team:
+CompanyName: Name of the hiring company (e.g., "JPMorganChase")
+CompanyIndustry: Industry sector (e.g., "Financial Services", "Healthcare")
+CompanySize: Number of employees (e.g., "1-50", "51-200", "10001+")
+Experience & Education:
+MinYearsExperience: Minimum years of experience required (e.g., 3, 5)
+MaxYearsExperience: Maximum years of experience expected, if any (e.g., 7, 10)
+EducationLevel: Minimum education required (Options: high-school, bachelor, master, phd)
+CertificationsRequired: Required professional certifications (MUST be an array of strings, e.g., ["AWS Solutions Architect"])
+SecurityClearance: Required clearance level (Options: none, secret, top-secret, TS/SCI)
+Other questions:
+HealthInsurance: Health insurance offered? (Options: yes, no)
+Urgency: How fast they need to fill the role (Options: immediate, within-1-month, within-3-months, flexible)
+HiringManagerName: Name of the hiring manager (string)
+RequiredLanguages: Human languages required (MUST be an array of SINGLE WORD strings, e.g., ["English"], ["English", "German"]).
+Vacancy Metadata:
+JobId: The unique identifier for the job posting (e.g., "123456789").
+VacancySite: The platform or website where the job is posted (e.g., "LinkedIn", "Indeed", "HireHive").
+VacancyURL: The primary URL of the published job posting (string).
+ApplyURL: The specific URL for the application action, if different from VacancyURL (string).
+PublicationDate: When the job was posted or reposted (e.g., "2023-10-15", "4 days ago").
+ApplicantsCount: The number of applicants mentioned (e.g., 100, 200). If vacancy says "Over 100" or "100+" then answer "100".
+
+2. Technical Proficiencies — EXTRACTION RULES
+Scan the vacancy text for technologies. Classify ONLY the ones actually mentioned into these exact array keys:
+"expert": Mandatory, "must have", or heavy experience required. If it is included in vacancy title, it is expert.
+"required": simply listed as required without significant stress on expert knowledge
+"nice-to-have": listed as optional, bonus, or "nice-to-have"
+
+⛔ TECHNOLOGY EXTRACTION RULES ⛔
+- List ONLY technologies whose EXACT NAME appears in the vacancy text.
+- The taxonomy lists below are for CLASSIFICATION REFERENCE ONLY.
+- Do NOT list technologies from the taxonomy that are NOT mentioned in the vacancy text.
+- Each array element must be a SINGLE technology name (e.g., "Python", "AWS", "ETL").
+- Do NOT put phrases, descriptions, or multiple technologies in one array element.
+  WRONG: "required": ["ETL design, implementation, and maintenance"]
+  RIGHT: "required": ["ETL"]
+  WRONG: "required": ["AWS, GCP or Azure delivering data-centric product experiences"]
+  RIGHT: "required": ["AWS", "GCP", "Azure"]
+- Do NOT infer technologies from context. Only extract explicitly named ones.
+
+Technical Proficiency Taxonomy (REFERENCE ONLY — extract only what is in the text):
+Programming Languages (30):
+Python, SQL, Java, JavaScript, C++, Bash, C#, TypeScript, R, Go, PHP, Kotlin, Swift, Ruby, Rust, Scala, Dart, MATLAB, Perl, Objective-C, Julia, Lua, PowerShell, Solidity, Elixir, F#, C, GDScript, Ada, Haskell.
+SQL Dialects (15):
+PostgreSQL, MySQL, T-SQL, PL/SQL, Snowflake SQL, BigQuery SQL, PL/pgSQL, Redshift SQL, SQLite, Spark SQL, MariaDB, HiveQL, Teradata SQL, DB2 SQL, Trino SQL.
+BI Platforms (15):
+Power BI, Tableau, Looker, Qlik, QuickSight, MicroStrategy, SAP Analytics Cloud, Cognos, TIBCO Spotfire, Domo, Sisense, ThoughtSpot, Oracle Analytics, Metabase, Superset.
+ETL Tools (20):
+Airflow, dbt, Informatica, Spark, Glue, Azure Data Factory, Talend, DataStage, SSIS, Fivetran, Matillion, NiFi, Dagster, Airbyte, Alteryx, Apache Beam, Google Cloud Dataflow, Prefect, Pentaho, Flink.
+DWH Concepts (25):
+Star Schema, Snowflake Schema, 3NF, Data Vault, Columnstore, SCD, Fact Table, Dimension Table, Surrogate Key, Conformed Dimension, Data Mart, Data Lakehouse, OLAP, OLTP, ELT, ETL, CDC, Table Partitioning, Sharding, Materialized View, Data Lineage, Data Governance, Kimball Methodology, Data Mesh, Data Quality.
+AI/ML/Data Science Concepts (30):
+Machine Learning, Deep Learning, Neural Networks, NLP, Computer Vision, Reinforcement Learning, Supervised Learning, Unsupervised Learning, Transfer Learning, Generative AI, LLMs, Prompt Engineering, RAG, Fine-Tuning, Regression, Classification, Clustering, Random Forest, Gradient Boosting, K-Means, CNN, RNN, Transformers, Attention Mechanism, Tokenization, Embeddings, BERT, GPT, Model Evaluation, MLOps.
+Cloud Platforms (10):
+AWS, Azure, GCP, IBM Cloud, Oracle Cloud, Alibaba Cloud, Salesforce, DigitalOcean, VMware, Rackspace.
+Message Brokers & Streaming (6):
+Kafka, RabbitMQ, Redis, Pulsar, NATS, Redis Streams.
+Testing Frameworks (8):
+PyTest, Jest, Mocha, Cypress, Selenium, JUnit, Playwright, Postman.
+Collaboration & Project Management (6):
+Jira, Confluence, Notion, Slack, Microsoft Teams, Asana.
+Operating Systems (3):
+Linux, Windows, macOS.
+
+⚠️ CRITICAL OUTPUT INSTRUCTIONS ⚠️
+Output ONLY a valid, well-formatted JSON object.
+NO markdown formatting (no ```json or ```), NO introductory text, NO trailing whitespace.
+DO NOT include any introductory text, greetings, comments, or explanations.
+Use null (unquoted) for missing general values.
+Fields marked as arrays MUST be JSON arrays (e.g., ["USA"], never "USA").
+Missing Values Rule: If a general value (like Title, Salary, or yes/no fields) is not found use null without quotes.
+If a technical proficiency is not found, do not include it in any list.
+DO NOT copy any values from the example below. Extract every value ONLY from the vacancy text.
+DO NOT invent values. If the text does not say it, output null.
+
+Expected JSON Structure (KEYS ONLY — all values are null placeholders):
+{
+  "Title": null,
+  "Level": null,
+  "SalaryMin": null,
+  "SalaryMax": null,
+  "SalaryCurrency": null,
+  "SalaryPeriod": null,
+  "EmploymentType": null,
+  "FullTime": null,
+  "EmployerCountry": [],
+  "EmployerCity": null,
+  "EmployerState": null,
+  "EmployerTimezone": null,
+  "CandidateCountry": [],
+  "CandidateNoCountry": [],
+  "RelocationOffered": null,
+  "RelocationBudget": null,
+  "RelocationBudgetCurrency": null,
+  "VisaSponsorship": null,
+  "ContractType": null,
+  "WorkingHoursPerWeek": null,
+  "CompanyName": null,
+  "CompanyIndustry": null,
+  "CompanySize": null,
+  "MinYearsExperience": null,
+  "MaxYearsExperience": null,
+  "EducationLevel": null,
+  "CertificationsRequired": [],
+  "SecurityClearance": null,
+  "HealthInsurance": null,
+  "Urgency": null,
+  "HiringManagerName": null,
+  "RequiredLanguages": [],
+  "JobId": null,
+  "VacancySite": null,
+  "VacancyURL": null,
+  "ApplyURL": null,
+  "PublicationDate": null,
+  "ApplicantsCount": null,
+  "expert": [],
+  "required": [],
+  "nice-to-have": []
+}
+TFG (The Foschini Group)
+Engineering Lead (C#, .Net) https://www.linkedin.com/jobs/view/4410055263/?trackingId=LRQIagRio586FygY0Zd5Cw%3D%3D&refId=sv8CSAFfTuGa38LX75ZiFw%3D%3D&eBP=NOT_ELIGIBLE_FOR_CHARGING&alternateChannel=search&isJobSearch=false
+Western Cape, South Africa
+·
+Reposted 5 days ago
+·
+Over 100 people clicked apply
+Promoted by hirer ·
+Responses managed off LinkedIn
+On-site Full-time Apply https://www.linkedin.com/safety/go/?url=https%3A%2F%2Ffa-expc-saasfaprod1%2Efa%2Eocs%2Eoraclecloud%2Ecom%2FhcmUI%2FCandidateExperience%2Fen%2Fjob%2F1481%2F%3Futm_medium%3Djobshare&urlhash=sWZX&mt=ZtOHlLj9110ILIznaWn1k8Z_HKoGuCJEHir64VkdCeDeLcdJ_nVZJ14e7x7Ho0ydbZykki7Xk8uIZcNpJpOFuHxNMYg&isSdui=true
+Save
+Your profile and resume
+match some
+required qualifications
+Show match details BETA • Is this information helpful?
+About the job
+Key Responsibilities
+JOB DESCRIPTION
+Lead and mentor a team of engineers, fostering a culture of collaboration, innovation, and continuous learning
+Collaborate with cross-functional teams to define and execute the technical roadmap, aligning with business objectives and customer needs
+Drive the design, development, and optimization of our platforms, ensuring scalability, reliability, and security
+Provide technical guidance and support to ensure the successful delivery of projects on time and within budget
+Stay abreast of industry trends and emerging technologies, evaluating their potential impact and relevance to our business
+Partner with Product managers and stakeholders to translate business requirements into technical solutions, driving alignment and execution
+Implement best practices, processes, and tools to streamline development workflows and improve efficiency
+Monitor and analyse platform performance metrics, identifying areas for optimization and improvement to enhance the customer experience
+Qualifications And Experience
+Bachelor's Degree in Engineering, Computer Science, or related field.
+Proven experience in software development and technical leadership roles, with a track record of successfully delivering complex projects
+Deep understanding of software architecture, design patterns, and best practices, with hands-on experience in backend and frontend development
+Experience with cloud platforms (e.g., AWS, Azure) and modern development frameworks/tools
+Development Experience:
+Languages: C#, Javascript, SQL, Python, Go
+Frameworks: Angular, React, .NET, .NET Core
+ORM Tools: Entity Framework, Hibernate
+Relational Databases: Oracle, MSSql, MySQL
+Cloud Environments: Azure, AWS
+Messaging/Event: Kafka
+Skills
+Strong problem-solving skills and a passion for driving technical excellence and innovation
+Ability to thrive in a fast-paced, dynamic environment and effectively prioritize and manage multiple projects
+Strong leadership and communication skills, with the ability to inspire and motivate teams to achieve their goals
+Behaviours
+Business Insight - applies market and business insights in order to drive organisational objectives
+Communicates Effectively - conveys information and communicates ideas in a clear, concise and impactful manner
+Decision Quality - consistently makes timely, well-rounded and informed decisions
+Ensures Accountability - takes accountability and ensures others are held to account on agreed upon performance targets
+Manages Complexity - interprets and simplifies complex and contradictory information when resolving organisational problems
+Optimizes Work Processes - assesses and improves the efficiency, effectiveness, and quality of various work processes
+Plans and Aligns - develops plans and prioritises initiatives that align to the organisational goals and objectives
+Tech Savvy - leverages new technology to enhance productivity, improve problem solving, and support business growth
+Preference will be given, but not limited to, candidates from designated groups in terms of the Employment Equity Act.
+About Us
+Who we are is because of our people. They are our greatest asset. TFG is an internationally diversified retail portfolio of 34 speciality lifestyle and apparel brands that
+Inspire our Customers to live their Best Lives
+and are woven into the lives of millions. Our vision is to create the most remarkable omnichannel experiences for our customers. TFG is more than a workplace, it's a launchpad for your growth. Join us and explore endless growth opportunities across our diverse brands. We’re a purpose-led business, and on this team, you’ll share the pride of making an impact across a whole industry.
+We’re the designers, the makers, the shakers and the teams behind the scenes.
+Are you with us?
+About The Team
+At TFG, technology is the silent engine behind fashion, financial services, and our factory floors. Our Infotec team builds the platforms that power over 3,600 stores and millions of customer moments. From cloud-native retail applications to AI/ML deployments, we solve real-world retail problems at scale. Whether you love engineering, data, architecture, or innovation at the edge—we have room for your kind of talent. Let’s build something enduring together.
+…
+more

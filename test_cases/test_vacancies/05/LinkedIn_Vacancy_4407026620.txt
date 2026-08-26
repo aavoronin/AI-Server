@@ -1,0 +1,507 @@
+ROLE & TASK
+You are an expert technical recruiter and data extraction AI. Your task is to analyze a job description and extract specific details regarding the role's requirements, compensation, location, technical stack, and vacancy metadata.
+
+CRITICAL RULES — READ BEFORE PROCEEDING:
+1. Extract ONLY information explicitly stated in the vacancy text below.
+2. NEVER invent, guess, or copy values from the example JSON structure.
+3. If a value is not mentioned in the vacancy text, output null (without quotes).
+4. The example JSON shows KEYS ONLY. Every value in it is null. You must replace each null with the real value found in the text, or leave it as null if absent.
+5. Do NOT wrap output in markdown code blocks. Output raw JSON only.
+
+⛔ ANTI-HALLUCINATION RULES ⛔
+- If the vacancy text does not EXPLICITLY state a value, output null. Period.
+- Do NOT infer values from the company type, role description, or what seems "typical".
+- Do NOT assume a value is present because it would be "reasonable" for this kind of role.
+- The following fields MUST be null unless the vacancy text explicitly states them:
+  Urgency, EducationLevel, HealthInsurance, ContractType, SecurityClearance,
+  VisaSponsorship, ApplicantsCount, HiringManagerName, WorkingHoursPerWeek,
+  CompanySize, EmployerTimezone, EmployerState, MaxYearsExperience.
+- Example: "Business English classes" in benefits does NOT mean EducationLevel or HealthInsurance.
+- Example: "Remote-first and flexible schedule" does NOT mean Urgency or ContractType.
+
+QUESTIONS TO ANSWER
+1. General Vacancy Details
+Core Details:
+Title: What is the Job Title/Role for this vacancy?
+  IMPORTANT — STRIP seniority, technology names, and codes from the Title.
+  Examples:
+    "Senior Data Engineer (SQL, Python)" → "Data Engineer"
+    "Software Engineer III"              → "Software Engineer"
+    "Lead ML Ops Engineer"               → "ML Ops Engineer"
+    "Junior Backend Developer (Java)"     → "Backend Developer"
+  The seniority goes into the "Level" field instead.
+Level: What is the Seniority/Experience Level? (Options: Junior, Middle, Middle+, Senior, Architect)
+SalaryMin: What is the minimum salary/compensation? (e.g., 50000 for "50k-75k USD", 30 for "30-40 Euro per hour")
+SalaryMax: What is the maximum salary/compensation? (e.g., 75000 for "50k-75k USD", 40 for "30-40 Euro per hour")
+SalaryCurrency: What is the currency? (e.g., USD, EUR)
+SalaryPeriod: What is the pay period? (Options: year, month, week, hour)
+EmploymentType: What is the work arrangement? (Options: remote, hybrid, office)
+FullTime: Is this a full-time vacancy? (Options: yes, no)
+Location & Geography:
+EmployerCountry: What country or countries is the employer located in? MUST be an array of strings (e.g., ["USA"]).
+EmployerCity: City where the office is located (e.g., "Tampa", "London"). For several offices select headquarters or the first office.
+EmployerState: State/Region/Province (e.g., "FL", "Bavaria")
+EmployerTimezone: Timezone of the team (e.g., "EST", "CET")
+CandidateCountry: What countries must the candidate be located in? MUST be an array of strings (e.g., ["USA", "Canada"]).
+CandidateNoCountry: What countries is the candidate explicitly forbidden from being located in? MUST be an array of strings (e.g., ["Russia", "Iran"]).
+RelocationOffered: Is relocation assistance available? (Options: yes, no)
+RelocationBudget: Relocation budget amount if specified (e.g., "5000" for "5K EUR")
+RelocationBudgetCurrency: Relocation budget currency if specified (e.g., "EUR" for "5K EUR")
+VisaSponsorship: Will the company sponsor a work visa? (Options: yes, no)
+Employment & Contract:
+ContractType: Type of employment contract (Options: permanent, contract, freelance, internship, temp-to-perm)
+WorkingHoursPerWeek: Expected weekly hours (e.g., 40, 37.5)
+Company & Team:
+CompanyName: Name of the hiring company (e.g., "JPMorganChase")
+CompanyIndustry: Industry sector (e.g., "Financial Services", "Healthcare")
+CompanySize: Number of employees (e.g., "1-50", "51-200", "10001+")
+Experience & Education:
+MinYearsExperience: Minimum years of experience required (e.g., 3, 5)
+MaxYearsExperience: Maximum years of experience expected, if any (e.g., 7, 10)
+EducationLevel: Minimum education required (Options: high-school, bachelor, master, phd)
+CertificationsRequired: Required professional certifications (MUST be an array of strings, e.g., ["AWS Solutions Architect"])
+SecurityClearance: Required clearance level (Options: none, secret, top-secret, TS/SCI)
+Other questions:
+HealthInsurance: Health insurance offered? (Options: yes, no)
+Urgency: How fast they need to fill the role (Options: immediate, within-1-month, within-3-months, flexible)
+HiringManagerName: Name of the hiring manager (string)
+RequiredLanguages: Human languages required (MUST be an array of SINGLE WORD strings, e.g., ["English"], ["English", "German"]).
+Vacancy Metadata:
+JobId: The unique identifier for the job posting (e.g., "123456789").
+VacancySite: The platform or website where the job is posted (e.g., "LinkedIn", "Indeed", "HireHive").
+VacancyURL: The primary URL of the published job posting (string).
+ApplyURL: The specific URL for the application action, if different from VacancyURL (string).
+PublicationDate: When the job was posted or reposted (e.g., "2023-10-15", "4 days ago").
+ApplicantsCount: The number of applicants mentioned (e.g., 100, 200). If vacancy says "Over 100" or "100+" then answer "100".
+
+2. Technical Proficiencies — EXTRACTION RULES
+Scan the vacancy text for technologies. Classify ONLY the ones actually mentioned into these exact array keys:
+"expert": Mandatory, "must have", or heavy experience required. If it is included in vacancy title, it is expert.
+"required": simply listed as required without significant stress on expert knowledge
+"nice-to-have": listed as optional, bonus, or "nice-to-have"
+
+⛔ TECHNOLOGY EXTRACTION RULES ⛔
+- List ONLY technologies whose EXACT NAME appears in the vacancy text.
+- The taxonomy lists below are for CLASSIFICATION REFERENCE ONLY.
+- Do NOT list technologies from the taxonomy that are NOT mentioned in the vacancy text.
+- Each array element must be a SINGLE technology name (e.g., "Python", "AWS", "ETL").
+- Do NOT put phrases, descriptions, or multiple technologies in one array element.
+  WRONG: "required": ["ETL design, implementation, and maintenance"]
+  RIGHT: "required": ["ETL"]
+  WRONG: "required": ["AWS, GCP or Azure delivering data-centric product experiences"]
+  RIGHT: "required": ["AWS", "GCP", "Azure"]
+- Do NOT infer technologies from context. Only extract explicitly named ones.
+
+Technical Proficiency Taxonomy (REFERENCE ONLY — extract only what is in the text):
+Programming Languages (30):
+Python, SQL, Java, JavaScript, C++, Bash, C#, TypeScript, R, Go, PHP, Kotlin, Swift, Ruby, Rust, Scala, Dart, MATLAB, Perl, Objective-C, Julia, Lua, PowerShell, Solidity, Elixir, F#, C, GDScript, Ada, Haskell.
+SQL Dialects (15):
+PostgreSQL, MySQL, T-SQL, PL/SQL, Snowflake SQL, BigQuery SQL, PL/pgSQL, Redshift SQL, SQLite, Spark SQL, MariaDB, HiveQL, Teradata SQL, DB2 SQL, Trino SQL.
+BI Platforms (15):
+Power BI, Tableau, Looker, Qlik, QuickSight, MicroStrategy, SAP Analytics Cloud, Cognos, TIBCO Spotfire, Domo, Sisense, ThoughtSpot, Oracle Analytics, Metabase, Superset.
+ETL Tools (20):
+Airflow, dbt, Informatica, Spark, Glue, Azure Data Factory, Talend, DataStage, SSIS, Fivetran, Matillion, NiFi, Dagster, Airbyte, Alteryx, Apache Beam, Google Cloud Dataflow, Prefect, Pentaho, Flink.
+DWH Concepts (25):
+Star Schema, Snowflake Schema, 3NF, Data Vault, Columnstore, SCD, Fact Table, Dimension Table, Surrogate Key, Conformed Dimension, Data Mart, Data Lakehouse, OLAP, OLTP, ELT, ETL, CDC, Table Partitioning, Sharding, Materialized View, Data Lineage, Data Governance, Kimball Methodology, Data Mesh, Data Quality.
+AI/ML/Data Science Concepts (30):
+Machine Learning, Deep Learning, Neural Networks, NLP, Computer Vision, Reinforcement Learning, Supervised Learning, Unsupervised Learning, Transfer Learning, Generative AI, LLMs, Prompt Engineering, RAG, Fine-Tuning, Regression, Classification, Clustering, Random Forest, Gradient Boosting, K-Means, CNN, RNN, Transformers, Attention Mechanism, Tokenization, Embeddings, BERT, GPT, Model Evaluation, MLOps.
+Cloud Platforms (10):
+AWS, Azure, GCP, IBM Cloud, Oracle Cloud, Alibaba Cloud, Salesforce, DigitalOcean, VMware, Rackspace.
+Message Brokers & Streaming (6):
+Kafka, RabbitMQ, Redis, Pulsar, NATS, Redis Streams.
+Testing Frameworks (8):
+PyTest, Jest, Mocha, Cypress, Selenium, JUnit, Playwright, Postman.
+Collaboration & Project Management (6):
+Jira, Confluence, Notion, Slack, Microsoft Teams, Asana.
+Operating Systems (3):
+Linux, Windows, macOS.
+
+⚠️ CRITICAL OUTPUT INSTRUCTIONS ⚠️
+Output ONLY a valid, well-formatted JSON object.
+NO markdown formatting (no ```json or ```), NO introductory text, NO trailing whitespace.
+DO NOT include any introductory text, greetings, comments, or explanations.
+Use null (unquoted) for missing general values.
+Fields marked as arrays MUST be JSON arrays (e.g., ["USA"], never "USA").
+Missing Values Rule: If a general value (like Title, Salary, or yes/no fields) is not found use null without quotes.
+If a technical proficiency is not found, do not include it in any list.
+DO NOT copy any values from the example below. Extract every value ONLY from the vacancy text.
+DO NOT invent values. If the text does not say it, output null.
+
+Expected JSON Structure (KEYS ONLY — all values are null placeholders):
+{
+  "Title": null,
+  "Level": null,
+  "SalaryMin": null,
+  "SalaryMax": null,
+  "SalaryCurrency": null,
+  "SalaryPeriod": null,
+  "EmploymentType": null,
+  "FullTime": null,
+  "EmployerCountry": [],
+  "EmployerCity": null,
+  "EmployerState": null,
+  "EmployerTimezone": null,
+  "CandidateCountry": [],
+  "CandidateNoCountry": [],
+  "RelocationOffered": null,
+  "RelocationBudget": null,
+  "RelocationBudgetCurrency": null,
+  "VisaSponsorship": null,
+  "ContractType": null,
+  "WorkingHoursPerWeek": null,
+  "CompanyName": null,
+  "CompanyIndustry": null,
+  "CompanySize": null,
+  "MinYearsExperience": null,
+  "MaxYearsExperience": null,
+  "EducationLevel": null,
+  "CertificationsRequired": [],
+  "SecurityClearance": null,
+  "HealthInsurance": null,
+  "Urgency": null,
+  "HiringManagerName": null,
+  "RequiredLanguages": [],
+  "JobId": null,
+  "VacancySite": null,
+  "VacancyURL": null,
+  "ApplyURL": null,
+  "PublicationDate": null,
+  "ApplicantsCount": null,
+  "expert": [],
+  "required": [],
+  "nice-to-have": []
+}
+AI & Data Engineer | Energean | LinkedIn
+Jobs | LinkedIn
+Jobs | LinkedIn
+Jobs | LinkedIn
+0 notifications
+Skip to main content
+Home
+My Network
+Jobs https://www.linkedin.com/jobs/
+Messaging
+1Notifications
+Me
+For Business
+Try Premium for AED 0 Jobs
+Date posted
+Remote
+Azure
+LLM
+Gen AI
+Cloud
+Easy Apply
+Experience level
+Employment type
+Company
+Under 10 applicants
+In my network
+Jobs
+Date posted
+Remote
+Azure
+LLM
+Gen AI
+Cloud
+Easy Apply
+Experience level
+Employment type
+Company
+Under 10 applicants
+In my network
+99+ results
+Select a location
+How promoted jobs are ranked
+Senior Data Architect (Verified job)
+Senior Data Architect
+Eneco
+Rotterdam
+Viewed
+·
+Posted 2 weeks ago
+2 weeks ago
+Senior Data & AI Solution Architect
+Senior Data & AI Solution Architect
+Commit
+Kyiv (Remote)
+Viewed
+·
+Be an early applicant
+·
+Posted 4 days ago
+4 days ago
+Data Analytics Software Architect
+Data Analytics Software Architect
+Marsh
+Cluj-Napoca (Hybrid)
+Viewed
+·
+Be an early applicant
+·
+Posted 11 hours ago
+11 hours ago
+Data & AI Engineering (Experienced) (Verified job)
+Data & AI Engineering (Experienced)
+Bank of Cyprus
+Nicosia (On-site)
+Viewed
+·
+Posted 4 days ago
+4 days ago
+Senior Data Architect
+Senior Data Architect
+scandiweb
+Vilnius (Remote)
+3,100 EUR/month - 3,500 EUR/month
+Viewed
+·
+Be an early applicant
+·
+Posted 3 months ago
+3 months ago
+(SENIOR) DATA ARCHITECT
+(SENIOR) DATA ARCHITECT
+Recordly
+Tampere (Hybrid)
+Viewed
+·
+Be an early applicant
+·
+Posted 2 months ago
+2 months ago
+Senior AI-First Data Engineer (Verified job)
+Senior AI-First Data Engineer
+Smartcat
+Portugal (Remote)
+Viewed
+·
+Posted 1 week ago
+1 week ago
+Data Architect (Verified job)
+Data Architect
+Solita
+Finland (Remote)
+Viewed
+·
+Posted 1 month ago
+1 month ago
+Data, Analytics & AI Architect (Verified job)
+Data, Analytics & AI Architect
+itm8 Danmark
+Viby (Hybrid)
+Viewed
+·
+Be an early applicant
+·
+Posted 4 days ago
+4 days ago
+AI-Driven Data Architect (Verified job)
+AI-Driven Data Architect
+Nortal
+Oulu (Hybrid)
+Be an early applicant
+·
+Posted 2 weeks ago
+2 weeks ago
+Data & AI Technical Lead
+Data & AI Technical Lead
+TRG Tech Research Group
+Greece (Remote)
+Viewed
+·
+Posted 1 month ago
+1 month ago
+Senior Data Architect
+Senior Data Architect
+scandiweb
+Riga (Hybrid)
+4,440 EUR/month - 5,040 EUR/month
+Be an early applicant
+·
+Posted 3 months ago
+3 months ago
+Data Architect (Verified job)
+Data Architect
+Norrin
+Stockholm
+Viewed
+·
+Posted 1 week ago
+1 week ago
+AI & Analytics Engineer
+AI & Analytics Engineer
+Castor Ships S.A.
+Kifisiá (On-site)
+Viewed
+·
+Posted 1 month ago
+1 month ago
+·
+Easy Apply
+AI-Driven Data Architect (Verified job)
+AI-Driven Data Architect
+Nortal
+Helsinki (Hybrid)
+Posted 2 weeks ago
+2 weeks ago
+Data Analytics and AI Lead (Verified job)
+Data Analytics and AI Lead
+RES
+Larne (Hybrid)
+Viewed
+·
+Posted 2 days ago
+2 days ago
+Senior Data Engineer
+Senior Data Engineer
+Satori Analytics
+Greece (Remote)
+Actively reviewing applicants
+Viewed
+·
+Posted 2 months ago
+2 months ago
+·
+Easy Apply
+AI Senior Consultant (m/w/d) (Verified job)
+AI Senior Consultant (m/w/d)
+Capgemini
+Vienna
+2 school alumni work here
+Viewed
+·
+Posted 2 months ago
+2 months ago
+Data & AI Architect (Verified job)
+Data & AI Architect
+Nexer Insight
+Greater Malmö Metropolitan Area (On-site)
+Viewed
+·
+Posted 6 days ago
+6 days ago
+Principal Data & AI Architect
+Principal Data & AI Architect
+jaydhub
+Lisboa (Remote)
+78.4K EUR/yr - 85.4K EUR/yr
+Viewed
+·
+Be an early applicant
+·
+Posted 1 week ago
+1 week ago
+Data Architect (Verified job)
+Data Architect
+Gaming Innovation Group
+San Ġiljan (Hybrid)
+Be an early applicant
+·
+Posted 2 days ago
+2 days ago
+AI & Data Engineer (Verified job)
+AI & Data Engineer
+Energean
+Athens
+Viewed
+·
+Posted 3 weeks ago
+3 weeks ago
+Data & AI Platform Architect (Verified job)
+Data & AI Platform Architect
+Red Bull
+Elsbethen (On-site)
+1 school alumni works here
+Be an early applicant
+·
+Posted 13 hours ago
+13 hours ago
+Senior Analytics Engineer
+Senior Analytics Engineer
+team.blue
+Crete, Greece (Remote)
+Be an early applicant
+·
+Posted 1 week ago
+1 week ago
+Data and AI Solution Architect
+Data and AI Solution Architect
+EPAM Systems
+Armenia (Remote)
+1 connection works here
+Be an early applicant
+·
+Posted 6 days ago
+6 days ago
+See jobs where you’re a top applicant
+Try Premium for AED 0 https://www.linkedin.com/premium/products/?upsellOrderOrigin=Tracking%3Av1%3Apremium_semantic_job_search_bottom_upsell%3AJob+Seeker%3AIn-Product&utype=job&referenceId=FvCH6nDYTA2yyayFQnAsdQ%3D%3D&isSS=false&upsellSlotId=SEMANTIC_JOB_SEARCH_BOTTOM
+Previous
+1
+2
+3
+Next
+AboutAccessibilityHelp Center
+Privacy & Terms
+Ad ChoicesAdvertising
+Business Services
+Get the LinkedIn appMore LinkedIn Corporation © 2026
+Energean
+AI & Data Engineer https://www.linkedin.com/jobs/view/4407026620/?trackingId=Skc1QjFj7gdg9lZIxsVhyA%3D%3D&refId=3KTRmWmac%2BArkeZfj1aAOA%3D%3D&eBP=NOT_ELIGIBLE_FOR_CHARGING&alternateChannel=search&isJobSearch=false
+Athens, Attiki, Greece
+·
+Reposted 3 weeks ago
+·
+Over 100 people clicked apply
+Responses managed off LinkedIn
+Full-time Apply https://www.linkedin.com/safety/go/?url=https%3A%2F%2Fcareers%2Eenergean%2Ecom%2Fjob%2FAthens-AI-%26-Data-Engineer%2F1350749855%2F%3Futm_source%3DLINKEDIN%26utm_medium%3Dreferrer&urlhash=Av-s&mt=zoaWqyq3WFLygAZYMvFBc2ouazU_ZAdG9gRhhuarhReBcq-YN2e5qTt1a1rFyWALgQmyh2nHQBIppX9OI8tGQiCd-xo&isSdui=true
+Save
+Your profile and resume
+match
+the required qualifications well
+Show match details BETA • Is this information helpful?
+About the job
+Why Energean
+Energean is an independent E&P company focused on developing resources in the Mediterranean and UK North Sea. With presence in various countries Energean is operating production, development and exploration assets with an excellent HSE track record.
+The company has an approximately 70% gas weighted portfolio with more than 1200 MMboe 2P reserves and 2C resources and our flagship development assets are the multi-tcf Karish, Karish North and Tanin gas fields, offshore Israel.
+Energean is committed to sustainable development and to be a net zero emitter by 2050 contributing to the global net zero target. The company also strives to meet United Nations' 17 Sustainable Development Goals through its day-to-day operations and a wide range of corporate social responsibility initiatives.
+Being an equal opportunity employer and valuing diversity Energean does not discriminate on the basis of race, religion, colour, national origin, sex, gender, gender expression, sexual orientation, age, marital status, or disability status.
+Summary
+Energean is seeking a motivated and capable AI & Data Engineer to join our team in Athens and support the delivery of digital, data, and AI-driven solutions across a dynamic Oil & Gas Group.
+Reporting to the Head of Business Solutions & ERP, this role is ideal for an early to mid-career professional with a strong academic background and hands-on experience in data engineering, software development, data management, and modern Microsoft technologies.
+The successful candidate will contribute to the design, development, and continuous improvement of scalable data pipelines, analytic platforms, and AI solutions that enhance business operations, decision-making, and process efficiency across the organization.
+Key Accountabilities
+Contribute to the design, development and deployment of data platforms and AI-driven solutions in collaboration with internal stakeholders and external partners
+Build, optimise, and maintain SQL queries, data models, and database structures for reporting, analytics and business intelligence
+Develop data pipelines and workflows to ingest, transform, and manage structured and unstructured data
+Develop and implement automations, applications, and AI-enabled solutions using Microsoft technologies (e.g. Power Platform, Azure AI, Copilot Studio), SAP, and other tools
+Translate business requirements into scalable technical solutions, ensuring alignment with business needs and best practices
+Support testing, troubleshooting, documentation, and continuous improvement of digital and AI solutions
+Ensure data quality, integrity, and governance standards are maintained across solutions
+Qualifications And Experience
+1–4 years of relevant experience in data engineering, software development, or similar roles
+Degree in Computer Science, Engineering, IT, or a related discipline
+Hands-on experience with SQL, data modelling, and relational databases
+Experience with Microsoft ecosystem (e.g. Power Platform, Azure services, Copilot Studio)
+Programming experience in Python or other modern programming languages
+Exposure to data visualization tools (e.g. Power BI) and analytics solutions
+Basic understanding of AI, machine learning, and/or generative AI concepts
+Familiarity with APIs, data integration, and automation tools will be considered an asset
+Exposure to enterprise systems (e.g. SAP) and business processes is a plus
+Excellent command of English (written and verbal)
+Skills
+Strong analytical thinking and problem-solving capabilities
+Proactive, detail-oriented, and results-driven mindset
+Ability to work both independently and collaboratively in a fast-paced environment
+Strong communication skills with the ability to engage both technical and non-technical stakeholders
+High level of ownership and accountability
+Rewards:
+We offer a competitive remuneration and benefits package including private medical insurance, pension plan, life insurance, and continuous learning and career development opportunities within a growing international organization.
+If you are passionate about data, AI, and building impactful digital solutions in a complex and evolving industry, we would love to hear from you.
+Please apply online by hitting the 'Apply' button.
+Applications will ONLY be accepted via the ‘Apply’ button.
+This role is being handled by the Energean recruitment team and no agency contact is required.
+…
+more
+Benefits found in job post
+Medical insurance, Pension plan

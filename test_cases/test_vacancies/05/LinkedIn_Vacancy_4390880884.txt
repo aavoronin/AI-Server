@@ -1,0 +1,273 @@
+ROLE & TASK
+You are an expert technical recruiter and data extraction AI. Your task is to analyze a job description and extract specific details regarding the role's requirements, compensation, location, technical stack, and vacancy metadata.
+
+CRITICAL RULES — READ BEFORE PROCEEDING:
+1. Extract ONLY information explicitly stated in the vacancy text below.
+2. NEVER invent, guess, or copy values from the example JSON structure.
+3. If a value is not mentioned in the vacancy text, output null (without quotes).
+4. The example JSON shows KEYS ONLY. Every value in it is null. You must replace each null with the real value found in the text, or leave it as null if absent.
+5. Do NOT wrap output in markdown code blocks. Output raw JSON only.
+
+⛔ ANTI-HALLUCINATION RULES ⛔
+- If the vacancy text does not EXPLICITLY state a value, output null. Period.
+- Do NOT infer values from the company type, role description, or what seems "typical".
+- Do NOT assume a value is present because it would be "reasonable" for this kind of role.
+- The following fields MUST be null unless the vacancy text explicitly states them:
+  Urgency, EducationLevel, HealthInsurance, ContractType, SecurityClearance,
+  VisaSponsorship, ApplicantsCount, HiringManagerName, WorkingHoursPerWeek,
+  CompanySize, EmployerTimezone, EmployerState, MaxYearsExperience.
+- Example: "Business English classes" in benefits does NOT mean EducationLevel or HealthInsurance.
+- Example: "Remote-first and flexible schedule" does NOT mean Urgency or ContractType.
+
+QUESTIONS TO ANSWER
+1. General Vacancy Details
+Core Details:
+Title: What is the Job Title/Role for this vacancy?
+  IMPORTANT — STRIP seniority, technology names, and codes from the Title.
+  Examples:
+    "Senior Data Engineer (SQL, Python)" → "Data Engineer"
+    "Software Engineer III"              → "Software Engineer"
+    "Lead ML Ops Engineer"               → "ML Ops Engineer"
+    "Junior Backend Developer (Java)"     → "Backend Developer"
+  The seniority goes into the "Level" field instead.
+Level: What is the Seniority/Experience Level? (Options: Junior, Middle, Middle+, Senior, Architect)
+SalaryMin: What is the minimum salary/compensation? (e.g., 50000 for "50k-75k USD", 30 for "30-40 Euro per hour")
+SalaryMax: What is the maximum salary/compensation? (e.g., 75000 for "50k-75k USD", 40 for "30-40 Euro per hour")
+SalaryCurrency: What is the currency? (e.g., USD, EUR)
+SalaryPeriod: What is the pay period? (Options: year, month, week, hour)
+EmploymentType: What is the work arrangement? (Options: remote, hybrid, office)
+FullTime: Is this a full-time vacancy? (Options: yes, no)
+Location & Geography:
+EmployerCountry: What country or countries is the employer located in? MUST be an array of strings (e.g., ["USA"]).
+EmployerCity: City where the office is located (e.g., "Tampa", "London"). For several offices select headquarters or the first office.
+EmployerState: State/Region/Province (e.g., "FL", "Bavaria")
+EmployerTimezone: Timezone of the team (e.g., "EST", "CET")
+CandidateCountry: What countries must the candidate be located in? MUST be an array of strings (e.g., ["USA", "Canada"]).
+CandidateNoCountry: What countries is the candidate explicitly forbidden from being located in? MUST be an array of strings (e.g., ["Russia", "Iran"]).
+RelocationOffered: Is relocation assistance available? (Options: yes, no)
+RelocationBudget: Relocation budget amount if specified (e.g., "5000" for "5K EUR")
+RelocationBudgetCurrency: Relocation budget currency if specified (e.g., "EUR" for "5K EUR")
+VisaSponsorship: Will the company sponsor a work visa? (Options: yes, no)
+Employment & Contract:
+ContractType: Type of employment contract (Options: permanent, contract, freelance, internship, temp-to-perm)
+WorkingHoursPerWeek: Expected weekly hours (e.g., 40, 37.5)
+Company & Team:
+CompanyName: Name of the hiring company (e.g., "JPMorganChase")
+CompanyIndustry: Industry sector (e.g., "Financial Services", "Healthcare")
+CompanySize: Number of employees (e.g., "1-50", "51-200", "10001+")
+Experience & Education:
+MinYearsExperience: Minimum years of experience required (e.g., 3, 5)
+MaxYearsExperience: Maximum years of experience expected, if any (e.g., 7, 10)
+EducationLevel: Minimum education required (Options: high-school, bachelor, master, phd)
+CertificationsRequired: Required professional certifications (MUST be an array of strings, e.g., ["AWS Solutions Architect"])
+SecurityClearance: Required clearance level (Options: none, secret, top-secret, TS/SCI)
+Other questions:
+HealthInsurance: Health insurance offered? (Options: yes, no)
+Urgency: How fast they need to fill the role (Options: immediate, within-1-month, within-3-months, flexible)
+HiringManagerName: Name of the hiring manager (string)
+RequiredLanguages: Human languages required (MUST be an array of SINGLE WORD strings, e.g., ["English"], ["English", "German"]).
+Vacancy Metadata:
+JobId: The unique identifier for the job posting (e.g., "123456789").
+VacancySite: The platform or website where the job is posted (e.g., "LinkedIn", "Indeed", "HireHive").
+VacancyURL: The primary URL of the published job posting (string).
+ApplyURL: The specific URL for the application action, if different from VacancyURL (string).
+PublicationDate: When the job was posted or reposted (e.g., "2023-10-15", "4 days ago").
+ApplicantsCount: The number of applicants mentioned (e.g., 100, 200). If vacancy says "Over 100" or "100+" then answer "100".
+
+2. Technical Proficiencies — EXTRACTION RULES
+Scan the vacancy text for technologies. Classify ONLY the ones actually mentioned into these exact array keys:
+"expert": Mandatory, "must have", or heavy experience required. If it is included in vacancy title, it is expert.
+"required": simply listed as required without significant stress on expert knowledge
+"nice-to-have": listed as optional, bonus, or "nice-to-have"
+
+⛔ TECHNOLOGY EXTRACTION RULES ⛔
+- List ONLY technologies whose EXACT NAME appears in the vacancy text.
+- The taxonomy lists below are for CLASSIFICATION REFERENCE ONLY.
+- Do NOT list technologies from the taxonomy that are NOT mentioned in the vacancy text.
+- Each array element must be a SINGLE technology name (e.g., "Python", "AWS", "ETL").
+- Do NOT put phrases, descriptions, or multiple technologies in one array element.
+  WRONG: "required": ["ETL design, implementation, and maintenance"]
+  RIGHT: "required": ["ETL"]
+  WRONG: "required": ["AWS, GCP or Azure delivering data-centric product experiences"]
+  RIGHT: "required": ["AWS", "GCP", "Azure"]
+- Do NOT infer technologies from context. Only extract explicitly named ones.
+
+Technical Proficiency Taxonomy (REFERENCE ONLY — extract only what is in the text):
+Programming Languages (30):
+Python, SQL, Java, JavaScript, C++, Bash, C#, TypeScript, R, Go, PHP, Kotlin, Swift, Ruby, Rust, Scala, Dart, MATLAB, Perl, Objective-C, Julia, Lua, PowerShell, Solidity, Elixir, F#, C, GDScript, Ada, Haskell.
+SQL Dialects (15):
+PostgreSQL, MySQL, T-SQL, PL/SQL, Snowflake SQL, BigQuery SQL, PL/pgSQL, Redshift SQL, SQLite, Spark SQL, MariaDB, HiveQL, Teradata SQL, DB2 SQL, Trino SQL.
+BI Platforms (15):
+Power BI, Tableau, Looker, Qlik, QuickSight, MicroStrategy, SAP Analytics Cloud, Cognos, TIBCO Spotfire, Domo, Sisense, ThoughtSpot, Oracle Analytics, Metabase, Superset.
+ETL Tools (20):
+Airflow, dbt, Informatica, Spark, Glue, Azure Data Factory, Talend, DataStage, SSIS, Fivetran, Matillion, NiFi, Dagster, Airbyte, Alteryx, Apache Beam, Google Cloud Dataflow, Prefect, Pentaho, Flink.
+DWH Concepts (25):
+Star Schema, Snowflake Schema, 3NF, Data Vault, Columnstore, SCD, Fact Table, Dimension Table, Surrogate Key, Conformed Dimension, Data Mart, Data Lakehouse, OLAP, OLTP, ELT, ETL, CDC, Table Partitioning, Sharding, Materialized View, Data Lineage, Data Governance, Kimball Methodology, Data Mesh, Data Quality.
+AI/ML/Data Science Concepts (30):
+Machine Learning, Deep Learning, Neural Networks, NLP, Computer Vision, Reinforcement Learning, Supervised Learning, Unsupervised Learning, Transfer Learning, Generative AI, LLMs, Prompt Engineering, RAG, Fine-Tuning, Regression, Classification, Clustering, Random Forest, Gradient Boosting, K-Means, CNN, RNN, Transformers, Attention Mechanism, Tokenization, Embeddings, BERT, GPT, Model Evaluation, MLOps.
+Cloud Platforms (10):
+AWS, Azure, GCP, IBM Cloud, Oracle Cloud, Alibaba Cloud, Salesforce, DigitalOcean, VMware, Rackspace.
+Message Brokers & Streaming (6):
+Kafka, RabbitMQ, Redis, Pulsar, NATS, Redis Streams.
+Testing Frameworks (8):
+PyTest, Jest, Mocha, Cypress, Selenium, JUnit, Playwright, Postman.
+Collaboration & Project Management (6):
+Jira, Confluence, Notion, Slack, Microsoft Teams, Asana.
+Operating Systems (3):
+Linux, Windows, macOS.
+
+⚠️ CRITICAL OUTPUT INSTRUCTIONS ⚠️
+Output ONLY a valid, well-formatted JSON object.
+NO markdown formatting (no ```json or ```), NO introductory text, NO trailing whitespace.
+DO NOT include any introductory text, greetings, comments, or explanations.
+Use null (unquoted) for missing general values.
+Fields marked as arrays MUST be JSON arrays (e.g., ["USA"], never "USA").
+Missing Values Rule: If a general value (like Title, Salary, or yes/no fields) is not found use null without quotes.
+If a technical proficiency is not found, do not include it in any list.
+DO NOT copy any values from the example below. Extract every value ONLY from the vacancy text.
+DO NOT invent values. If the text does not say it, output null.
+
+Expected JSON Structure (KEYS ONLY — all values are null placeholders):
+{
+  "Title": null,
+  "Level": null,
+  "SalaryMin": null,
+  "SalaryMax": null,
+  "SalaryCurrency": null,
+  "SalaryPeriod": null,
+  "EmploymentType": null,
+  "FullTime": null,
+  "EmployerCountry": [],
+  "EmployerCity": null,
+  "EmployerState": null,
+  "EmployerTimezone": null,
+  "CandidateCountry": [],
+  "CandidateNoCountry": [],
+  "RelocationOffered": null,
+  "RelocationBudget": null,
+  "RelocationBudgetCurrency": null,
+  "VisaSponsorship": null,
+  "ContractType": null,
+  "WorkingHoursPerWeek": null,
+  "CompanyName": null,
+  "CompanyIndustry": null,
+  "CompanySize": null,
+  "MinYearsExperience": null,
+  "MaxYearsExperience": null,
+  "EducationLevel": null,
+  "CertificationsRequired": [],
+  "SecurityClearance": null,
+  "HealthInsurance": null,
+  "Urgency": null,
+  "HiringManagerName": null,
+  "RequiredLanguages": [],
+  "JobId": null,
+  "VacancySite": null,
+  "VacancyURL": null,
+  "ApplyURL": null,
+  "PublicationDate": null,
+  "ApplicantsCount": null,
+  "expert": [],
+  "required": [],
+  "nice-to-have": []
+}
+Proton
+Machine Learning Engineer https://www.linkedin.com/jobs/view/4390880884/?trackingId=K7atglShmXrelDxsaUHylw%3D%3D&refId=%2Bsoo1Wk2MIvwMnfCyLZ%2FuQ%3D%3D&eBP=NOT_ELIGIBLE_FOR_CHARGING&alternateChannel=search&isJobSearch=false
+Taipei, Taipei City, Taiwan
+·
+Reposted 5 days ago
+·
+Over 100 people clicked apply
+Promoted by hirer ·
+Responses managed off LinkedIn
+On-site Full-time Apply https://www.linkedin.com/safety/go/?url=https%3A%2F%2Fjob-boards%2Eeu%2Egreenhouse%2Eio%2Fproton%2Fjobs%2F4823205101%3Fgh_src%3D4cbb4882teu&urlhash=3pol&mt=t5huAehxpvTq5NoMo1Gh2HUtc1fXJDK6fjhGJCLo5eBw8IPutypnGUJ91Im_Yv4iYdo0E1FqnoeT2qD80yuEpddVPXc&isSdui=true
+Save
+Your profile and resume
+are missing some
+required qualifications
+Show match details BETA • Is this information helpful?
+People you can reach out to
+Meet the hiring team
+Eamonn M.• 3rdDirector of Engineering, ML & AI @ Proton
+Message https://www.linkedin.com/messaging/compose/?profileUrn=urn%3Ali%3Afsd_profile%3AACoAAAWJ0vwBb2tsGGOcx7m7XAJyTqvB7I2ontQ&recipient=ACoAAAWJ0vwBb2tsGGOcx7m7XAJyTqvB7I2ontQ&screenContext=JOB_DETAILS_HIRING_TEAM&jobPostingUrn=urn%3Ali%3Afsd_jobPosting%3A4390880884&contextEntityUrn=urn%3Ali%3Afsd_jobPosting%3A4390880884&interop=msgOverlay
+About the job
+Join Proton and build a better internet where privacy is the default
+Proton was founded in 2014 by scientists from CERN on a simple truth:
+privacy is a fundamental human right
+. Since then, we’ve built the world’s largest encrypted email service (Proton Mail) and expanded into Proton VPN, Proton Drive, Proton Pass, and Proton Calendar—tools used by millions globally to protect their freedom, fight censorship, and keep their data safe. In some situations, Proton has literally helped save lives!
+We are profitable, independent (no VC control), and selectively hire from the top :1% of applicants. Our 500+ team members across 50+ countries come from leading organizations and elite academic backgrounds. We move fast, keep hierarchy light, and prioritize impact over optics. If you want to do meaningful work with exceptionally high-caliber people, this is it. Join us and do work you can truly be proud of. Check our open-source projects
+here!
+About the role:
+The MSA team (Mail Delivery, Spam, and Anti-Abuse) is a multidisciplinary group founded in 2019 to solve complex security challenges across the Proton ecosystem. We build sophisticated systems from scratch that combine human intelligence and machine learning to make tens of millions of real-time or asynchronous decisions daily. Our focus areas include:
+Mail delivery and spam prevention
+Abuse detection
+Account security
+Site reliability and resilience
+Over the past few years, our custom systems have:
+Reduced spam filter misclassifications by over 70%
+Blocked millions of abusive bulk signups
+Protected hundreds of thousands of users from account compromises
+Mitigated hundreds of DDoS attacks
+Recently, we’ve expanded our impact with
+Proton Sentinel
+(an AI-human hybrid security program) and
+Proton CAPTCHA
+(our own puzzle system to detect and prevent abuse). We’re now scaling our capabilities with
+agentic AI
+to enable autonomous threat detection and response.
+In 5 years, we’ve grown from 2 engineers to 40+ engineers and analysts across 3 continents, operating 24/7. We’re looking for
+curious, collaborative, and impact-driven
+engineers who thrive in a startup environment and want to shape the future of secure AI.
+What You Will Do
+Design and deploy scalable ML systems using modern MLOps practices, including real-time inference, model monitoring, and automated retraining pipelines.
+Architect agentic AI systems capable of autonomous threat detection, adaptive policy enforcement, and self-healing security responses.
+Build tools for model development, debugging, and explainability to accelerate iteration and transparency.
+Optimize ML workflows for distributed environments to handle large-scale data processing.
+Collaborate cross-functionally with security analysts, backend/frontend engineers, and customer support to align technical solutions with user needs.
+Advance the state of ML for anti abuse and account security, exploring cutting-edge techniques like adversarial robustness, graph-based anomaly detection, and privacy-preserving AI.
+What You Bring
+Degree in Computer Science or a related quantitative field, with 2+ years hands-on experience in building and running ML systems.
+Production-level ML expertise: You’ve shipped models that handle real-world scale and complexity.
+Hands-on experience with LLMs in agentic environments.
+Strong software engineering skills: Proficiency in Python, with a solid understanding of backend and server fundamentals.
+Statistical rigor: Deep understanding of probability, hypothesis testing, and experimental design.
+Bonus Points For
+Experience with adversarial ML or red-teaming ML systems.
+Experience working on distributed systems.
+Contributions to open-source security/privacy tools.
+Knowledge of federated learning, differential privacy, or on-device inference.
+Familiarity with graph-based anomaly detection or knowledge graphs.
+Technical leadership: Experience owning projects, mentoring peers, and driving technical direction.
+Security mindset: Familiarity with abuse patterns, adversarial attacks, or threat intelligence (bonus points!).
+Why Join Us?
+Impact at scale: Your work will protect millions of users globally.
+Cutting-edge tech: Tackle challenges like agentic AI, real-time threat detection, and privacy-preserving ML.
+Collaborative culture: Work with a global team of experts in security, ML, and systems engineering.
+Growth opportunities: Lead initiatives, mentor other, and learn across a diverse technology stack
+Mission-driven: Contribute to a privacy-first internet where users control their data.
+What We Offer
+Work that Matters: millions of people trust Proton with their privacy. We answer only to our users — not advertisers, not investors with conflicting agendas, not governments. The work you do here is real, and the impact is measurable. (read more about our impact
+here)
+A great Team: Our team is diverse, collaborative, and tight-knit with people coming from all walks of life, including many of the world’s top academic institutions and organizations, such as MIT, Harvard, Stanford, Caltech, Cambridge, and ETH.
+Technology: you'll get the right hardware and the right software you need to do your best work.
+Learning & Development: we invest in your growth because sharp people make us better. Proton is one of the fastest ways to accelerate your career because you'll be thrown into real challenges, with real ownership, from day one.
+Employee Benefits: your wellbeing isn't an afterthought. We offer strong health coverage, solid retirement options, generous leave, and wellness support so you can bring your best self to work every day
+Stock Options: at Proton, we all have the opportunity to be owners of the company. From day one, you have a real stake in what we're building. When Proton wins, you win.
+In-Person Collaboration: Amazing things happen when passionate, smart, and purposeful people get together in the same room. With offices across Geneva, Zürich, Barcelona, London and more, you'll spend most of your time collaborating face-to-face with people who genuinely care about what they're building
+Food: Lunch and snacks are on us every day in our offices so you can focus on the work and not on what's for lunch.
+Transport: getting to the office shouldn't cost you. We cover public transport, bike allowances, or parking, whichever works for you.
+Flexible Working: you own your schedule. Set hours that work for you and your team — because outcomes matter more than when the clock says you started.
+Our Commitment to Diversity and Inclusion
+At Proton, we believe diversity drives innovation and strengthens our mission to provide privacy as a default for all. We are committed to fostering an inclusive environment where all individuals, regardless of race, ethnicity, gender, age, sexual orientation, physical ability, or socio-economic background, feel valued and empowered. We strive to create equal opportunities, promote open dialogue, and support continuous learning to ensure every voice is heard and respected.
+If you need any extra support or reasonable adjustments during the hiring process, please let your talent partner know.
+Candidate Privacy Notice
+When you apply for a position, refer a candidate, or are considered for a role at Proton Technologies AG (Proton, we, us, or our), your information is stored in Greenhouse, in accordance with their
+Service Privacy Policy.
+This information is used to evaluate your suitability for the posted position. We also retain this information for consideration for future roles that you may apply for or that we believe may align with your background and skills.
+If we no longer have a legitimate business need to process your information, we will either delete or anonymize it. Should you have any inquiries about how we use or manage your information, or if you wish to access, correct, or delete your data, please contact our privacy team at careers@proton.ch.
+Proton does not accept unsolicited resumes from any sources other than directly from candidates. We will not pay a fee for any placement resulting from an unsolicited offer, even if the candidate is subsequently hired by Proton.
+To learn more about our privacy policy, please visit
+our privacy policy page
+.
+…
+more

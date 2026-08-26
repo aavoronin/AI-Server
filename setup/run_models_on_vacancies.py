@@ -60,7 +60,8 @@ def shorten_vacancy_text(v_name: str, v_text: str) -> str:
     return v_text
 
 
-def get_prompt_and_model(version) -> tuple[list[str], list[str], str]:
+def get_prompt_and_model(version) -> tuple[list[str], list[str], str, bool]:
+    bulk_run = False
     test_models = [
         "NikolayKozloff/gemma-3-1b-it-Q8_0-GGUF|GPU|32768",
         "NikolayKozloff/gemma-3-4b-it-Q8_0-GGUF|GPU|32768",
@@ -174,18 +175,19 @@ def get_prompt_and_model(version) -> tuple[list[str], list[str], str]:
         vacancies_folder = r"C:\Py\AI-Server\test_cases\test_vacancies\04"
     elif version == 5:
         prompt_files = [
-            "PROMPT_SIMPLE5.txt"
+            "PROMPT_SIMPLE6.txt"
         ]
         test_models = [
             "matrixportalx/Llama-3.3-8B-Instruct-128K-Q5_K_M-GGUF|GPU|32768",
             "Brunobkr/OFFELLIA_Q6_K_gemma-4-26B-A4B-it-ultra-uncensored-heretic.gguf|CPU|32768",
         ]
-        vacancies_folder = r"C:\Py\AI-Server\test_cases\test_vacancies\04"
+        vacancies_folder = r"C:\Py\AI-Server\test_cases\test_vacancies\05"
+        bulk_run = True
     else:
         prompt_files = []
         test_models = []
         vacancies_folder = r"C:\Py\AI-Server\test_cases\test_vacancies\01"
-    return prompt_files, test_models, vacancies_folder
+    return prompt_files, test_models, vacancies_folder, bulk_run
 
 
 def warmup_model(client, model_id, timeout):
@@ -366,7 +368,8 @@ def run_models_on_vacancies(version):
     verbose = True
     vacancies_limit = 999999
 
-    prompt_files, test_models, vacancies_dir = get_prompt_and_model(version)
+    prompt_files, test_models, vacancies_dir, bulk_run = \
+        get_prompt_and_model(version)
     vacancies_path = Path(vacancies_dir)
 
     client = TextToTextClient()
@@ -401,19 +404,8 @@ def run_models_on_vacancies(version):
         for i, (txt_file, result_json_file) in enumerate(vacancies):
             if i >= vacancies_limit:
                 continue
-            vacancy_name = txt_file.stem
-            vacancy_text = txt_file.read_text(encoding='utf-8')
-            vacancy_text = shorten_vacancy_text(vacancy_name, vacancy_text)
-
-            try:
-                with open(result_json_file, 'r', encoding='utf-8') as f:
-                    expected_json = json.load(f)
-            except json.JSONDecodeError:
-                print(f"[{vacancy_name}] ERROR: Invalid JSON in {result_json_file.name}. Scoring as 0.00")
-                expected_json = {}
-            except Exception as e:
-                print(f"[{vacancy_name}] ERROR: Failed to read {result_json_file.name}: {e}. Scoring as 0.00")
-                expected_json = {}
+            expected_json, vacancy_name, vacancy_text = \
+                get_vacancy_and_expected_result(result_json_file, txt_file, bulk_run)
 
             combined_parsed_dict = {}
             total_vacancy_time = 0.0
@@ -422,12 +414,7 @@ def run_models_on_vacancies(version):
                 prompt_path = vacancies_path.parent / p_file
                 if not prompt_path.exists():
                     continue
-                prompt_text = prompt_path.read_text(encoding='utf-8')
-                full_prompt = prompt_text + "\n" + vacancy_text
-
-                print(
-                    f"  [{p_file}] Vacancy Length: {len(vacancy_text)} chars | "
-                    f"Total Prompt Length: {len(full_prompt)} chars")
+                full_prompt = get_full_prompt(p_file, prompt_path, vacancy_text)
 
                 if i == 0:
                     warmup_model(client, model_id, VACANCY_TIMEOUT_0)
@@ -489,6 +476,37 @@ def run_models_on_vacancies(version):
                              total_time, vacancy_scores, model_summaries)
 
         print_vacancies_model_summary(model_summaries)
+
+
+def get_full_prompt(p_file: str, prompt_path: Path, vacancy_text) -> str | Any:
+    prompt_text = prompt_path.read_text(encoding='utf-8')
+    if prompt_text in vacancy_text:
+        full_prompt = vacancy_text
+    else:
+        full_prompt = prompt_text + "\n" + vacancy_text
+
+    print(
+        f"  [{p_file}] Vacancy Length: {len(vacancy_text)} chars | "
+        f"Total Prompt Length: {len(full_prompt)} chars")
+    return full_prompt
+
+
+def get_vacancy_and_expected_result(result_json_file, txt_file, bulk_run) -> tuple[str, Any, Any]:
+    vacancy_name = txt_file.stem
+    vacancy_text = txt_file.read_text(encoding='utf-8')
+    if not bulk_run:
+        vacancy_text = shorten_vacancy_text(vacancy_name, vacancy_text)
+
+    try:
+        with open(result_json_file, 'r', encoding='utf-8') as f:
+            expected_json = json.load(f)
+    except json.JSONDecodeError:
+        print(f"[{vacancy_name}] ERROR: Invalid JSON in {result_json_file.name}. Scoring as 0.00")
+        expected_json = {}
+    except Exception as e:
+        print(f"[{vacancy_name}] ERROR: Failed to read {result_json_file.name}: {e}. Scoring as 0.00")
+        expected_json = {}
+    return expected_json, vacancy_name, vacancy_text
 
 
 def print_vacancies_model_summary(model_summaries: list[Any]):
