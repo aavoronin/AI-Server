@@ -58,7 +58,7 @@ ApplicantsCount: The number of applicants mentioned (e.g., 100, 200). If vacancy
 Scan the text for technologies (Programming Languages, SQL Dialects, BI, ETL, DWH Concepts, AI/ML, Cloud, Message Brokers, Testing, Collaboration, OS). Classify only the mentioned ones into these exact array keys:
 "expert": Mandatory, "must have", or heavy experience required
 "required": simply listed as required for vacancy without significant stress on expert knowledge
-"nice-to_have": listed as optional, bonus, or "nice-to-have" or listed as one of the possible items required.
+"nice-to-have": listed as optional, bonus, or "nice-to-have" or listed as one of the possible items required.
 
 2. Technical Proficiencies
 
@@ -147,5 +147,5 @@ The keys should be copied:
 "ApplicantsCount": 1000,
 "expert": ["SQL", "Python", "Windows"]
 "required": ["C#", "PySpark", "airflow", "PL/SQL", "SSIS", "ELT"],
-"nice-to_have": ["C#", "MariaDB", "dbt", "ML", "Linux"]
+"nice-to-have": ["C#", "MariaDB", "dbt", "ML", "Linux"]
 }

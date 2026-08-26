@@ -55,7 +55,7 @@
     "DynamoDB",
     "OpenSearch"
   ],
-  "nice-to_have": [
+  "nice-to-have": [
     "Spark",
     "Pandas",
     "Data Lakehouse",

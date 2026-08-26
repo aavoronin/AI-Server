@@ -48,7 +48,7 @@
     "TeamCity",
     "Python"
   ],
-  "nice-to_have": [
+  "nice-to-have": [
     "ZenML",
     "Dagster",
     "Airflow",

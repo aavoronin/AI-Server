@@ -45,7 +45,7 @@
     "PySpark",
     "AWS"
   ],
-  "nice-to_have": [
+  "nice-to-have": [
     "EC2",
     "EKS",
     "RDS",

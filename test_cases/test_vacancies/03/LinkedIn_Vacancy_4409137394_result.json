@@ -50,7 +50,7 @@
   "required": [
     "SQL"
   ],
-  "nice-to_have": [
+  "nice-to-have": [
     "AWS",
     "ETL",
     "Snowflake SQL"

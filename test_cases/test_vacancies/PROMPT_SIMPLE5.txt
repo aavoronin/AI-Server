@@ -78,8 +78,7 @@ ApplicantsCount: The number of applicants mentioned (e.g., 100, 200). If vacancy
 Scan the vacancy text for technologies. Classify ONLY the ones actually mentioned into these exact array keys:
 "expert": Mandatory, "must have", or heavy experience required
 "required": simply listed as required without significant stress on expert knowledge
-"nice-to_have": listed as optional, bonus, or "nice-to-have"
-NOTE: The key is "nice-to_have" (underscore between "to" and "have"), NOT "nice-to-have".
+"nice-to-have": listed as optional, bonus, or "nice-to-have"
 
 ⛔ TECHNOLOGY EXTRACTION RULES ⛔
 - List ONLY technologies whose EXACT NAME appears in the vacancy text.
@@ -170,5 +169,5 @@ Expected JSON Structure (KEYS ONLY — all values are null placeholders):
   "ApplicantsCount": null,
   "expert": [],
   "required": [],
-  "nice-to_have": []
+  "nice-to-have": []
 }

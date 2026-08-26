@@ -12,19 +12,19 @@ from setup.running_model_utils import (
 # Scoring matrix for version >= 4
 # Rows = expected level, Columns = generated level
 PROFICIENCY_SCORE_MATRIX = {
-    "expert":       {"expert": 6, "required": 3, "nice-to_have": 1},
-    "required":     {"expert": 3, "required": 4, "nice-to_have": 1},
-    "nice-to_have": {"expert": 1, "required": 1, "nice-to_have": 2},
+    "expert":       {"expert": 6, "required": 3, "nice-to-have": 1},
+    "required":     {"expert": 3, "required": 4, "nice-to-have": 1},
+    "nice-to-have": {"expert": 1, "required": 1, "nice-to-have": 2},
 }
 
 # Keys that use proficiency matrix scoring
-PROFICIENCY_LEVEL_KEYS = {"expert", "required", "nice-to_have"}
+PROFICIENCY_LEVEL_KEYS = {"expert", "required", "nice-to-have"}
 
 # Max points per expected level
 PROFICIENCY_MAX_POINTS = {
     "expert": 6,
     "required": 4,
-    "nice-to_have": 2,
+    "nice-to-have": 2,
 }
 
 
@@ -172,6 +172,15 @@ def get_prompt_and_model(version) -> tuple[list[str], list[str], str]:
 
         ]
         vacancies_folder = r"C:\Py\AI-Server\test_cases\test_vacancies\04"
+    elif version == 5:
+        prompt_files = [
+            "PROMPT_SIMPLE5.txt"
+        ]
+        test_models = [
+            "matrixportalx/Llama-3.3-8B-Instruct-128K-Q5_K_M-GGUF|GPU|32768",
+            "Brunobkr/OFFELLIA_Q6_K_gemma-4-26B-A4B-it-ultra-uncensored-heretic.gguf|CPU|32768",
+        ]
+        vacancies_folder = r"C:\Py\AI-Server\test_cases\test_vacancies\04"
     else:
         prompt_files = []
         test_models = []
@@ -233,7 +242,7 @@ def calculate_vacancy_score(expected_json, combined_parsed_dict, version=1):
 
 def calculate_vacancy_score_matrix(expected_json, combined_parsed_dict):
     """Calculate score using proficiency matrix for version >= 4."""
-    levels = ["expert", "required", "nice-to_have"]
+    levels = ["expert", "required", "nice-to-have"]
 
     # Build expected skill->level mapping (normalized to lowercase)
     expected_skills = {}
@@ -279,7 +288,7 @@ def calculate_vacancy_score_matrix(expected_json, combined_parsed_dict):
 
 def print_json_failures_v4(expected_json, combined_parsed_dict):
     """Print failures for version >= 4, showing per-skill breakdown for proficiency keys."""
-    levels = ["expert", "required", "nice-to_have"]
+    levels = ["expert", "required", "nice-to-have"]
 
     # Build expected skill->level mapping
     expected_skills = {}
