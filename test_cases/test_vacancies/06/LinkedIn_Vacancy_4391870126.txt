@@ -1,0 +1,519 @@
+ROLE & TASK
+You are an expert technical recruiter and data extraction AI. Your task is to analyze a job description and extract specific details regarding the role's requirements, compensation, location, technical stack, and vacancy metadata.
+
+CRITICAL RULES — READ BEFORE PROCEEDING:
+1. Extract ONLY information explicitly stated in the vacancy text below.
+2. NEVER invent, guess, or copy values from the example JSON structure.
+3. If a value is not mentioned in the vacancy text, output null (without quotes).
+4. The example JSON shows KEYS ONLY. Every value in it is null. You must replace each null with the real value found in the text, or leave it as null if absent.
+5. Do NOT wrap output in markdown code blocks. Output raw JSON only.
+
+⛔ ANTI-HALLUCINATION RULES ⛔
+- If the vacancy text does not EXPLICITLY state a value, output null. Period.
+- Do NOT infer values from the company type, role description, or what seems "typical".
+- Do NOT assume a value is present because it would be "reasonable" for this kind of role.
+- The following fields MUST be null unless the vacancy text explicitly states them:
+  Urgency, EducationLevel, HealthInsurance, ContractType, SecurityClearance,
+  VisaSponsorship, ApplicantsCount, HiringManagerName, WorkingHoursPerWeek,
+  CompanySize, EmployerTimezone, EmployerState, MaxYearsExperience.
+- Example: "Business English classes" in benefits does NOT mean EducationLevel or HealthInsurance.
+- Example: "Remote-first and flexible schedule" does NOT mean Urgency or ContractType.
+
+QUESTIONS TO ANSWER
+1. General Vacancy Details
+Core Details:
+Title: What is the Job Title/Role for this vacancy?
+  IMPORTANT — STRIP seniority, technology names, and codes from the Title.
+  Examples:
+    "Senior Data Engineer (SQL, Python)" → "Data Engineer"
+    "Software Engineer III"              → "Software Engineer"
+    "Lead ML Ops Engineer"               → "ML Ops Engineer"
+    "Junior Backend Developer (Java)"     → "Backend Developer"
+  The seniority goes into the "Level" field instead.
+Level: What is the Seniority/Experience Level? (Options: Junior, Middle, Middle+, Senior, Architect)
+SalaryMin: What is the minimum salary/compensation? (e.g., 50000 for "50k-75k USD", 30 for "30-40 Euro per hour")
+SalaryMax: What is the maximum salary/compensation? (e.g., 75000 for "50k-75k USD", 40 for "30-40 Euro per hour")
+SalaryCurrency: What is the currency? (e.g., USD, EUR)
+SalaryPeriod: What is the pay period? (Options: year, month, week, hour)
+EmploymentType: What is the work arrangement? (Options: remote, hybrid, office)
+FullTime: Is this a full-time vacancy? (Options: yes, no)
+Location & Geography:
+EmployerCountry: What country or countries is the employer located in? MUST be an array of strings (e.g., ["USA"]).
+EmployerCity: City where the office is located (e.g., "Tampa", "London"). For several offices select headquarters or the first office.
+EmployerState: State/Region/Province (e.g., "FL", "Bavaria")
+EmployerTimezone: Timezone of the team (e.g., "EST", "CET")
+CandidateCountry: What countries must the candidate be located in? MUST be an array of strings (e.g., ["USA", "Canada"]).
+CandidateNoCountry: What countries is the candidate explicitly forbidden from being located in? MUST be an array of strings (e.g., ["Russia", "Iran"]).
+RelocationOffered: Is relocation assistance available? (Options: yes, no)
+RelocationBudget: Relocation budget amount if specified (e.g., "5000" for "5K EUR")
+RelocationBudgetCurrency: Relocation budget currency if specified (e.g., "EUR" for "5K EUR")
+VisaSponsorship: Will the company sponsor a work visa? (Options: yes, no)
+Employment & Contract:
+ContractType: Type of employment contract (Options: permanent, contract, freelance, internship, temp-to-perm)
+WorkingHoursPerWeek: Expected weekly hours (e.g., 40, 37.5)
+Company & Team:
+CompanyName: Name of the hiring company (e.g., "JPMorganChase")
+CompanyIndustry: Industry sector (e.g., "Financial Services", "Healthcare")
+CompanySize: Number of employees (e.g., "1-50", "51-200", "10001+")
+Experience & Education:
+MinYearsExperience: Minimum years of experience required (e.g., 3, 5)
+MaxYearsExperience: Maximum years of experience expected, if any (e.g., 7, 10)
+EducationLevel: Minimum education required (Options: high-school, bachelor, master, phd)
+CertificationsRequired: Required professional certifications (MUST be an array of strings, e.g., ["AWS Solutions Architect"])
+SecurityClearance: Required clearance level (Options: none, secret, top-secret, TS/SCI)
+Other questions:
+HealthInsurance: Health insurance offered? (Options: yes, no)
+Urgency: How fast they need to fill the role (Options: immediate, within-1-month, within-3-months, flexible)
+HiringManagerName: Name of the hiring manager (string)
+RequiredLanguages: Human languages required (MUST be an array of SINGLE WORD strings, e.g., ["English"], ["English", "German"]).
+Vacancy Metadata:
+JobId: The unique identifier for the job posting (e.g., "123456789").
+VacancySite: The platform or website where the job is posted (e.g., "LinkedIn", "Indeed", "HireHive").
+VacancyURL: The primary URL of the published job posting (string).
+ApplyURL: The specific URL for the application action, if different from VacancyURL (string).
+PublicationDate: When the job was posted or reposted (e.g., "2023-10-15", "4 days ago").
+ApplicantsCount: The number of applicants mentioned (e.g., 100, 200). If vacancy says "Over 100" or "100+" then answer "100".
+
+2. Technical Proficiencies — EXTRACTION RULES
+Scan the vacancy text for technologies. Classify ONLY the ones actually mentioned into these exact array keys:
+"expert": Mandatory, "must have", or heavy experience required. If it is included in vacancy title, it is expert.
+"required": simply listed as required without significant stress on expert knowledge
+"nice-to-have": listed as optional, bonus, or "nice-to-have"
+
+⛔ TECHNOLOGY EXTRACTION RULES ⛔
+- List ONLY technologies whose EXACT NAME appears in the vacancy text.
+- The taxonomy lists below are for CLASSIFICATION REFERENCE ONLY.
+- Do NOT list technologies from the taxonomy that are NOT mentioned in the vacancy text.
+- Each array element must be a SINGLE technology name (e.g., "Python", "AWS", "ETL").
+- Do NOT put phrases, descriptions, or multiple technologies in one array element.
+  WRONG: "required": ["ETL design, implementation, and maintenance"]
+  RIGHT: "required": ["ETL"]
+  WRONG: "required": ["AWS, GCP or Azure delivering data-centric product experiences"]
+  RIGHT: "required": ["AWS", "GCP", "Azure"]
+- Do NOT infer technologies from context. Only extract explicitly named ones.
+
+Technical Proficiency Taxonomy (REFERENCE ONLY — extract only what is in the text):
+Programming Languages (30):
+Python, SQL, Java, JavaScript, C++, Bash, C#, TypeScript, R, Go, PHP, Kotlin, Swift, Ruby, Rust, Scala, Dart, MATLAB, Perl, Objective-C, Julia, Lua, PowerShell, Solidity, Elixir, F#, C, GDScript, Ada, Haskell.
+SQL Dialects (15):
+PostgreSQL, MySQL, T-SQL, PL/SQL, Snowflake SQL, BigQuery SQL, PL/pgSQL, Redshift SQL, SQLite, Spark SQL, MariaDB, HiveQL, Teradata SQL, DB2 SQL, Trino SQL.
+BI Platforms (15):
+Power BI, Tableau, Looker, Qlik, QuickSight, MicroStrategy, SAP Analytics Cloud, Cognos, TIBCO Spotfire, Domo, Sisense, ThoughtSpot, Oracle Analytics, Metabase, Superset.
+ETL Tools (20):
+Airflow, dbt, Informatica, Spark, Glue, Azure Data Factory, Talend, DataStage, SSIS, Fivetran, Matillion, NiFi, Dagster, Airbyte, Alteryx, Apache Beam, Google Cloud Dataflow, Prefect, Pentaho, Flink.
+DWH Concepts (25):
+Star Schema, Snowflake Schema, 3NF, Data Vault, Columnstore, SCD, Fact Table, Dimension Table, Surrogate Key, Conformed Dimension, Data Mart, Data Lakehouse, OLAP, OLTP, ELT, ETL, CDC, Table Partitioning, Sharding, Materialized View, Data Lineage, Data Governance, Kimball Methodology, Data Mesh, Data Quality.
+AI/ML/Data Science Concepts (30):
+Machine Learning, Deep Learning, Neural Networks, NLP, Computer Vision, Reinforcement Learning, Supervised Learning, Unsupervised Learning, Transfer Learning, Generative AI, LLMs, Prompt Engineering, RAG, Fine-Tuning, Regression, Classification, Clustering, Random Forest, Gradient Boosting, K-Means, CNN, RNN, Transformers, Attention Mechanism, Tokenization, Embeddings, BERT, GPT, Model Evaluation, MLOps.
+Cloud Platforms (10):
+AWS, Azure, GCP, IBM Cloud, Oracle Cloud, Alibaba Cloud, Salesforce, DigitalOcean, VMware, Rackspace.
+Message Brokers & Streaming (6):
+Kafka, RabbitMQ, Redis, Pulsar, NATS, Redis Streams.
+Testing Frameworks (8):
+PyTest, Jest, Mocha, Cypress, Selenium, JUnit, Playwright, Postman.
+Collaboration & Project Management (6):
+Jira, Confluence, Notion, Slack, Microsoft Teams, Asana.
+Operating Systems (3):
+Linux, Windows, macOS.
+
+⚠️ CRITICAL OUTPUT INSTRUCTIONS ⚠️
+Output ONLY a valid, well-formatted JSON object.
+NO markdown formatting (no ```json or ```), NO introductory text, NO trailing whitespace.
+DO NOT include any introductory text, greetings, comments, or explanations.
+Use null (unquoted) for missing general values.
+Fields marked as arrays MUST be JSON arrays (e.g., ["USA"], never "USA").
+Missing Values Rule: If a general value (like Title, Salary, or yes/no fields) is not found use null without quotes.
+If a technical proficiency is not found, do not include it in any list.
+DO NOT copy any values from the example below. Extract every value ONLY from the vacancy text.
+DO NOT invent values. If the text does not say it, output null.
+
+Expected JSON Structure (KEYS ONLY — all values are null placeholders):
+{
+  "Title": null,
+  "Level": null,
+  "SalaryMin": null,
+  "SalaryMax": null,
+  "SalaryCurrency": null,
+  "SalaryPeriod": null,
+  "EmploymentType": null,
+  "FullTime": null,
+  "EmployerCountry": [],
+  "EmployerCity": null,
+  "EmployerState": null,
+  "EmployerTimezone": null,
+  "CandidateCountry": [],
+  "CandidateNoCountry": [],
+  "RelocationOffered": null,
+  "RelocationBudget": null,
+  "RelocationBudgetCurrency": null,
+  "VisaSponsorship": null,
+  "ContractType": null,
+  "WorkingHoursPerWeek": null,
+  "CompanyName": null,
+  "CompanyIndustry": null,
+  "CompanySize": null,
+  "MinYearsExperience": null,
+  "MaxYearsExperience": null,
+  "EducationLevel": null,
+  "CertificationsRequired": [],
+  "SecurityClearance": null,
+  "HealthInsurance": null,
+  "Urgency": null,
+  "HiringManagerName": null,
+  "RequiredLanguages": [],
+  "JobId": null,
+  "VacancySite": null,
+  "VacancyURL": null,
+  "ApplyURL": null,
+  "PublicationDate": null,
+  "ApplicantsCount": null,
+  "expert": [],
+  "required": [],
+  "nice-to-have": []
+}
+Big Data Architect (Azure) | SoftServe | LinkedIn
+Jobs | LinkedIn
+Jobs | LinkedIn
+Jobs | LinkedIn
+0 notifications
+Skip to main content
+Home
+My Network
+Jobs https://www.linkedin.com/jobs/
+Messaging
+1Notifications
+Me
+For Business
+Try Premium for AED 0 Jobs
+Date posted
+Remote
+Azure
+LLM
+Gen AI
+Cloud
+Easy Apply
+Experience level
+Employment type
+Company
+Under 10 applicants
+In my network
+Jobs
+Date posted
+Remote
+Azure
+LLM
+Gen AI
+Cloud
+Easy Apply
+Experience level
+Employment type
+Company
+Under 10 applicants
+In my network
+99+ results
+Select a location
+How promoted jobs are ranked
+Data Architect (Verified job)
+Data Architect
+Scalefocus
+Skopje (Hybrid)
+Actively reviewing applicants
+Viewed
+·
+Be an early applicant
+·
+Posted 1 month ago
+1 month ago
+·
+Easy Apply
+Data & AI Platform Architect (Verified job)
+Data & AI Platform Architect
+Red Bull
+Elsbethen (On-site)
+1 school alumni works here
+Viewed
+·
+Posted 1 day ago
+1 day ago
+Lead Data Engineer
+Lead Data Engineer
+Trinetix
+Bulgaria (Remote)
+Viewed
+·
+Be an early applicant
+·
+Posted 3 days ago
+3 days ago
+·
+Easy Apply
+Platform Data Architect (Verified job)
+Platform Data Architect
+IZIGROUP
+Birkirkara (On-site)
+Company response time is typically 1 week
+Viewed
+·
+Be an early applicant
+·
+Posted 1 week ago
+1 week ago
+·
+Easy Apply
+AI Architect (Verified job)
+AI Architect
+SILVARE
+Athens Metropolitan Area (Hybrid)
+Viewed
+·
+Be an early applicant
+·
+Posted 2 weeks ago
+2 weeks ago
+Data Engineering & BI Lead
+Data Engineering & BI Lead
+Glintt Global
+Lisboa (Hybrid)
+Viewed
+·
+Be an early applicant
+·
+Posted 2 months ago
+2 months ago
+Data Architect (Verified job)
+Data Architect
+Scalefocus
+Sofia (Remote)
+Actively reviewing applicants
+Viewed
+·
+Be an early applicant
+·
+Posted 5 days ago
+5 days ago
+·
+Easy Apply
+Lead Data/AI Engineer (Verified job)
+Lead Data/AI Engineer
+CADABRA
+Sofia (Hybrid)
+Actively reviewing applicants
+Viewed
+·
+Be an early applicant
+·
+Posted 3 weeks ago
+3 weeks ago
+·
+Easy Apply
+Senior Data Architect
+Senior Data Architect
+scandiweb
+Lithuania (Remote)
+Viewed
+·
+Be an early applicant
+·
+Posted 3 months ago
+3 months ago
+Senior AI Data Engineer (Verified job)
+Senior AI Data Engineer
+Lombard Odier Investment Managers
+Geneva, Switzerland (On-site)
+Actively reviewing applicants
+Viewed
+·
+Posted 1 week ago
+1 week ago
+·
+Easy Apply
+Data Architect (Verified job)
+Data Architect
+Norrin
+Helsinki Metropolitan Area
+Viewed
+·
+Posted 1 week ago
+1 week ago
+Data Architect
+Data Architect
+Devapo
+Warsaw (Remote)
+Viewed
+·
+Be an early applicant
+·
+Posted 2 months ago
+2 months ago
+Data, Analytics & AI Architect (Verified job)
+Data, Analytics & AI Architect
+itm8 Danmark
+Aarhus Municipality (Hybrid)
+Viewed
+·
+Be an early applicant
+·
+Posted 4 days ago
+4 days ago
+Data & AI Architect (Verified job)
+Data & AI Architect
+Nexer Insight
+Gothenburg (On-site)
+Viewed
+·
+Posted 6 days ago
+6 days ago
+Senior/Lead Data Engineer - Data Quality
+Senior/Lead Data Engineer - Data Quality
+Navarino
+Piraeus (Hybrid)
+Viewed
+·
+Posted 2 months ago
+2 months ago
+·
+Easy Apply
+Data & AI Technical Lead
+Data & AI Technical Lead
+TRG Tech Research Group
+Poland (Remote)
+Viewed
+·
+Posted 1 month ago
+1 month ago
+Data Engineer
+Data Engineer
+Arada
+Dubai (Hybrid)
+Viewed
+·
+Posted 6 days ago
+6 days ago
+AI Principal Engineer (Verified job)
+AI Principal Engineer
+Netcompany
+Athens
+Viewed
+·
+Posted 5 days ago
+5 days ago
+Senior Data, Analytics & AI Solution Architect (Verified job)
+Senior Data, Analytics & AI Solution Architect
+AppGreat
+Bulgaria (Remote)
+Actively reviewing applicants
+Viewed
+·
+Be an early applicant
+·
+Posted 3 days ago
+3 days ago
+·
+Easy Apply
+(SENIOR) DATA ARCHITECT
+(SENIOR) DATA ARCHITECT
+Recordly
+Helsinki (Hybrid)
+Viewed
+·
+Be an early applicant
+·
+Posted 2 months ago
+2 months ago
+Data Architect (IR-541)
+Data Architect (IR-541)
+Intellectsoft
+Portugal (Remote)
+Viewed
+·
+Posted 3 weeks ago
+3 weeks ago
+Data Engineer (Hybrid or Onsite) (Verified job)
+Data Engineer (Hybrid or Onsite)
+Viva.com
+Marousi (On-site)
+Posted 2 weeks ago
+2 weeks ago
+·
+Easy Apply
+Data Architect (Verified job)
+Data Architect
+Gaming Innovation Group
+San Ġiljan (Hybrid)
+Viewed
+·
+Be an early applicant
+·
+Posted 3 weeks ago
+3 weeks ago
+Big Data Architect (Azure) (Verified job)
+Big Data Architect (Azure)
+SoftServe
+Bulgaria (Remote)
+Viewed
+·
+Posted 1 week ago
+1 week ago
+Lead Data Engineer (Verified job)
+Lead Data Engineer
+Acuity Analytics
+Birkirkara (On-site)
+Be an early applicant
+·
+Posted 4 days ago
+4 days ago
+See jobs where you’re a top applicant
+Try Premium for AED 0 https://www.linkedin.com/premium/products/?upsellOrderOrigin=Tracking%3Av1%3Apremium_semantic_job_search_bottom_upsell%3AJob+Seeker%3AIn-Product&utype=job&referenceId=U8dstvsbS%2BKQyNASzK1u9g%3D%3D&isSS=false&upsellSlotId=SEMANTIC_JOB_SEARCH_BOTTOM
+Previous
+2
+3
+4
+Next
+AboutAccessibilityHelp Center
+Privacy & Terms
+Ad ChoicesAdvertising
+Business Services
+Get the LinkedIn appMore LinkedIn Corporation © 2026
+SoftServe
+Big Data Architect (Azure) https://www.linkedin.com/jobs/view/4391870126/?trackingId=0yDQihVs9%2B02CYQGJpbeHQ%3D%3D&refId=Rad9jv5UeaE9A6PGHeD8%2BA%3D%3D&eBP=NOT_ELIGIBLE_FOR_CHARGING&alternateChannel=search&isJobSearch=false
+Bulgaria
+·
+Reposted 1 week ago
+·
+37 people clicked apply
+Promoted by hirer ·
+Responses managed off LinkedIn
+Remote Full-time Apply
+Save
+Your profile and resume
+match some
+required qualifications
+Show match details BETA • Is this information helpful?
+About the job
+About The Role
+In this role, you will design and deliver end-to-end data architectures on Azure for enterprise-scale data platforms and translate business needs into scalable, secure, and high-performance data solutions.
+Responsibilities
+Lead architecture design and decision-making, defining standards, patterns, and best practices
+Collaborate with stakeholders to drive requirements gathering, data modeling, and solution design
+Support and guide engineering teams in implementing data pipelines and platform components
+Contribute to pre-sales activities, including workshops, solution envisioning, and proposal creation
+Build and evolve data platforms, including ingestion, transformation, storage, and serving layers
+Ensure data governance, quality, and security standards across the platform
+Participate in the full project lifecycle, from PoC through MVP to full-scale implementation
+Explore new technologies, build prototypes, and contribute to the Big Data community
+Requirements
+Hands-on expertise in building large-scale data platforms, migrations, and decision-support systems
+Knowledge of designing and implementing modern data architectures (DWH, lakehouses, streaming, real-time, event-driven processing)
+Experience with Azure data ecosystem, including services such as Microsoft Fabric, Azure Synapse, Data Factory, ADLS Gen2, Cosmos, Azure SQL, Databricks, and Azure Stream Analytics
+Familiarity with SQL and Python (PySpark) for designing and optimizing data solutions
+Experience in translating business requirements into scalable architecture and implementation roadmaps
+Openness for acting as a customer-facing consultant, presenting architecture decisions, and leading technical discussions
+Readiness for leading and mentoring data engineering teams, providing technical direction, and ensuring best practices
+Knowledge of data governance, security, and data management frameworks across modern data platforms
+Familiarity with streaming and real-time processing (e.g., Kafka, Event Hub, Spark Structured Streaming)
+Hands-on experience in SDLC and software engineering best practices (CI/CD, version control, testing) applied to data platforms
+Proficiency in supporting pre-sales activities, including discovery, solution shaping, and high-level estimations
+Working proficiency in English, with excellent communication and presentation skills in a multicultural environment
+SoftServe is an equal opportunity employer. Qualified applicants will receive consideration regardless of race, color, ancestry, ethnicity, national origin, religion, sex, sexual orientation, gender identity or expression, age, citizenship, disability, health condition, marital or family status, veteran status, or any other characteristic protected by applicable law.
+…
+more

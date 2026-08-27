@@ -19,6 +19,7 @@ class ModelBase(ABC):
         self.model_path = self.cache_dir / self.model_folder_name
         self.usage_file = self.model_path / "model_usage.json"
         self.is_loaded = False
+        self.registered_common_prompt = None
 
     @abstractmethod
     def load(self):
@@ -32,7 +33,27 @@ class ModelBase(ABC):
     def generate(self, prompt: str, **kwargs) -> str:
         pass
 
+    def register_common_prompt(self, prompt: str):
+        """Register a common prompt for prefix caching / precalculation."""
+        self.registered_common_prompt = prompt
+        logger.info(
+            f"Registered common prompt for {self.model_id} "
+            f"(length: {len(prompt)})"
+        )
+
     def safe_generate(self, prompt: str, **kwargs) -> str:
+        if self.registered_common_prompt is not None:
+            if not prompt.startswith(self.registered_common_prompt):
+                logger.info(
+                    "Prompt does not start with registered common "
+                    "prompt. Clearing it."
+                )
+                self.registered_common_prompt = None
+                # Clear engine-specific precalculated KV cache data
+                if hasattr(self, 'common_prompt_tokens'):
+                    self.common_prompt_tokens = None
+                if hasattr(self, 'common_prompt_past_key_values'):
+                    self.common_prompt_past_key_values = None
         try:
             return self.generate(prompt, **kwargs)
         except Exception as e:
@@ -42,9 +63,10 @@ class ModelBase(ABC):
     def _print_debug_info(self):
         if self.model_id in self._debug_printed_models:
             return
-        self._debug_printed_models.add(self.model_id)
 
+        self._debug_printed_models.add(self.model_id)
         print(f"\n--- DEBUG INFO FOR {self.model_id} ---")
+
         readme_path = self.model_path / "README.md"
         if readme_path.exists():
             print("\n[README.md]")
@@ -63,6 +85,7 @@ class ModelBase(ABC):
                     print(json_file.read_text())
             except Exception as e:
                 print(f"Error reading {json_file.name}: {e}")
+
         print("--- END DEBUG INFO ---\n")
 
     def increment_fails(self):

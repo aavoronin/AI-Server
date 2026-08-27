@@ -1,5 +1,4 @@
 import urllib.parse
-
 from ai_clients.model_client_base import ModelClientBase
 
 
@@ -17,4 +16,20 @@ class TextToTextClient(ModelClientBase):
         }
         if max_new_tokens is not None:
             data["max_new_tokens"] = max_new_tokens
-        return self._request("POST", f"/models/{encoded_id}/generate", data=data, timeout=model_limit_seconds)
+
+        return self._request(
+            "POST",
+            f"/models/{encoded_id}/generate",
+            data=data,
+            timeout=model_limit_seconds
+        )
+
+    def register_common_prompt(self, model_id: str, prompt: str):
+        """Register a common prompt on the server for precalculation."""
+        encoded_id = urllib.parse.quote(model_id, safe='')
+        data = {"prompt": prompt}
+        return self._request(
+            "POST",
+            f"/models/{encoded_id}/register_common_prompt",
+            data=data
+        )

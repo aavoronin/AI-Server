@@ -27,7 +27,6 @@ PROFICIENCY_MAX_POINTS = {
     "nice-to-have": 2,
 }
 
-
 def shorten_vacancy_text(v_name: str, v_text: str) -> str:
     vacancy_slice = [
         ("LinkedIn_Vacancy", "About the job", "Unlock hiring insights", 8),
@@ -59,22 +58,20 @@ def shorten_vacancy_text(v_name: str, v_text: str) -> str:
 
     return v_text
 
-
 def get_prompt_and_model(version) -> tuple[list[str], list[str], str, bool]:
     bulk_run = False
     test_models = [
         "NikolayKozloff/gemma-3-1b-it-Q8_0-GGUF|GPU|32768",
         "NikolayKozloff/gemma-3-4b-it-Q8_0-GGUF|GPU|32768",
     ]
-
     '''
-        "Bhuvneesh/gemma-3-4b-it-Q8_0-GGUF",
-        "lynnea1517/huihui-ai_gemma-3-27b-it-abliterated-Q8_0-GGUF",
-        "paultimothymooney/gemma-3-27b-it-Q8_0-GGUF",
-        "aminlouhichi/gemma-3-merged-GGUF-Q16",
-        "Bhuvneesh/gemma-3-27b-it-Q5_K_M-GGUF",
-        #"NikolayKozloff/gemma-3-12b-it-Q5_K_S-GGUF",
-        "NikolayKozloff/gemma-3-12b-it-Q8_0-GGUF",
+    "Bhuvneesh/gemma-3-4b-it-Q8_0-GGUF",
+    "lynnea1517/huihui-ai_gemma-3-27b-it-abliterated-Q8_0-GGUF",
+    "paultimothymooney/gemma-3-27b-it-Q8_0-GGUF",
+    "aminlouhichi/gemma-3-merged-GGUF-Q16",
+    "Bhuvneesh/gemma-3-27b-it-Q5_K_M-GGUF",
+    #"NikolayKozloff/gemma-3-12b-it-Q5_K_S-GGUF",
+    "NikolayKozloff/gemma-3-12b-it-Q8_0-GGUF",
     '''
 
     if version == 1:
@@ -86,7 +83,6 @@ def get_prompt_and_model(version) -> tuple[list[str], list[str], str, bool]:
             "NikolayKozloff/gemma-3-4b-it-Q8_0-GGUF|GPU|32768",
         ]
         vacancies_folder = r"C:\Py\AI-Server\test_cases\test_vacancies\01"
-
     elif version == 2:
         prompt_files = [
             "PROMPT_01.txt",
@@ -126,19 +122,15 @@ def get_prompt_and_model(version) -> tuple[list[str], list[str], str, bool]:
             "matrixportalx/Llama-3.3-8B-Instruct-128K-Q5_K_M-GGUF|GPU|32768",
             #"NikolayKozloff/Llama-3.3-8B-Instruct-Q8_0-GGUF|GPU|32768",
             #"Medvedko/Huihui-Qwen3-8B-abliterated-v2-Q5_K_M-GGUF|GPU|32768",
-
             #"Jackxuanxuan/Gemma-4-31B-JANG-Q8_4M-CRACK-GGUF|CPU|32768",
             # "KikoCis/gemma-4-31b-it-Q3_K_M-GGUF|CPU|32768",
-
             #"Ma7ee7/Qwen3.8_1.2B_LFM_Distillation_GGUF|GPU|32768|Q4_K_M",
             #"Ma7ee7/Qwen3.8_1.2B_LFM_Distillation_GGUF|GPU|32768|Q5_K_M",
             #"Ma7ee7/Qwen3.8_1.2B_LFM_Distillation_GGUF|GPU|32768|Q8_0",
             #"matrixportalx/Llama-3.3-8B-Instruct-Q4_K_M-GGUF|GPU|32768",
             #"NikolayKozloff/Qwen3-8B-Q8_0-GGUF|GPU|32768",
-
             #"neopolita/Qwen3.6-11B-A3B-Niwaki-4bit-GGUF|GPU|32768|Q4_K_M",
             #"neopolita/Qwen3.6-11B-A3B-Niwaki-4bit-GGUF|GPU|32768|UD-Q3K",
-
             #"KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q6_K",
             #"KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q8_0",
             #"KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q5_K_M",
@@ -150,8 +142,6 @@ def get_prompt_and_model(version) -> tuple[list[str], list[str], str, bool]:
             #"KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|GPU|32768|Q4_K_M",
             # "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|CPU|32768|Q6_K",
             # "KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF|CPU|32768|Q8_0",
-
-
             "Brunobkr/OFFELLIA_Q6_K_gemma-4-26B-A4B-it-ultra-uncensored-heretic.gguf|CPU|16384",
             "Brunobkr/OFFELLIA_Q6_K_gemma-4-26B-A4B-it-ultra-uncensored-heretic.gguf|CPU|32768",
             "majentik/gemma-4-12B-it-RotorQuant-GGUF-Q5_K_M|CPU|32768",
@@ -170,7 +160,6 @@ def get_prompt_and_model(version) -> tuple[list[str], list[str], str, bool]:
             "mradermacher/Llama-3.3-8B-Instruct-128K-Jbliterated-i1-GGUF|GPU|16384|Q6_K",
             "mradermacher/Llama-3.3-8B-Instruct-128K-Jbliterated-i1-GGUF|GPU|16384|Q5_K_M",
             "mradermacher/Llama-3.3-8B-Instruct-128K-Jbliterated-i1-GGUF|GPU|16384|Q4_K_M",
-
         ]
         vacancies_folder = r"C:\Py\AI-Server\test_cases\test_vacancies\04"
     elif version == 5:
@@ -179,7 +168,16 @@ def get_prompt_and_model(version) -> tuple[list[str], list[str], str, bool]:
         ]
         test_models = [
             "matrixportalx/Llama-3.3-8B-Instruct-128K-Q5_K_M-GGUF|GPU|32768",
-            "Brunobkr/OFFELLIA_Q6_K_gemma-4-26B-A4B-it-ultra-uncensored-heretic.gguf|CPU|32768",
+            #"Brunobkr/OFFELLIA_Q6_K_gemma-4-26B-A4B-it-ultra-uncensored-heretic.gguf|CPU|32768",
+        ]
+        vacancies_folder = r"C:\Py\AI-Server\test_cases\test_vacancies\05"
+    elif version == 6:
+        prompt_files = [
+            "PROMPT_SIMPLE6.txt"
+        ]
+        test_models = [
+            "matrixportalx/Llama-3.3-8B-Instruct-128K-Q5_K_M-GGUF|GPU|32768",
+            #"Brunobkr/OFFELLIA_Q6_K_gemma-4-26B-A4B-it-ultra-uncensored-heretic.gguf|CPU|32768",
         ]
         vacancies_folder = r"C:\Py\AI-Server\test_cases\test_vacancies\05"
         bulk_run = True
@@ -187,8 +185,8 @@ def get_prompt_and_model(version) -> tuple[list[str], list[str], str, bool]:
         prompt_files = []
         test_models = []
         vacancies_folder = r"C:\Py\AI-Server\test_cases\test_vacancies\01"
-    return prompt_files, test_models, vacancies_folder, bulk_run
 
+    return prompt_files, test_models, vacancies_folder, bulk_run
 
 def warmup_model(client, model_id, timeout):
     """1) Cache/warm-up model by sending a simple request."""
@@ -199,7 +197,6 @@ def warmup_model(client, model_id, timeout):
     duration = time.time() - start_time
     end_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     print(f"{end_timestamp} Ping time: {duration:.2f}s -- {model_id}")
-
 
 def make_vacancy_request(client, model_id, full_prompt, timeout, start_time):
     """2) Make a single generation request to the model."""
@@ -213,7 +210,6 @@ def make_vacancy_request(client, model_id, full_prompt, timeout, start_time):
     end_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     return generated_text, duration, end_timestamp
 
-
 def parse_and_merge_json(generated_text, combined_parsed_dict):
     """3) Parse JSON response and merge into combined dict."""
     parsed_dict = parse_json_safely(generated_text)
@@ -222,7 +218,6 @@ def parse_and_merge_json(generated_text, combined_parsed_dict):
             if key not in combined_parsed_dict:
                 combined_parsed_dict[key] = value
     return parsed_dict
-
 
 def calculate_vacancy_score(expected_json, combined_parsed_dict, version=1):
     """4) Calculate score for a vacancy by comparing expected vs actual."""
@@ -240,7 +235,6 @@ def calculate_vacancy_score(expected_json, combined_parsed_dict, version=1):
         # version >= 4: use proficiency matrix scoring for level keys,
         # compare_values for other keys
         return calculate_vacancy_score_matrix(expected_json, combined_parsed_dict)
-
 
 def calculate_vacancy_score_matrix(expected_json, combined_parsed_dict):
     """Calculate score using proficiency matrix for version >= 4."""
@@ -265,11 +259,9 @@ def calculate_vacancy_score_matrix(expected_json, combined_parsed_dict):
     # Calculate score for proficiency matrix keys
     total_points = 0.0
     actual_points = 0.0
-
     for skill_norm, expected_level in expected_skills.items():
         max_points = PROFICIENCY_MAX_POINTS[expected_level]
         total_points += max_points
-
         generated_level = generated_skills.get(skill_norm)
         if generated_level is not None and generated_level in PROFICIENCY_SCORE_MATRIX.get(expected_level, {}):
             actual_points += PROFICIENCY_SCORE_MATRIX[expected_level][generated_level]
@@ -286,7 +278,6 @@ def calculate_vacancy_score_matrix(expected_json, combined_parsed_dict):
 
     score = actual_points / total_points if total_points > 0 else 0.0
     return score, total_points, actual_points
-
 
 def print_json_failures_v4(expected_json, combined_parsed_dict):
     """Print failures for version >= 4, showing per-skill breakdown for proficiency keys."""
@@ -312,7 +303,6 @@ def print_json_failures_v4(expected_json, combined_parsed_dict):
     for skill_norm, expected_level in expected_skills.items():
         max_points = PROFICIENCY_MAX_POINTS[expected_level]
         generated_level = generated_skills.get(skill_norm)
-
         if generated_level is not None and generated_level in PROFICIENCY_SCORE_MATRIX.get(expected_level, {}):
             points = PROFICIENCY_SCORE_MATRIX[expected_level][generated_level]
         else:
@@ -341,7 +331,6 @@ def print_json_failures_v4(expected_json, combined_parsed_dict):
             if score < 1.0:
                 print(f'    "{key}": fail (|"{expected_disp}")')
 
-
 def update_model_summary(model_id, total_keys, total_correct_keys, total_time,
                          vacancy_scores, model_summaries):
     """5) Update and print model summary."""
@@ -360,18 +349,17 @@ def update_model_summary(model_id, total_keys, total_correct_keys, total_time,
         "time_str": time_str
     })
 
-
 def run_models_on_vacancies(version):
     """Benchmark models on real vacancy text files against ground truth JSONs."""
     VACANCY_TIMEOUT = 60 * 20
     VACANCY_TIMEOUT_0 = 3600 * 6
     verbose = True
-    vacancies_limit = 999999
+    vacancies_limit = 5
 
     prompt_files, test_models, vacancies_dir, bulk_run = \
         get_prompt_and_model(version)
-    vacancies_path = Path(vacancies_dir)
 
+    vacancies_path = Path(vacancies_dir)
     client = TextToTextClient()
 
     # Find all vacancy txt files and their corresponding result jsons
@@ -390,7 +378,6 @@ def run_models_on_vacancies(version):
     print(f"Total Vacancies: {len(vacancies)}")
 
     model_summaries = []
-
     for model_id in test_models:
         print(f"\n{'=' * 80}")
         print(f"Testing Model: {model_id}")
@@ -404,6 +391,7 @@ def run_models_on_vacancies(version):
         for i, (txt_file, result_json_file) in enumerate(vacancies):
             if i >= vacancies_limit:
                 continue
+
             expected_json, vacancy_name, vacancy_text = \
                 get_vacancy_and_expected_result(result_json_file, txt_file, bulk_run)
 
@@ -414,22 +402,35 @@ def run_models_on_vacancies(version):
                 prompt_path = vacancies_path.parent / p_file
                 if not prompt_path.exists():
                     continue
+
                 full_prompt = get_full_prompt(p_file, prompt_path, vacancy_text)
 
                 if i == 0:
                     warmup_model(client, model_id, VACANCY_TIMEOUT_0)
-                    if verbose:
-                        print(20 * '=' + ' START PROMPT ' + 20 * '=')
-                        print(full_prompt)
-                        print(20 * '=' + ' END PROMPT ' + 20 * '=')
+                    if bulk_run and len(prompt_files) == 1:
+                        common_prompt_text = prompt_path.read_text(
+                            encoding='utf-8'
+                        )
+                        print(
+                            f"Registering common prompt for {model_id}: "
+                            f"{p_file}"
+                        )
+                        client.register_common_prompt(
+                            model_id, common_prompt_text
+                        )
+
+                if verbose:
+                    print(20 * '=' + ' START PROMPT ' + 20 * '=')
+                    print(full_prompt)
+                    print(20 * '=' + ' END PROMPT ' + 20 * '=')
 
                 start_time = time.time()
                 try:
                     generated_text, duration, end_timestamp = make_vacancy_request(
                         client, model_id, full_prompt, VACANCY_TIMEOUT, start_time)
                     total_vacancy_time += duration
-
                     parsed_dict = parse_and_merge_json(generated_text, combined_parsed_dict)
+
                     if i == 0:
                         print(20 * '=' + ' START RESPONSE ' + 20 * '=')
                         if parsed_dict is not None:
@@ -463,6 +464,7 @@ def run_models_on_vacancies(version):
             })
 
             print(f"\n[{vacancy_name}] Combined Time: {total_vacancy_time:.2f}s | Score: {score:.2f}")
+
             if score < 1.0 and keys_in_expected > 0:
                 if version >= 4:
                     print_json_failures_v4(expected_json, combined_parsed_dict)
@@ -475,8 +477,7 @@ def run_models_on_vacancies(version):
         update_model_summary(model_id, total_keys, total_correct_keys,
                              total_time, vacancy_scores, model_summaries)
 
-        print_vacancies_model_summary(model_summaries)
-
+    print_vacancies_model_summary(model_summaries)
 
 def get_full_prompt(p_file: str, prompt_path: Path, vacancy_text) -> str | Any:
     prompt_text = prompt_path.read_text(encoding='utf-8')
@@ -490,10 +491,10 @@ def get_full_prompt(p_file: str, prompt_path: Path, vacancy_text) -> str | Any:
         f"Total Prompt Length: {len(full_prompt)} chars")
     return full_prompt
 
-
 def get_vacancy_and_expected_result(result_json_file, txt_file, bulk_run) -> tuple[str, Any, Any]:
     vacancy_name = txt_file.stem
     vacancy_text = txt_file.read_text(encoding='utf-8')
+
     if not bulk_run:
         vacancy_text = shorten_vacancy_text(vacancy_name, vacancy_text)
 
@@ -506,8 +507,8 @@ def get_vacancy_and_expected_result(result_json_file, txt_file, bulk_run) -> tup
     except Exception as e:
         print(f"[{vacancy_name}] ERROR: Failed to read {result_json_file.name}: {e}. Scoring as 0.00")
         expected_json = {}
-    return expected_json, vacancy_name, vacancy_text
 
+    return expected_json, vacancy_name, vacancy_text
 
 def print_vacancies_model_summary(model_summaries: list[Any]):
     # Final Overall Summary

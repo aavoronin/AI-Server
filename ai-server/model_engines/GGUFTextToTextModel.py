@@ -1,11 +1,11 @@
 from .TextToTextModel import TextToTextModel
 import logging
+import itertools
 
 logger = logging.getLogger(__name__)
 
 
 class GGUFTextToTextModel(TextToTextModel):
-
     def __init__(self, model_id: str, cache_dir: str):
         super().__init__(model_id, cache_dir)
         self.model = None
@@ -35,7 +35,6 @@ class GGUFTextToTextModel(TextToTextModel):
         # 1. Try using llama-cpp-python first (Recommended for GGUF)
         try:
             from llama_cpp import Llama
-
             logger.info(
                 f"Loading GGUF model with llama-cpp-python: {self.model_id}")
 
@@ -101,7 +100,6 @@ class GGUFTextToTextModel(TextToTextModel):
         # 2. Fallback to transformers
         try:
             from transformers import AutoTokenizer, AutoModelForCausalLM
-
             logger.info(
                 f"Loading GGUF model with Transformers: {self.model_id}")
 
@@ -199,7 +197,6 @@ class GGUFTextToTextModel(TextToTextModel):
                 device_map="auto",
                 trust_remote_code=True
             )
-
             self.use_llama_cpp = False
             self.is_loaded = True
             self.increment_used()
@@ -234,6 +231,20 @@ class GGUFTextToTextModel(TextToTextModel):
         self.is_loaded = False
         logger.info(f"Unloaded GGUF {self.model_id}")
 
+    def register_common_prompt(self, prompt: str):
+        super().register_common_prompt(prompt)
+        if self.use_llama_cpp and self.llm is not None:
+            # Precalculate by tokenizing and evaluating to fill the KV cache
+            self.common_prompt_tokens = self.llm.tokenize(
+                prompt.encode("utf-8"), add_bos=True
+            )
+            self.llm.eval(self.common_prompt_tokens)
+            self.common_prompt_len = len(self.common_prompt_tokens)
+            logger.info(
+                f"Precalculated common prompt for {self.model_id} "
+                f"({self.common_prompt_len} tokens)"
+            )
+
     def generate(self, prompt: str, **kwargs) -> str:
         if not self.is_loaded:
             raise RuntimeError("Model is not loaded")
@@ -251,19 +262,95 @@ class GGUFTextToTextModel(TextToTextModel):
 
         try:
             if self.use_llama_cpp:
-                messages = [
-                    {"role": "user", "content": prompt}
-                ]
-                output = self.llm.create_chat_completion(
-                    messages=messages,
-                    max_tokens=max_new_tokens,
-                    temperature=temperature,
-                    top_p=0.85,
-                    repeat_penalty=repeat_penalty,
-                    stream=False
-                )
-                return output["choices"][0]["message"][
-                    "content"].strip()
+                # Check if we can reuse the precalculated KV cache
+                if (hasattr(self, 'common_prompt_tokens') and
+                        self.common_prompt_tokens is not None and
+                        prompt.startswith(self.registered_common_prompt)):
+
+                    # Reset KV cache to the state after common prompt
+                    # This prevents context overflow from previous requests
+                    try:
+                        self.llm.reset()
+                        self.llm.eval(self.common_prompt_tokens)
+                    except Exception as e:
+                        logger.warning(
+                            f"Failed to reset KV cache: {e}")
+
+                    # Tokenize only the remaining part of the prompt
+                    remaining_prompt = prompt[len(self.registered_common_prompt):]
+                    remaining_tokens = self.llm.tokenize(
+                        remaining_prompt.encode("utf-8"), add_bos=False
+                    )
+
+                    # Truncate remaining tokens if they would overflow context
+                    # Reserve space for generation output
+                    max_remaining = self.context_size - self.common_prompt_len - max_new_tokens - 16
+
+                    if max_remaining <= 0:
+                        logger.warning(
+                            "Common prompt already fills context. "
+                            "Falling back to chat completion.")
+                        messages = [
+                            {"role": "user", "content": prompt}
+                        ]
+                        output = self.llm.create_chat_completion(
+                            messages=messages,
+                            max_tokens=max_new_tokens,
+                            temperature=temperature,
+                            top_p=0.85,
+                            repeat_penalty=repeat_penalty,
+                            stream=False
+                        )
+                        return output["choices"][0]["message"][
+                            "content"].strip()
+
+                    if len(remaining_tokens) > max_remaining:
+                        logger.warning(
+                            f"Truncating remaining tokens from "
+                            f"{len(remaining_tokens)} to "
+                            f"{max_remaining} to fit context")
+                        remaining_tokens = remaining_tokens[
+                            :max_remaining
+                        ]
+
+                    if remaining_tokens:
+                        self.llm.eval(remaining_tokens)
+
+                    # llama_cpp.Llama.generate() is a generator that
+                    # yields tokens one at a time. It does NOT accept
+                    # max_tokens. Use itertools.islice to cap output
+                    # length, and reset=False to preserve the KV cache
+                    # populated by eval() above.
+                    output_ids = list(itertools.islice(
+                        self.llm.generate(
+                            [],
+                            temp=temperature,
+                            top_p=0.85,
+                            repeat_penalty=repeat_penalty,
+                            reset=False,
+                        ),
+                        max_new_tokens,
+                    ))
+
+                    content = self.llm.detokenize(
+                        output_ids
+                    ).decode("utf-8").strip()
+                    return content
+                else:
+                    # Fallback to normal chat completion
+                    messages = [
+                        {"role": "user", "content": prompt}
+                    ]
+                    output = self.llm.create_chat_completion(
+                        messages=messages,
+                        max_tokens=max_new_tokens,
+                        temperature=temperature,
+                        top_p=0.85,
+                        repeat_penalty=repeat_penalty,
+                        stream=False
+                    )
+                    return output["choices"][0]["message"][
+                        "content"].strip()
             else:
                 messages = [
                     {"role": "user", "content": prompt}
@@ -276,7 +363,6 @@ class GGUFTextToTextModel(TextToTextModel):
                 model_inputs = self.tokenizer(
                     [text], return_tensors="pt"
                 ).to(self.model.device)
-
                 generated_ids = self.model.generate(
                     **model_inputs,
                     max_new_tokens=max_new_tokens,

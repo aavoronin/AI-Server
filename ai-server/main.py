@@ -63,8 +63,8 @@ def ensure_model_cached(model_id: str, cache_folder: str, hf_token_path: str) ->
     model_folder_name = clean_model_id.replace("/", "_")
     model_dir = Path(cache_folder) / model_folder_name
     model_dir.mkdir(parents=True, exist_ok=True)
-    usage_file = model_dir / "model_usage.json"
 
+    usage_file = model_dir / "model_usage.json"
     is_cached = False
     usage_data = {
         "model_id": clean_model_id,
@@ -75,6 +75,7 @@ def ensure_model_cached(model_id: str, cache_folder: str, hf_token_path: str) ->
         "num_used": 0,
         "num_fails": 0
     }
+
     if usage_file.exists():
         with open(usage_file, 'r') as f:
             usage_data = json.load(f)
@@ -115,7 +116,6 @@ def ensure_model_cached(model_id: str, cache_folder: str, hf_token_path: str) ->
                 if attempt < max_retries:
                     logger.info("Retrying download in 60 seconds...")
                     time.sleep(60)
-
         return False
 
     return True
@@ -146,6 +146,7 @@ async def get_all_models():
     """Get all models"""
     if model_manager is None:
         raise HTTPException(status_code=500, detail="Model manager not initialized")
+
     models = model_manager.get_all_models()
     return {
         "count": len(models),
@@ -278,6 +279,7 @@ async def uncache_model(model_id: str):
     usage_data["model_id"] = clean_model_id
     usage_data["is_cached"] = False
     usage_data["last_uncached"] = datetime.now().isoformat()
+
     with open(usage_file, 'w') as f:
         json.dump(usage_data, f, indent=2)
 
@@ -289,6 +291,7 @@ async def list_cached_models():
     """List all cached models and their status."""
     cache_dir = Path(config.cache_folder_path)
     cached_models = []
+
     if cache_dir.exists():
         for item in cache_dir.iterdir():
             if item.is_dir():
@@ -330,6 +333,34 @@ async def get_model_stats(model_id: str):
     }
 
 
+@app.post("/models/{model_id:path}/register_common_prompt")
+async def register_common_prompt(model_id: str, request: dict):
+    """Register a common prompt for prefix caching / precalculation."""
+    if model_manager is None:
+        raise HTTPException(
+            status_code=500, detail="Model manager not initialized"
+        )
+    if not ensure_model_cached(
+            model_id, config.cache_folder_path, config.hf_token_path
+    ):
+        raise HTTPException(
+            status_code=500, detail="Failed to cache model"
+        )
+    try:
+        model = ModelFactory.get_model(
+            model_id, config.cache_folder_path
+        )
+        common_prompt = request.get("prompt", "")
+        model.register_common_prompt(common_prompt)
+        return {
+            "model_id": model_id,
+            "status": "common_prompt_registered"
+        }
+    except Exception as e:
+        logger.error(f"Failed to register common prompt: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.post("/models/{model_id:path}/generate")
 async def generate_text(model_id: str, request: dict):
     """Process a text-to-text generation request."""
@@ -341,7 +372,6 @@ async def generate_text(model_id: str, request: dict):
 
     try:
         model = ModelFactory.get_model(model_id, config.cache_folder_path)
-
         prompt = request.get("prompt", "")
         max_new_tokens = request.get("max_new_tokens")
         temperature = request.get("temperature", 0.7)

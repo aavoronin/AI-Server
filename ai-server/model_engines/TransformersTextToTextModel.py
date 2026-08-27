@@ -31,6 +31,7 @@ class TransformersTextToTextModel(TextToTextModel):
                     logger.warning(f"Could not patch config.json for {self.model_id}: {e}")
 
             logger.info(f"Loading Transformers model: {self.model_id}")
+
             self.tokenizer = AutoTokenizer.from_pretrained(self.model_path, trust_remote_code=True)
             self.model = AutoModelForCausalLM.from_pretrained(
                 self.model_path,
@@ -38,15 +39,18 @@ class TransformersTextToTextModel(TextToTextModel):
                 device_map="auto",
                 trust_remote_code=True
             )
+
             # Do not pass device=device when device_map="auto" is used
             self.pipeline = pipeline(
                 "text-generation",
                 model=self.model,
                 tokenizer=self.tokenizer
             )
+
             self.is_loaded = True
             logger.info(f"Successfully loaded {self.model_id}")
             self.increment_init_success()
+
         except Exception as e:
             logger.error(f"Failed to load Transformers model {self.model_id}: {e}")
             self.increment_fails()
@@ -60,10 +64,31 @@ class TransformersTextToTextModel(TextToTextModel):
             del self.pipeline
         if self.tokenizer is not None:
             del self.tokenizer
+
         import gc
         gc.collect()
         self.is_loaded = False
         logger.info(f"Unloaded {self.model_id}")
+
+    def register_common_prompt(self, prompt: str):
+        super().register_common_prompt(prompt)
+        if not self.use_llama_cpp and self.model is not None:
+            import torch
+            # Precalculate by running a forward pass to extract past_key_values
+            messages = [{"role": "user", "content": prompt}]
+            text = self.tokenizer.apply_chat_template(
+                messages, tokenize=False, add_generation_prompt=True
+            )
+            inputs = self.tokenizer([text], return_tensors="pt").to(self.model.device)
+            with torch.no_grad():
+                outputs = self.model(**inputs, use_cache=True)
+
+            self.common_prompt_past_key_values = outputs.past_key_values
+            self.common_prompt_input_length = inputs.input_ids.shape[1]
+            logger.info(
+                f"Precalculated common prompt for {self.model_id} "
+                f"({self.common_prompt_input_length} tokens)"
+            )
 
     def generate(self, prompt: str, **kwargs) -> str:
         if not self.is_loaded:
@@ -75,13 +100,51 @@ class TransformersTextToTextModel(TextToTextModel):
         max_new_tokens = kwargs.get("max_new_tokens", default_max_tokens)
 
         try:
-            result = self.pipeline(
-                prompt,
-                max_new_tokens=max_new_tokens,
-                do_sample=kwargs.get("do_sample", True),
-                temperature=kwargs.get("temperature", 0.7)
-            )
-            return result[0]["generated_text"]
+            if self.use_llama_cpp:
+                # This branch is theoretically unreachable for this class,
+                # but kept for structural consistency if mixed
+                pass
+            else:
+                # Check if we can reuse the precalculated past_key_values
+                if (hasattr(self, 'common_prompt_past_key_values') and
+                        self.common_prompt_past_key_values is not None and
+                        prompt.startswith(self.registered_common_prompt)):
+
+                    import torch
+                    remaining_prompt = prompt[len(self.registered_common_prompt):]
+
+                    # Tokenize the remaining part without special tokens
+                    # since they were already processed in the common prompt
+                    remaining_inputs = self.tokenizer(
+                        [remaining_prompt], return_tensors="pt", add_special_tokens=False
+                    ).to(self.model.device)
+
+                    generated_ids = self.model.generate(
+                        input_ids=remaining_inputs.input_ids,
+                        past_key_values=self.common_prompt_past_key_values,
+                        max_new_tokens=max_new_tokens,
+                        temperature=kwargs.get("temperature", 0.7),
+                        repetition_penalty=kwargs.get("repeat_penalty", 1.1),
+                        do_sample=kwargs.get("do_sample", True),
+                        use_cache=True
+                    )
+
+                    # Decode only the newly generated tokens
+                    output_ids = generated_ids[0][remaining_inputs.input_ids.shape[1]:].tolist()
+                    content = self.tokenizer.decode(
+                        output_ids, skip_special_tokens=True
+                    ).strip("\n")
+                    return content
+                else:
+                    # Fallback to normal pipeline generation
+                    result = self.pipeline(
+                        prompt,
+                        max_new_tokens=max_new_tokens,
+                        do_sample=kwargs.get("do_sample", True),
+                        temperature=kwargs.get("temperature", 0.7)
+                    )
+                    return result[0]["generated_text"]
+
         except Exception as e:
             logger.error(f"Generation failed for {self.model_id}: {e}")
             raise

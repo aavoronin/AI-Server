@@ -22,6 +22,7 @@ if __name__ == '__main__':
 
     if True:
         run_models_on_vacancies(5)
+        run_models_on_vacancies(6)
         #run_models_on_vacancies(4)
         #run_models_on_vacancies(3)
         #run_models_on_vacancies(1, r"C:\Py\AI-Server\test_cases\test_vacancies\01")
