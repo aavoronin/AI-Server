@@ -1,6 +1,9 @@
 from .TextToTextModel import TextToTextModel
 import logging
+import itertools
+
 logger = logging.getLogger(__name__)
+
 
 class GGUFTextToTextModel(TextToTextModel):
     def __init__(self, model_id: str, cache_dir: str):
@@ -51,8 +54,8 @@ class GGUFTextToTextModel(TextToTextModel):
 
             model_id_lower = self.clean_model_id.lower()
             if (self.device_preference == "GPU"
-                or "gemma-3-1b" in model_id_lower
-                or "gemma-3-4b" in model_id_lower):
+                    or "gemma-3-1b" in model_id_lower
+                    or "gemma-3-4b" in model_id_lower):
                 n_gpu_layers = -1
             else:
                 n_gpu_layers = 0
@@ -216,6 +219,11 @@ class GGUFTextToTextModel(TextToTextModel):
                 prompt.encode("utf-8"), add_bos=True
             )
             self.common_prompt_len = len(self.common_prompt_tokens)
+
+            # Pre-evaluate to populate cache initially for the first request
+            self.llm.reset()
+            self.llm.eval(self.common_prompt_tokens)
+
             logger.info(
                 f"Precalculated common prompt for {self.model_id} "
                 f"({self.common_prompt_len} tokens)"
@@ -238,14 +246,9 @@ class GGUFTextToTextModel(TextToTextModel):
             if self.use_llama_cpp:
                 # Check if we can reuse the precalculated KV cache
                 if (hasattr(self, 'common_prompt_tokens') and
-                    self.common_prompt_tokens is not None and
-                    prompt.startswith(self.registered_common_prompt)):
+                        self.common_prompt_tokens is not None and
+                        prompt.startswith(self.registered_common_prompt)):
 
-                    # === CRITICAL FIX: Always reset and re-eval common prompt ===
-                    self.llm.reset()
-                    self.llm.eval(self.common_prompt_tokens)
-
-                    # Tokenize only the remaining part of the prompt
                     remaining_prompt = prompt[len(self.registered_common_prompt):]
                     remaining_tokens = self.llm.tokenize(
                         remaining_prompt.encode("utf-8"), add_bos=False
@@ -253,14 +256,12 @@ class GGUFTextToTextModel(TextToTextModel):
 
                     # Check context space
                     max_remaining = self.context_size - self.common_prompt_len - max_new_tokens - 16
-                    if max_remaining <= 0:
+                    if max_remaining <= 0 or len(remaining_tokens) > max_remaining:
                         logger.warning(
-                            "Common prompt already fills context. "
+                            "Common prompt already fills context or remaining is too long. "
                             "Falling back to chat completion."
                         )
-                        messages = [
-                            {"role": "user", "content": prompt}
-                        ]
+                        messages = [{"role": "user", "content": prompt}]
                         output = self.llm.create_chat_completion(
                             messages=messages,
                             max_tokens=max_new_tokens,
@@ -269,32 +270,36 @@ class GGUFTextToTextModel(TextToTextModel):
                             repeat_penalty=repeat_penalty,
                             stream=False
                         )
-                        return output["choices"][0]["message"][
-                            "content"].strip()
+                        return output["choices"][0]["message"]["content"].strip()
 
-                    if len(remaining_tokens) > max_remaining:
+                    # Trim the KV cache to keep ONLY the common prompt
+                    try:
+                        if hasattr(self.llm, 'kv_cache_seq_rm'):
+                            self.llm.kv_cache_seq_rm(0, self.common_prompt_len, -1)
+                        elif hasattr(self.llm, 'ctx') and hasattr(self.llm.ctx, 'kv_cache_seq_rm'):
+                            self.llm.ctx.kv_cache_seq_rm(0, self.common_prompt_len, -1)
+                        else:
+                            raise AttributeError("kv_cache_seq_rm not found")
+                    except Exception as e:
                         logger.warning(
-                            f"Truncating remaining tokens from "
-                            f"{len(remaining_tokens)} to "
-                            f"{max_remaining} to fit context"
+                            f"kv_cache_seq_rm failed: {e}, "
+                            f"falling back to reset+eval"
                         )
-                        remaining_tokens = remaining_tokens[:max_remaining]
+                        self.llm.reset()
+                        self.llm.eval(self.common_prompt_tokens)
 
-                    if remaining_tokens:
-                        self.llm.eval(remaining_tokens)
-
-                    # Generate from current KV cache state
-                    output_ids = []
-                    for _ in range(max_new_tokens):
-                        token = self.llm.sample(
+                    # Generate using the built-in iterator, which correctly handles
+                    # eval + sample looping and KV cache updates for each new token
+                    output_ids = list(itertools.islice(
+                        self.llm.generate(
+                            remaining_tokens,
+                            reset=False,
                             temp=temperature,
                             top_p=0.85,
-                            repeat_penalty=repeat_penalty
-                        )
-                        if token == self.llm.token_eos():
-                            break
-                        output_ids.append(token)
-
+                            repeat_penalty=repeat_penalty,
+                        ),
+                        max_new_tokens
+                    ))
                     content = self.llm.detokenize(
                         output_ids
                     ).decode("utf-8").strip()
@@ -304,10 +309,9 @@ class GGUFTextToTextModel(TextToTextModel):
                     # Prompt doesn't start with common prompt - clear cache
                     if hasattr(self, 'common_prompt_tokens'):
                         self.common_prompt_tokens = None
+
                     # Fallback to normal chat completion
-                    messages = [
-                        {"role": "user", "content": prompt}
-                    ]
+                    messages = [{"role": "user", "content": prompt}]
                     output = self.llm.create_chat_completion(
                         messages=messages,
                         max_tokens=max_new_tokens,
@@ -316,13 +320,10 @@ class GGUFTextToTextModel(TextToTextModel):
                         repeat_penalty=repeat_penalty,
                         stream=False
                     )
-                    return output["choices"][0]["message"][
-                        "content"].strip()
+                    return output["choices"][0]["message"]["content"].strip()
 
             else:
-                messages = [
-                    {"role": "user", "content": prompt}
-                ]
+                messages = [{"role": "user", "content": prompt}]
                 text = self.tokenizer.apply_chat_template(
                     messages,
                     tokenize=False,

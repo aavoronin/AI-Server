@@ -441,7 +441,7 @@ def run_models_on_vacancies(version):
                     total_vacancy_time += duration
                     parsed_dict = parse_and_merge_json(generated_text, combined_parsed_dict)
 
-                    if i == 0:
+                    if i == 0 or verbose:
                         print(20 * '=' + ' START RESPONSE ' + 20 * '=')
                         if parsed_dict is not None:
                             pretty_json_string = json.dumps(parsed_dict, indent=4)
