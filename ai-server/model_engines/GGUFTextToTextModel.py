@@ -1,6 +1,5 @@
 from .TextToTextModel import TextToTextModel
 import logging
-import itertools
 
 logger = logging.getLogger(__name__)
 
@@ -13,9 +12,8 @@ class GGUFTextToTextModel(TextToTextModel):
         self.llm = None
         self.use_llama_cpp = False
 
-        # Parse model_id for device, context, and quantization preferences
-        self.device_preference = "CPU"  # Default
-        self.context_size = 32768  # Default
+        self.device_preference = "CPU"
+        self.context_size = 32768
         self.quant_preference = None
 
         if "|" in model_id:
@@ -32,7 +30,6 @@ class GGUFTextToTextModel(TextToTextModel):
                 self.quant_preference = parts[3].strip()
 
     def load(self):
-        # 1. Try using llama-cpp-python first (Recommended for GGUF)
         try:
             from llama_cpp import Llama
             logger.info(
@@ -43,7 +40,6 @@ class GGUFTextToTextModel(TextToTextModel):
                 raise FileNotFoundError(
                     f"No .gguf file found in {self.model_path}")
 
-            # Filter by quantization preference if provided
             if self.quant_preference:
                 preferred_files = [
                     f for f in gguf_files
@@ -59,14 +55,13 @@ class GGUFTextToTextModel(TextToTextModel):
             else:
                 gguf_path = str(gguf_files[0])
 
-            # Determine n_gpu_layers based on device preference
             model_id_lower = self.clean_model_id.lower()
             if (self.device_preference == "GPU"
                     or "gemma-3-1b" in model_id_lower
                     or "gemma-3-4b" in model_id_lower):
-                n_gpu_layers = -1  # All layers on GPU
+                n_gpu_layers = -1
             else:
-                n_gpu_layers = 0  # All layers on CPU
+                n_gpu_layers = 0
 
             logger.info(
                 f"Device preference: {self.device_preference}, "
@@ -97,7 +92,6 @@ class GGUFTextToTextModel(TextToTextModel):
                 f"Failed to load with llama-cpp-python: {e}. "
                 f"Falling back to transformers.")
 
-        # 2. Fallback to transformers
         try:
             from transformers import AutoTokenizer, AutoModelForCausalLM
             logger.info(
@@ -108,7 +102,6 @@ class GGUFTextToTextModel(TextToTextModel):
                 raise FileNotFoundError(
                     f"No .gguf file found in {self.model_path}")
 
-            # Filter by quantization preference if provided
             if self.quant_preference:
                 preferred_files = [
                     f for f in gguf_files
@@ -127,20 +120,16 @@ class GGUFTextToTextModel(TextToTextModel):
 
             logger.info(f"Found GGUF file: {gguf_file}")
 
-            # Try loading tokenizer from the original model ID first
             try:
                 self.tokenizer = AutoTokenizer.from_pretrained(
                     self.clean_model_id, trust_remote_code=True
                 )
             except Exception:
-                # If that fails, try the local path
                 try:
                     self.tokenizer = AutoTokenizer.from_pretrained(
                         self.model_path, trust_remote_code=True
                     )
                 except Exception:
-                    # Fallback for known GGUF repos that lack
-                    # tokenizer files locally
                     model_id_lower = self.clean_model_id.lower()
                     if "gemma-4-e4b" in model_id_lower:
                         self.tokenizer = \
@@ -233,24 +222,17 @@ class GGUFTextToTextModel(TextToTextModel):
 
     def register_common_prompt(self, prompt: str):
         super().register_common_prompt(prompt)
-        if self.use_llama_cpp and self.llm is not None:
-            # Precalculate by tokenizing and evaluating to fill the KV cache
-            self.common_prompt_tokens = self.llm.tokenize(
-                prompt.encode("utf-8"), add_bos=True
-            )
-            self.llm.eval(self.common_prompt_tokens)
-            self.common_prompt_len = len(self.common_prompt_tokens)
-            logger.info(
-                f"Precalculated common prompt for {self.model_id} "
-                f"({self.common_prompt_len} tokens)"
-            )
+        # Note: llama-cpp-python doesn't support standalone eval() for KV cache prefill
+        # We just store the common prompt text for reference
+        logger.info(
+            f"Registered common prompt for {self.model_id} "
+            f"(length: {len(prompt)} chars)"
+        )
 
     def generate(self, prompt: str, **kwargs) -> str:
         if not self.is_loaded:
             raise RuntimeError("Model is not loaded")
 
-        # Set max_new_tokens to 8192 for Gemma-3 models
-        # as per specification
         model_id_lower = self.clean_model_id.lower()
         default_max_tokens = (
             8192 if "gemma-3" in model_id_lower else 2048
@@ -262,95 +244,20 @@ class GGUFTextToTextModel(TextToTextModel):
 
         try:
             if self.use_llama_cpp:
-                # Check if we can reuse the precalculated KV cache
-                if (hasattr(self, 'common_prompt_tokens') and
-                        self.common_prompt_tokens is not None and
-                        prompt.startswith(self.registered_common_prompt)):
-
-                    # Reset KV cache to the state after common prompt
-                    # This prevents context overflow from previous requests
-                    try:
-                        self.llm.reset()
-                        self.llm.eval(self.common_prompt_tokens)
-                    except Exception as e:
-                        logger.warning(
-                            f"Failed to reset KV cache: {e}")
-
-                    # Tokenize only the remaining part of the prompt
-                    remaining_prompt = prompt[len(self.registered_common_prompt):]
-                    remaining_tokens = self.llm.tokenize(
-                        remaining_prompt.encode("utf-8"), add_bos=False
-                    )
-
-                    # Truncate remaining tokens if they would overflow context
-                    # Reserve space for generation output
-                    max_remaining = self.context_size - self.common_prompt_len - max_new_tokens - 16
-
-                    if max_remaining <= 0:
-                        logger.warning(
-                            "Common prompt already fills context. "
-                            "Falling back to chat completion.")
-                        messages = [
-                            {"role": "user", "content": prompt}
-                        ]
-                        output = self.llm.create_chat_completion(
-                            messages=messages,
-                            max_tokens=max_new_tokens,
-                            temperature=temperature,
-                            top_p=0.85,
-                            repeat_penalty=repeat_penalty,
-                            stream=False
-                        )
-                        return output["choices"][0]["message"][
-                            "content"].strip()
-
-                    if len(remaining_tokens) > max_remaining:
-                        logger.warning(
-                            f"Truncating remaining tokens from "
-                            f"{len(remaining_tokens)} to "
-                            f"{max_remaining} to fit context")
-                        remaining_tokens = remaining_tokens[
-                            :max_remaining
-                        ]
-
-                    if remaining_tokens:
-                        self.llm.eval(remaining_tokens)
-
-                    # llama_cpp.Llama.generate() is a generator that
-                    # yields tokens one at a time. It does NOT accept
-                    # max_tokens. Use itertools.islice to cap output
-                    # length, and reset=False to preserve the KV cache
-                    # populated by eval() above.
-                    output_ids = list(itertools.islice(
-                        self.llm.generate(
-                            [],
-                            temp=temperature,
-                            top_p=0.85,
-                            repeat_penalty=repeat_penalty,
-                            reset=False,
-                        ),
-                        max_new_tokens,
-                    ))
-
-                    content = self.llm.detokenize(
-                        output_ids
-                    ).decode("utf-8").strip()
-                    return content
-                else:
-                    # Fallback to normal chat completion
-                    messages = [
-                        {"role": "user", "content": prompt}
-                    ]
-                    output = self.llm.create_chat_completion(
-                        messages=messages,
-                        max_tokens=max_new_tokens,
-                        temperature=temperature,
-                        top_p=0.85,
-                        repeat_penalty=repeat_penalty,
-                        stream=False
-                    )
-                    return output["choices"][0]["message"][
-                        "content"].strip()
+                # Process full prompt each time (KV cache reuse not supported with llama-cpp-python)
+                messages = [
+                    {"role": "user", "content": prompt}
+                ]
+                output = self.llm.create_chat_completion(
+                    messages=messages,
+                    max_tokens=max_new_tokens,
+                    temperature=temperature,
+                    top_p=0.85,
+                    repeat_penalty=repeat_penalty,
+                    stream=False
+                )
+                return output["choices"][0]["message"][
+                    "content"].strip()
             else:
                 messages = [
                     {"role": "user", "content": prompt}

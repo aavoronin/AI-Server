@@ -181,6 +181,16 @@ def get_prompt_and_model(version) -> tuple[list[str], list[str], str, bool]:
         ]
         vacancies_folder = r"C:\Py\AI-Server\test_cases\test_vacancies\05"
         bulk_run = True
+    elif version == 7:
+        prompt_files = [
+            "PROMPT_SIMPLE6.txt"
+        ]
+        test_models = [
+            #"matrixportalx/Llama-3.3-8B-Instruct-128K-Q5_K_M-GGUF|GPU|32768",
+            "Brunobkr/OFFELLIA_Q6_K_gemma-4-26B-A4B-it-ultra-uncensored-heretic.gguf|CPU|32768",
+        ]
+        vacancies_folder = r"C:\Py\AI-Server\test_cases\test_vacancies\05"
+        bulk_run = True
     else:
         prompt_files = []
         test_models = []

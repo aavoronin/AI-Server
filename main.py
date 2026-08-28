@@ -21,6 +21,7 @@ if __name__ == '__main__':
     tester.run_all()
 
     if True:
+        #run_models_on_vacancies(7)
         run_models_on_vacancies(5)
         run_models_on_vacancies(6)
         #run_models_on_vacancies(4)
