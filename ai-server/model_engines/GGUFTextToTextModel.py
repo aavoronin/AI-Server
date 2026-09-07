@@ -1,6 +1,7 @@
 from .TextToTextModel import TextToTextModel
 import logging
 import itertools
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -15,6 +16,7 @@ class GGUFTextToTextModel(TextToTextModel):
         self.device_preference = "CPU"
         self.context_size = 32768
         self.quant_preference = None
+
         if "|" in model_id:
             parts = model_id.split("|")
             if len(parts) >= 2:
@@ -37,6 +39,7 @@ class GGUFTextToTextModel(TextToTextModel):
             if not gguf_files:
                 raise FileNotFoundError(
                     f"No .gguf file found in {self.model_path}")
+
             if self.quant_preference:
                 preferred_files = [
                     f for f in gguf_files
@@ -64,6 +67,7 @@ class GGUFTextToTextModel(TextToTextModel):
                 f"Device preference: {self.device_preference}, "
                 f"Context size: {self.context_size}, "
                 f"GPU layers: {n_gpu_layers}")
+
             self.llm = Llama(
                 model_path=gguf_path,
                 n_gpu_layers=n_gpu_layers,
@@ -78,124 +82,168 @@ class GGUFTextToTextModel(TextToTextModel):
                 f"Successfully loaded GGUF {self.model_id} "
                 f"with llama-cpp-python")
             return
+
         except ImportError:
             logger.info(
                 "llama-cpp-python not found, "
                 "falling back to transformers")
-        except Exception as e:
+        except Exception as llama_cpp_error:
             logger.warning(
-                f"Failed to load with llama-cpp-python: {e}. "
-                f"Falling back to transformers.")
-
-        try:
-            from transformers import AutoTokenizer, AutoModelForCausalLM
-            logger.info(
-                f"Loading GGUF model with Transformers: {self.model_id}")
-            gguf_files = list(self.model_path.glob("*.gguf"))
-            if not gguf_files:
-                raise FileNotFoundError(
-                    f"No .gguf file found in {self.model_path}")
-
-            if self.quant_preference:
-                preferred_files = [
-                    f for f in gguf_files
-                    if self.quant_preference.lower() in f.name.lower()
-                ]
-                if preferred_files:
-                    gguf_file = preferred_files[0].name
-                else:
-                    logger.warning(
-                        f"Preferred quantization "
-                        f"'{self.quant_preference}' not found. "
-                        f"Falling back to first available.")
-                    gguf_file = gguf_files[0].name
-            else:
-                gguf_file = gguf_files[0].name
-
-            logger.info(f"Found GGUF file: {gguf_file}")
+                f"Failed to load with llama-cpp-python: {llama_cpp_error}. "
+                f"Attempting fallback to transformers."
+            )
             try:
-                self.tokenizer = AutoTokenizer.from_pretrained(
-                    self.clean_model_id, trust_remote_code=True
+                from transformers import AutoTokenizer, AutoModelForCausalLM
+                logger.info(
+                    f"Loading GGUF model with Transformers: {self.model_id}"
                 )
-            except Exception:
+
+                config_path = self.model_path / "config.json"
+                if not config_path.exists():
+                    logger.warning(
+                        f"config.json is missing in {self.model_path}. "
+                        f"Attempting to download it from the Hub..."
+                    )
+                    try:
+                        from huggingface_hub import hf_hub_download
+                        hf_hub_download(
+                            repo_id=self.clean_model_id,
+                            filename="config.json",
+                            local_dir=str(self.model_path),
+                            local_dir_use_symlinks=False,
+                            token=os.environ.get("HF_TOKEN")
+                        )
+                    except Exception as download_error:
+                        raise RuntimeError(
+                            f"Transformers fallback aborted: config.json is missing "
+                            f"in {self.model_path} and could not be downloaded. "
+                            f"Original llama-cpp error: {llama_cpp_error}. "
+                            f"Download error: {download_error}"
+                        )
+
+                gguf_files = list(self.model_path.glob("*.gguf"))
+                if not gguf_files:
+                    raise FileNotFoundError(
+                        f"No .gguf file found in {self.model_path}")
+
+                if self.quant_preference:
+                    preferred_files = [
+                        f for f in gguf_files
+                        if self.quant_preference.lower() in f.name.lower()
+                    ]
+                    if preferred_files:
+                        gguf_file = preferred_files[0].name
+                    else:
+                        logger.warning(
+                            f"Preferred quantization "
+                            f"'{self.quant_preference}' not found. "
+                            f"Falling back to first available.")
+                        gguf_file = gguf_files[0].name
+                else:
+                    gguf_file = gguf_files[0].name
+
+                logger.info(f"Found GGUF file: {gguf_file}")
+
                 try:
                     self.tokenizer = AutoTokenizer.from_pretrained(
-                        self.model_path, trust_remote_code=True
+                        self.clean_model_id, trust_remote_code=True
                     )
                 except Exception:
-                    model_id_lower = self.clean_model_id.lower()
-                    if "gemma-4-e4b" in model_id_lower:
-                        self.tokenizer = \
-                            AutoTokenizer.from_pretrained(
-                                "google/gemma-4-E4B-it",
-                                trust_remote_code=True)
-                    elif "gemma-3-4b" in model_id_lower:
-                        self.tokenizer = \
-                            AutoTokenizer.from_pretrained(
-                                "google/gemma-3-4b-it",
-                                trust_remote_code=True)
-                    elif "gemma-3-12b" in model_id_lower:
-                        self.tokenizer = \
-                            AutoTokenizer.from_pretrained(
-                                "google/gemma-3-12b-it",
-                                trust_remote_code=True)
-                    elif "gemma-3-1b" in model_id_lower:
-                        self.tokenizer = \
-                            AutoTokenizer.from_pretrained(
-                                "google/gemma-3-1b-it",
-                                trust_remote_code=True)
-                    elif "qwen3-0.6b" in model_id_lower:
-                        self.tokenizer = \
-                            AutoTokenizer.from_pretrained(
-                                "Qwen/Qwen3-0.6B",
-                                trust_remote_code=True)
-                    elif "qwen3-1.7b" in model_id_lower:
-                        self.tokenizer = \
-                            AutoTokenizer.from_pretrained(
-                                "Qwen/Qwen3-1.7B",
-                                trust_remote_code=True)
-                    elif "smollm-135m-instruct" in model_id_lower:
-                        self.tokenizer = \
-                            AutoTokenizer.from_pretrained(
-                                "HuggingFaceTB/SmolLM2-135M-Instruct",
-                                trust_remote_code=True)
-                    elif "smollm-135m" in model_id_lower:
-                        self.tokenizer = \
-                            AutoTokenizer.from_pretrained(
-                                "HuggingFaceTB/SmolLM2-135M",
-                                trust_remote_code=True)
-                    elif "bge-small-en-v1.5" in model_id_lower:
-                        self.tokenizer = \
-                            AutoTokenizer.from_pretrained(
-                                "BAAI/bge-small-en-v1.5",
-                                trust_remote_code=True)
-                    else:
-                        raise
+                    try:
+                        self.tokenizer = AutoTokenizer.from_pretrained(
+                            self.model_path, trust_remote_code=True
+                        )
+                    except Exception:
+                        model_id_lower = self.clean_model_id.lower()
+                        if "gemma-4-e4b" in model_id_lower:
+                            self.tokenizer = \
+                                AutoTokenizer.from_pretrained(
+                                    "google/gemma-4-E4B-it",
+                                    trust_remote_code=True)
+                        elif "gemma-3-4b" in model_id_lower:
+                            self.tokenizer = \
+                                AutoTokenizer.from_pretrained(
+                                    "google/gemma-3-4b-it",
+                                    trust_remote_code=True)
+                        elif "gemma-3-12b" in model_id_lower:
+                            self.tokenizer = \
+                                AutoTokenizer.from_pretrained(
+                                    "google/gemma-3-12b-it",
+                                    trust_remote_code=True)
+                        elif "gemma-3-1b" in model_id_lower:
+                            self.tokenizer = \
+                                AutoTokenizer.from_pretrained(
+                                    "google/gemma-3-1b-it",
+                                    trust_remote_code=True)
+                        elif "qwen3-0.6b" in model_id_lower:
+                            self.tokenizer = \
+                                AutoTokenizer.from_pretrained(
+                                    "Qwen/Qwen3-0.6B",
+                                    trust_remote_code=True)
+                        elif "qwen3-1.7b" in model_id_lower:
+                            self.tokenizer = \
+                                AutoTokenizer.from_pretrained(
+                                    "Qwen/Qwen3-1.7B",
+                                    trust_remote_code=True)
+                        elif "smollm-135m-instruct" in model_id_lower:
+                            self.tokenizer = \
+                                AutoTokenizer.from_pretrained(
+                                    "HuggingFaceTB/SmolLM2-135M-Instruct",
+                                    trust_remote_code=True)
+                        elif "smollm-135m" in model_id_lower:
+                            self.tokenizer = \
+                                AutoTokenizer.from_pretrained(
+                                    "HuggingFaceTB/SmolLM2-135M",
+                                    trust_remote_code=True)
+                        elif "bge-small-en-v1.5" in model_id_lower:
+                            self.tokenizer = \
+                                AutoTokenizer.from_pretrained(
+                                    "BAAI/bge-small-en-v1.5",
+                                    trust_remote_code=True)
+                        else:
+                            raise
 
-            self.model = AutoModelForCausalLM.from_pretrained(
-                self.model_path,
-                gguf_file=gguf_file,
-                torch_dtype="auto",
-                device_map="auto",
-                trust_remote_code=True
-            )
-            self.use_llama_cpp = False
-            self.is_loaded = True
-            self.increment_used()
-            logger.info(
-                f"Successfully loaded GGUF {self.model_id} "
-                f"with Transformers")
-        except ImportError as e:
-            logger.error(
-                f"Failed to load GGUF model {self.model_id}: {e}")
-            logger.error(
-                "Please install the 'gguf' package: "
-                "pip install 'gguf>=0.10.0'")
-            raise
-        except Exception as e:
-            logger.error(
-                f"Failed to load GGUF model {self.model_id}: {e}")
-            raise
+                self.model = AutoModelForCausalLM.from_pretrained(
+                    self.model_path,
+                    gguf_file=gguf_file,
+                    torch_dtype="auto",
+                    device_map="auto",
+                    trust_remote_code=True
+                )
+                self.use_llama_cpp = False
+                self.is_loaded = True
+                self.increment_used()
+                logger.info(
+                    f"Successfully loaded GGUF {self.model_id} "
+                    f"with Transformers")
+
+            except ImportError as e:
+                logger.error(
+                    f"Failed to load GGUF model {self.model_id}: {e}"
+                )
+                logger.error(
+                    f"Original llama-cpp-python error: {llama_cpp_error}"
+                )
+                logger.error(
+                    "Please install the 'gguf' package: "
+                    "pip install 'gguf>=0.10.0'"
+                )
+                raise
+            except Exception as tf_error:
+                logger.error(
+                    f"Transformers fallback failed for {self.model_id}: "
+                    f"{tf_error}"
+                )
+                logger.error(
+                    f"Original llama-cpp-python error: {llama_cpp_error}"
+                )
+                raise RuntimeError(
+                    f"Failed to load GGUF model {self.model_id}. "
+                    f"Transformers error: {tf_error}. "
+                    f"Original llama-cpp error: {llama_cpp_error}. "
+                    f"The GGUF file may be corrupted, incomplete, or "
+                    f"incompatible with the current llama-cpp-python version."
+                )
 
     def unload(self):
         if self.use_llama_cpp:
@@ -214,7 +262,6 @@ class GGUFTextToTextModel(TextToTextModel):
     def register_common_prompt(self, prompt: str):
         super().register_common_prompt(prompt)
         if self.use_llama_cpp and self.llm is not None:
-            # Tokenize and store tokens for later reuse
             self.common_prompt_tokens = self.llm.tokenize(
                 prompt.encode("utf-8"), add_bos=True
             )
@@ -239,30 +286,24 @@ class GGUFTextToTextModel(TextToTextModel):
 
         try:
             if self.use_llama_cpp:
-                # Check if we can reuse the precalculated KV cache
                 if (hasattr(self, 'common_prompt_tokens') and
                         self.common_prompt_tokens is not None and
                         prompt.startswith(self.registered_common_prompt)):
-
-                    # CRITICAL FIX: Always reset and re-eval common prompt.
-                    # kv_cache_seq_rm is unreliable in llama-cpp-python and silently
-                    # corrupts the cache, leading to garbage output and O(N^2) slowdowns.
-                    # Re-evaluating ~2600 tokens on GPU is extremely fast (~0.5s) and 100% reliable.
                     self.llm.reset()
                     self.llm.eval(self.common_prompt_tokens)
 
-                    # Tokenize only the remaining part of the prompt
-                    remaining_prompt = prompt[len(self.registered_common_prompt):]
+                    remaining_prompt = prompt[len(
+                        self.registered_common_prompt):]
                     remaining_tokens = self.llm.tokenize(
                         remaining_prompt.encode("utf-8"), add_bos=False
                     )
 
-                    # Check context space
-                    max_remaining = self.context_size - self.common_prompt_len - max_new_tokens - 16
+                    max_remaining = self.context_size - \
+                        self.common_prompt_len - max_new_tokens - 16
                     if max_remaining <= 0 or len(remaining_tokens) > max_remaining:
                         logger.warning(
-                            "Common prompt already fills context or remaining is too long. "
-                            "Falling back to chat completion."
+                            "Common prompt already fills context or remaining "
+                            "is too long. Falling back to chat completion."
                         )
                         messages = [{"role": "user", "content": prompt}]
                         output = self.llm.create_chat_completion(
@@ -275,9 +316,6 @@ class GGUFTextToTextModel(TextToTextModel):
                         )
                         return output["choices"][0]["message"]["content"].strip()
 
-                    # Generate using the built-in iterator, which correctly handles
-                    # eval + sample looping and KV cache updates for each new token.
-                    # reset=False ensures it continues from the pre-evaluated common prompt.
                     output_ids = list(itertools.islice(
                         self.llm.generate(
                             remaining_tokens,
@@ -288,17 +326,13 @@ class GGUFTextToTextModel(TextToTextModel):
                         ),
                         max_new_tokens
                     ))
-
                     content = self.llm.detokenize(
                         output_ids
                     ).decode("utf-8").strip()
                     return content
-
                 else:
-                    # Prompt doesn't start with common prompt - clear cache
                     if hasattr(self, 'common_prompt_tokens'):
                         self.common_prompt_tokens = None
-                    # Fallback to normal chat completion
                     messages = [{"role": "user", "content": prompt}]
                     output = self.llm.create_chat_completion(
                         messages=messages,
@@ -335,7 +369,6 @@ class GGUFTextToTextModel(TextToTextModel):
                     output_ids, skip_special_tokens=True
                 ).strip()
                 return content
-
         except Exception as e:
             logger.error(
                 f"Generation failed for GGUF "
