@@ -191,6 +191,26 @@ def get_prompt_and_model(version) -> tuple[list[str], list[str], str, bool]:
         ]
         vacancies_folder = r"C:\Py\AI-Server\test_cases\test_vacancies\05"
         bulk_run = True
+    elif version == 10:
+        prompt_files = [
+            "PROMPT_SIMPLE5.txt"
+        ]
+        test_models = [
+            #"end000/Spark-X2.5-4B-Q8_0-GGUF|GPU|32768",
+            "SC117/Spark-X2.5-4B-abliterated-FIT-GGUF|GPU|32768|Q4_K_S",
+            "SC117/Spark-X2.5-4B-abliterated-FIT-GGUF|GPU|32768|Q6_K",
+            "SC117/Spark-X2.5-4B-abliterated-FIT-GGUF|GPU|32768|BF16",
+            "featherless-ai-quants/arcee-ai-Arcee-Spark-GGUF|GPU|32768|Q2_K",
+            "featherless-ai-quants/arcee-ai-Arcee-Spark-GGUF|GPU|32768|Q4_K_M",
+            "featherless-ai-quants/arcee-ai-Arcee-Spark-GGUF|GPU|32768|Q6_K",
+            "featherless-ai-quants/arcee-ai-Arcee-Spark-GGUF|GPU|32768|Q8_0",
+            "matrixportalx/Llama-3.3-8B-Instruct-128K-Q5_K_M-GGUF|GPU|32768",
+            #"NikolayKozloff/gemma-3-4b-it-Q8_0-GGUF|GPU|32768",
+            #"rktmeister/Meta-Llama-3.1-8B-Instruct-Q5_K_M-GGUF|GPU|32768",
+            "Brunobkr/OFFELLIA_Q6_K_gemma-4-26B-A4B-it-ultra-uncensored-heretic.gguf|CPU|32768",
+            #"majentik/gemma-4-12B-it-RotorQuant-GGUF-Q5_K_M|CPU|32768",
+        ]
+        vacancies_folder = r"C:\Py\AI-Server\test_cases\test_vacancies\04"
     else:
         prompt_files = []
         test_models = []
