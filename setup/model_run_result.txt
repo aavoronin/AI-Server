@@ -1,3 +1,18 @@
+
+==========================================================================================
+Model ID                                           | Avg Score    | Total Time
+------------------------------------------------------------------------------------------
+matrixportalx/Llama-3.3-8B-Instruct-128K-Q5_K_M-GGUF|GPU|32768 | 66.29%    | 1:05
+Brunobkr/OFFELLIA_Q6_K_gemma-4-26B-A4B-it-ultra-uncensored-heretic.gguf|CPU|32768 | 79.35%    | 14:36
+featherless-ai-quants/arcee-ai-Arcee-Spark-GGUF|GPU|32768|Q8_0 | 48.31%    | 1:27
+llmfan46/gemma-4-26B-A4B-it-ultra-uncensored-heretic-GGUF|CPU|32768|Q3_K_L | 61.10%    | 12:33
+llmfan46/gemma-4-26B-A4B-it-ultra-uncensored-heretic-GGUF|CPU|32768|Q4_K_M | 72.47%    | 15:38
+llmfan46/gemma-4-26B-A4B-it-ultra-uncensored-heretic-GGUF|CPU|32768|Q5_K_M | 77.67%    | 15:56
+llmfan46/gemma-4-26B-A4B-it-ultra-uncensored-heretic-GGUF|CPU|32768|Q6_K | 79.35%    | 13:22
+llmfan46/gemma-4-26B-A4B-it-ultra-uncensored-heretic-GGUF|CPU|32768|Q8_0 | 79.92%    | 17:00
+llmfan46/gemma-4-26B-A4B-it-ultra-uncensored-heretic-GGUF|CPU|32768|BF16 | 29.35%    | 20:51
+==========================================================================================
+
 --- Summary for llmfan46/gemma-4-26B-A4B-it-ultra-uncensored-heretic-GGUF|CPU|32768|Q6_K ---
   Hirify_Vacancy_121200                    | Score: 0.71 | Time: 71.58s
   Hirify_Vacancy_717477                    | Score: 0.72 | Time: 66.00s
