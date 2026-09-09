@@ -1,3 +1,120 @@
+--- Summary for llmfan46/gemma-4-26B-A4B-it-ultra-uncensored-heretic-GGUF|CPU|32768|Q6_K ---
+  Hirify_Vacancy_121200                    | Score: 0.71 | Time: 71.58s
+  Hirify_Vacancy_717477                    | Score: 0.72 | Time: 66.00s
+  Hirify_Vacancy_748356                    | Score: 0.76 | Time: 63.06s
+  Hirify_Vacancy_78649                     | Score: 0.94 | Time: 57.43s
+  LinkedIn_Vacancy_3970352584              | Score: 0.84 | Time: 115.69s
+  LinkedIn_Vacancy_4336294444              | Score: 0.88 | Time: 107.51s
+  LinkedIn_Vacancy_4356579879              | Score: 0.80 | Time: 132.16s
+  LinkedIn_Vacancy_4409137394              | Score: 0.85 | Time: 121.63s
+  LinkedIn_Vacancy_4434349421              | Score: 0.85 | Time: 132.46s
+  LinkedIn_Vacancy_4438922840              | Score: 0.55 | Time: 75.27s
+  AVERAGE                                  | Score: 79.35% | Total Time: 15:42
+
+--- Summary for Brunobkr/OFFELLIA_Q6_K_gemma-4-26B-A4B-it-ultra-uncensored-heretic.gguf|CPU|32768 ---
+  Hirify_Vacancy_121200                    | Score: 0.71 | Time: 53.91s
+  Hirify_Vacancy_717477                    | Score: 0.72 | Time: 44.16s
+  Hirify_Vacancy_748356                    | Score: 0.76 | Time: 44.41s
+  Hirify_Vacancy_78649                     | Score: 0.94 | Time: 43.66s
+  LinkedIn_Vacancy_3970352584              | Score: 0.84 | Time: 76.53s
+  LinkedIn_Vacancy_4336294444              | Score: 0.88 | Time: 70.14s
+  LinkedIn_Vacancy_4356579879              | Score: 0.80 | Time: 81.48s
+  LinkedIn_Vacancy_4409137394              | Score: 0.85 | Time: 78.45s
+  LinkedIn_Vacancy_4434349421              | Score: 0.85 | Time: 146.40s
+  LinkedIn_Vacancy_4438922840              | Score: 0.55 | Time: 54.35s
+  AVERAGE                                  | Score: 79.35% | Total Time: 11:33
+
+--- Summary for matrixportalx/Llama-3.3-8B-Instruct-128K-Q5_K_M-GGUF|GPU|32768 ---
+  Hirify_Vacancy_121200                    | Score: 0.65 | Time: 9.12s
+  Hirify_Vacancy_717477                    | Score: 0.78 | Time: 6.35s
+  Hirify_Vacancy_748356                    | Score: 0.62 | Time: 6.30s
+  Hirify_Vacancy_78649                     | Score: 0.74 | Time: 5.99s
+  LinkedIn_Vacancy_3970352584              | Score: 0.69 | Time: 6.51s
+  LinkedIn_Vacancy_4336294444              | Score: 0.68 | Time: 7.37s
+  LinkedIn_Vacancy_4356579879              | Score: 0.51 | Time: 7.14s
+  LinkedIn_Vacancy_4409137394              | Score: 0.62 | Time: 6.42s
+  LinkedIn_Vacancy_4434349421              | Score: 0.81 | Time: 6.06s
+  LinkedIn_Vacancy_4438922840              | Score: 0.57 | Time: 5.52s
+  AVERAGE                                  | Score: 66.29% | Total Time: 1:06
+
+--- Summary for llmfan46/gemma-4-26B-A4B-it-ultra-uncensored-heretic-GGUF|CPU|32768|Q3_K_M ---
+  Hirify_Vacancy_121200                    | Score: 0.68 | Time: 42.52s
+  Hirify_Vacancy_717477                    | Score: 0.76 | Time: 36.03s
+  Hirify_Vacancy_748356                    | Score: 0.66 | Time: 36.72s
+  Hirify_Vacancy_78649                     | Score: 0.74 | Time: 34.94s
+  LinkedIn_Vacancy_3970352584              | Score: 0.85 | Time: 41.48s
+  LinkedIn_Vacancy_4336294444              | Score: 0.20 | Time: 46.77s
+  LinkedIn_Vacancy_4356579879              | Score: 0.77 | Time: 61.10s
+  LinkedIn_Vacancy_4409137394              | Score: 0.31 | Time: 37.51s
+  LinkedIn_Vacancy_4434349421              | Score: 0.40 | Time: 38.65s
+  LinkedIn_Vacancy_4438922840              | Score: 0.39 | Time: 39.48s
+  AVERAGE                                  | Score: 59.41% | Total Time: 6:55
+
+--- Summary for llmfan46/gemma-4-26B-A4B-it-ultra-uncensored-heretic-GGUF|CPU|32768|Q3_K_L ---
+  Hirify_Vacancy_121200                    | Score: 0.26 | Time: 51.56s
+  Hirify_Vacancy_717477                    | Score: 0.76 | Time: 55.77s
+  Hirify_Vacancy_748356                    | Score: 0.69 | Time: 42.20s
+  Hirify_Vacancy_78649                     | Score: 0.77 | Time: 46.45s
+  LinkedIn_Vacancy_3970352584              | Score: 0.78 | Time: 70.51s
+  LinkedIn_Vacancy_4336294444              | Score: 0.20 | Time: 77.80s
+  LinkedIn_Vacancy_4356579879              | Score: 0.80 | Time: 91.33s
+  LinkedIn_Vacancy_4409137394              | Score: 0.71 | Time: 80.64s
+  LinkedIn_Vacancy_4434349421              | Score: 0.71 | Time: 122.98s
+  LinkedIn_Vacancy_4438922840              | Score: 0.55 | Time: 55.42s
+  AVERAGE                                  | Score: 61.10% | Total Time: 11:34
+
+  --- Summary for llmfan46/gemma-4-26B-A4B-it-ultra-uncensored-heretic-GGUF|GPU|32768|Q3_K_L ---
+  Hirify_Vacancy_121200                    | Score: 0.65 | Time: 195.12s
+  Hirify_Vacancy_717477                    | Score: 0.79 | Time: 186.93s
+  Hirify_Vacancy_748356                    | Score: 0.69 | Time: 186.75s
+  Hirify_Vacancy_78649                     | Score: 0.86 | Time: 173.72s
+  LinkedIn_Vacancy_3970352584              | Score: 0.78 | Time: 325.15s
+  LinkedIn_Vacancy_4336294444              | Score: 0.68 | Time: 333.59s
+  LinkedIn_Vacancy_4356579879              | Score: 0.77 | Time: 309.87s
+  LinkedIn_Vacancy_4409137394              | Score: 0.90 | Time: 343.50s
+  LinkedIn_Vacancy_4434349421              | Score: 0.83 | Time: 256.59s
+  LinkedIn_Vacancy_4438922840              | Score: 0.55 | Time: 170.28s
+  AVERAGE                                  | Score: 75.00% | Total Time: 41:21
+
+--- Summary for llmfan46/gemma-4-26B-A4B-it-ultra-uncensored-heretic-GGUF|CPU|32768|Q4_K_S ---
+  Hirify_Vacancy_121200                    | Score: 0.68 | Time: 61.27s
+  Hirify_Vacancy_717477                    | Score: 0.83 | Time: 63.79s
+  Hirify_Vacancy_748356                    | Score: 0.80 | Time: 54.00s
+  Hirify_Vacancy_78649                     | Score: 0.87 | Time: 52.98s
+  LinkedIn_Vacancy_3970352584              | Score: 0.82 | Time: 97.70s
+  LinkedIn_Vacancy_4336294444              | Score: 0.80 | Time: 68.56s
+  LinkedIn_Vacancy_4356579879              | Score: 0.91 | Time: 94.14s
+  LinkedIn_Vacancy_4409137394              | Score: 0.31 | Time: 92.75s
+  LinkedIn_Vacancy_4434349421              | Score: 0.85 | Time: 64.33s
+  LinkedIn_Vacancy_4438922840              | Score: 0.55 | Time: 45.34s
+  AVERAGE                                  | Score: 75.14% | Total Time: 11:34
+
+    --- Summary for llmfan46/gemma-4-26B-A4B-it-ultra-uncensored-heretic-GGUF|CPU|32768|Q5_K_S ---
+  Hirify_Vacancy_121200                    | Score: 0.70 | Time: 48.15s
+  Hirify_Vacancy_717477                    | Score: 0.78 | Time: 40.20s
+  Hirify_Vacancy_748356                    | Score: 0.65 | Time: 38.55s
+  Hirify_Vacancy_78649                     | Score: 0.87 | Time: 39.79s
+  LinkedIn_Vacancy_3970352584              | Score: 0.84 | Time: 59.11s
+  LinkedIn_Vacancy_4336294444              | Score: 0.70 | Time: 81.81s
+  LinkedIn_Vacancy_4356579879              | Score: 0.81 | Time: 84.29s
+  LinkedIn_Vacancy_4409137394              | Score: 0.85 | Time: 81.35s
+  LinkedIn_Vacancy_4434349421              | Score: 0.90 | Time: 95.37s
+  LinkedIn_Vacancy_4438922840              | Score: 0.55 | Time: 66.31s
+  AVERAGE                                  | Score: 76.54% | Total Time: 10:34
+
+  --- Summary for llmfan46/gemma-4-26B-A4B-it-ultra-uncensored-heretic-GGUF|CPU|32768|Q5_K_M ---
+  Hirify_Vacancy_121200                    | Score: 0.65 | Time: 67.93s
+  Hirify_Vacancy_717477                    | Score: 0.78 | Time: 54.59s
+  Hirify_Vacancy_748356                    | Score: 0.74 | Time: 68.87s
+  Hirify_Vacancy_78649                     | Score: 0.94 | Time: 65.82s
+  LinkedIn_Vacancy_3970352584              | Score: 0.82 | Time: 100.97s
+  LinkedIn_Vacancy_4336294444              | Score: 0.74 | Time: 94.88s
+  LinkedIn_Vacancy_4356579879              | Score: 0.81 | Time: 105.27s
+  LinkedIn_Vacancy_4409137394              | Score: 0.85 | Time: 100.50s
+  LinkedIn_Vacancy_4434349421              | Score: 0.87 | Time: 198.56s
+  LinkedIn_Vacancy_4438922840              | Score: 0.55 | Time: 52.96s
+  AVERAGE                                  | Score: 77.67% | Total Time: 15:10
+
 
 ==========================================================================================
 Model ID                                           | Avg Score    | Total Time

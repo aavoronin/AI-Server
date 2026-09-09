@@ -196,20 +196,36 @@ def get_prompt_and_model(version) -> tuple[list[str], list[str], str, bool]:
             "PROMPT_SIMPLE5.txt"
         ]
         test_models = [
+            #"llmfan46/Qwen3.5-9B-ultra-uncensored-heretic-GGUF|GPU|32768|Q3_K_M",
+            #"llmfan46/Qwen3.5-9B-ultra-uncensored-heretic-GGUF|GPU|32768|Q3_K_L",
+            #"llmfan46/Qwen3.5-9B-ultra-uncensored-heretic-GGUF|GPU|32768|Q4_K_S",
+            #"llmfan46/Qwen3.5-9B-ultra-uncensored-heretic-GGUF|GPU|32768|Q4_K_M",
+            #"llmfan46/Qwen3.5-9B-ultra-uncensored-heretic-GGUF|GPU|32768|Q5_K_S",
+            #"llmfan46/Qwen3.5-9B-ultra-uncensored-heretic-GGUF|GPU|32768|Q5_K_M",
+            #"llmfan46/Qwen3.5-9B-ultra-uncensored-heretic-GGUF|GPU|32768|Q6_K",
+
             "matrixportalx/Llama-3.3-8B-Instruct-128K-Q5_K_M-GGUF|GPU|32768",
-            "featherless-ai-quants/arcee-ai-Arcee-Spark-GGUF|GPU|32768|Q2_K",
-            "featherless-ai-quants/arcee-ai-Arcee-Spark-GGUF|GPU|32768|Q4_K_M",
-            "featherless-ai-quants/arcee-ai-Arcee-Spark-GGUF|GPU|32768|Q6_K",
+            "Brunobkr/OFFELLIA_Q6_K_gemma-4-26B-A4B-it-ultra-uncensored-heretic.gguf|CPU|32768",
+
+            #"featherless-ai-quants/arcee-ai-Arcee-Spark-GGUF|GPU|32768|Q2_K",
+            #"featherless-ai-quants/arcee-ai-Arcee-Spark-GGUF|GPU|32768|Q4_K_M",
+            #"featherless-ai-quants/arcee-ai-Arcee-Spark-GGUF|GPU|32768|Q6_K",
             "featherless-ai-quants/arcee-ai-Arcee-Spark-GGUF|GPU|32768|Q8_0",
-            "llmfan46/gemma-4-26B-A4B-it-ultra-uncensored-heretic-GGUF|CPU|32768|Q3_K_M",
+
+            #"llmfan46/gemma-4-26B-A4B-it-ultra-uncensored-heretic-GGUF|CPU|32768|Q3_K_M",
             "llmfan46/gemma-4-26B-A4B-it-ultra-uncensored-heretic-GGUF|CPU|32768|Q3_K_L",
-            "llmfan46/gemma-4-26B-A4B-it-ultra-uncensored-heretic-GGUF|GPU|32768|Q3_K_M",
-            "llmfan46/gemma-4-26B-A4B-it-ultra-uncensored-heretic-GGUF|GPU|32768|Q3_K_L",
-            "llmfan46/gemma-4-26B-A4B-it-ultra-uncensored-heretic-GGUF|CPU|32768|Q4_K_S",
+            #"llmfan46/gemma-4-26B-A4B-it-ultra-uncensored-heretic-GGUF|GPU|32768|Q3_K_M",
+            #"llmfan46/gemma-4-26B-A4B-it-ultra-uncensored-heretic-GGUF|GPU|32768|Q3_K_L",
+            #"llmfan46/gemma-4-26B-A4B-it-ultra-uncensored-heretic-GGUF|CPU|32768|Q4_K_S",
             "llmfan46/gemma-4-26B-A4B-it-ultra-uncensored-heretic-GGUF|CPU|32768|Q4_K_M",
-            "llmfan46/gemma-4-26B-A4B-it-ultra-uncensored-heretic-GGUF|CPU|32768|Q5_K_S",
+            #"llmfan46/gemma-4-26B-A4B-it-ultra-uncensored-heretic-GGUF|CPU|32768|Q5_K_S",
             "llmfan46/gemma-4-26B-A4B-it-ultra-uncensored-heretic-GGUF|CPU|32768|Q5_K_M",
             "llmfan46/gemma-4-26B-A4B-it-ultra-uncensored-heretic-GGUF|CPU|32768|Q6_K",
+
+            #"llmfan46/Qwen3.5-9B-ultra-uncensored-heretic-GGUF|GPU|32768|Q8_0",
+            #"llmfan46/Qwen3.5-9B-ultra-uncensored-heretic-GGUF|CPU|32768|Q8_0",
+            #"llmfan46/Qwen3.5-9B-ultra-uncensored-heretic-GGUF|CPU|32768|BF16",
+
             "llmfan46/gemma-4-26B-A4B-it-ultra-uncensored-heretic-GGUF|CPU|32768|Q8_0",
             "llmfan46/gemma-4-26B-A4B-it-ultra-uncensored-heretic-GGUF|CPU|32768|BF16",
             #"end000/Spark-X2.5-4B-Q8_0-GGUF|GPU|32768",
@@ -218,7 +234,6 @@ def get_prompt_and_model(version) -> tuple[list[str], list[str], str, bool]:
             #"SC117/Spark-X2.5-4B-abliterated-FIT-GGUF|GPU|32768|BF16",
             #"NikolayKozloff/gemma-3-4b-it-Q8_0-GGUF|GPU|32768",
             #"rktmeister/Meta-Llama-3.1-8B-Instruct-Q5_K_M-GGUF|GPU|32768",
-            "Brunobkr/OFFELLIA_Q6_K_gemma-4-26B-A4B-it-ultra-uncensored-heretic.gguf|CPU|32768",
             #"majentik/gemma-4-12B-it-RotorQuant-GGUF-Q5_K_M|CPU|32768",
         ]
         vacancies_folder = r"C:\Py\AI-Server\test_cases\test_vacancies\04"
@@ -394,7 +409,7 @@ def run_models_on_vacancies(version):
     """Benchmark models on real vacancy text files against ground truth JSONs."""
     VACANCY_TIMEOUT = 60 * 20
     VACANCY_TIMEOUT_0 = 3600 * 6
-    verbose = True
+    verbose = False
     vacancies_limit = 5 + 9999999
 
     prompt_files, test_models, vacancies_dir, bulk_run = \
