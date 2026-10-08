@@ -1,3 +1,119 @@
+model_name,result
+Bhuvneesh/gemma-3-12b-it-Q5_K_M-GGUF,good
+Bhuvneesh/gemma-3-27b-it-Q5_K_M-GGUF,good
+Bhuvneesh/gemma-3-4b-it-Q8_0-GGUF,good
+Bhuvneesh/gemma-4-E4B-it-Q5_K_M-GGUF,good
+Bhuvneesh/gemma-4-E4B-it-Q8_0-GGUF,good
+Brunobkr/OFFELLIA_Q6_K_gemma-4-26B-A4B-it-ultra-uncensored-heretic.gguf,good
+Ma7ee7/Qwen3.8_1.2B_LFM_Distillation_GGUF,good
+Ma7ee7/Qwen3.8_4B_Distilled_GGUF,good
+Medvedko/Huihui-Qwen3-8B-abliterated-v2-Q5_K_M-GGUF,good
+Medvedko/gemma-3-12b-it-heretic-v2-Q4_K_M-GGUF,good
+NikolayKozloff/Llama-3.3-8B-Instruct-Q8_0-GGUF,good
+NikolayKozloff/Qwen3-8B-Q8_0-GGUF,good
+NikolayKozloff/amoral-gemma3-12B-Q5_K_M-GGUF,good
+NikolayKozloff/amoral-gemma3-12B-Q6_K-GGUF,good
+NikolayKozloff/gemma-3-12b-it-Q5_K_S-GGUF,good
+NikolayKozloff/gemma-3-12b-it-Q6_K-GGUF,good
+NikolayKozloff/gemma-3-12b-it-Q8_0-GGUF,good
+NikolayKozloff/gemma-3-1b-it-Q8_0-GGUF,good
+NikolayKozloff/gemma-3-4b-it-Q8_0-GGUF,good
+WesPro/amoral-gemma3-12B-Q6_K-GGUF,good
+aminlouhichi/gemma-3-merged-GGUF-Q16,good
+bartowski/SicariusSicariiStuff_Llama-3.3-8B-Instruct-128K_Abliterated-GGUF,good
+bartowski/google_gemma-3n-E4B-it-GGUF,good
+llmfan46/gemma-4-26B-A4B-it-ultra-uncensored-heretic-GGUF,good
+lynnea1517/huihui-ai_gemma-3-27b-it-abliterated-Q8_0-GGUF,good
+majentik/Nemotron-3-Nano-4B-RotorQuant-GGUF-Q4_K_M,good
+majentik/gemma-4-12B-it-RotorQuant-GGUF-Q4_K_M,good
+majentik/gemma-4-12B-it-RotorQuant-GGUF-Q5_K_M,good
+majentik/gemma-4-12B-it-TurboQuant-GGUF-Q4_K_M,good
+majentik/gemma-4-12B-it-TurboQuant-GGUF-Q5_K_M,good
+majentik/gemma-4-26B-A4B-it-RotorQuant-GGUF-Q4_K_M,good
+matrixportalx/Llama-3.3-8B-Instruct-128K-Q5_K_M-GGUF,good
+matrixportalx/Llama-3.3-8B-Instruct-Q4_K_M-GGUF,good
+mradermacher/Llama-3.3-8B-Instruct-128K-Jbliterated-i1-GGUF,good
+neopolita/Qwen3.6-11B-A3B-Niwaki-4bit-GGUF,good
+nocturne23/gemma-3-12b-it-Q4_K_M-GGUF,good
+paultimothymooney/gemma-3-27b-it-Q8_0-GGUF,good
+rktmeister/Meta-Llama-3.1-8B-Instruct-Q5_K_M-GGUF,good
+soob3123/GrayLine-Gemma3-12B-Q4_K_M-GGUF,good
+unsloth/Llama-3.2-3B-Instruct,good
+DavidAU/Llama-3.2-8X3B-MOE-Dark-Champion-Instruct-uncensored-abliterated-18.4B-GGUF,moderate
+DavidAU/Llama-3.2-8X4B-MOE-V2-Dark-Champion-Instruct-uncensored-abliterated-21B-GGUF,moderate
+Jackxuanxuan/Gemma-4-31B-JANG-Q8_4M-CRACK-GGUF,moderate
+KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF,moderate
+KikoCis/gemma-4-31b-it-Q3_K_M-GGUF,moderate
+featherless-ai-quants/arcee-ai-Arcee-Spark-GGUF,moderate
+majentik/gemma-4-12B-RotorQuant-GGUF-Q8_0,moderate
+majentik/gemma-4-26B-A4B-it-RotorQuant-GGUF-Q5_K_M,moderate
+majentik/gemma-4-26B-A4B-it-RotorQuant-GGUF-Q8_0,moderate
+Fazmin/solus_v1_gemma-4-12b-uncensored-q4,failed
+HuggingFaceTB/SmolLM2-135M-Instruct,failed
+LiquidAI/LFM2.5-1.2B-Instruct,failed
+NikolayKozloff/Mistral-Nemo-Instruct-2407-Q8_0-GGUF,failed
+OpenLLM-France/Luciole-1B-Instruct-1.1,failed
+TheBloke/TinyLlama-1.1B-Chat-v0.3-GPTQ,failed
+TheBlokeAI/Mixtral-tiny-GPTQ,failed
+TinyLlama/TinyLlama-1.1B-Chat-v1.0,failed
+Ygz-08123/Qwen3-7B-Instruct-Q2_K-GGUF,failed
+Ygz-08123/Qwen3-7B-Instruct-Q4_K_M-GGUF,failed
+aryamannningombam/gemma-GPTQ_g128-3bits,failed
+deepseek-ai/deepseek-coder-7b-instruct-v1.5,failed
+goodgooodboy/Qwen3-7B-Instruct-Q4_K_M-GGUF,failed
+google/gemma-3n-E4B-it-litert-lm,failed
+ilya-chak/gemma-4-12B-it-qat-GGUF-UD-Q4_K_XL-layers,failed
+mergekit-community/Qwen3-7B-Instruct,failed
+microsoft/Phi-4-mini-instruct,failed
+mlx-community/Huihui-gemma-3n-E4B-it-abliterated-lm-8bit,failed
+mlx-community/SmolLM3-3B-4bit,failed
+mlx-community/gemma-3-1b-it-4bit,failed
+nakue/SmolLM2-1.7B-W4A16-instruct,failed
+tencent/Hunyuan-1.8B-Instruct,failed
+tg-rising/gemma-3-12b-it-heretic-v2-MLX-Q6,failed
+unsloth/SmolLM2-1.7B-Instruct,failed
+unsloth/SmolLM2-1.7B-Instruct-bnb-4bit,failed
+unsloth/SmolLM2-135M-Instruct,failed
+unsloth/SmolLM2-360M-Instruct,failed
+unsloth/gemma-3-1b-it-unsloth-bnb-4bit,failed
+unsloth/gemma-3-1b-pt-unsloth-bnb-4bit,failed
+
+
+==========================================================================================
+Model ID                                           | Avg Score    | Total Time
+------------------------------------------------------------------------------------------
+neopolita/Qwen3.6-11B-A3B-Niwaki-4bit-GGUF|GPU|32768|Q4_K_M | 42.98%    | 2:15
+Ma7ee7/Qwen3.8_4B_Distilled_GGUF|GPU|32768|Q4_K_M  | 57.30%    | 1:03
+Ma7ee7/Qwen3.8_4B_Distilled_GGUF|GPU|32768|Q5_K_M  | 52.53%    | 1:38
+DavidAU/Llama-3.2-8X3B-MOE-Dark-Champion-Instruct-uncensored-abliterated-18.4B-GGUF|CPU|32768|Q5_K_M | 49.30%    | 21:38
+DavidAU/Llama-3.2-8X3B-MOE-Dark-Champion-Instruct-uncensored-abliterated-18.4B-GGUF|CPU|32768|Q6_K | 47.05%    | 33:40
+DavidAU/Llama-3.2-8X3B-MOE-Dark-Champion-Instruct-uncensored-abliterated-18.4B-GGUF|CPU|32768|Q8_0 | 46.91%    | 18:58
+DavidAU/Llama-3.2-8X4B-MOE-V2-Dark-Champion-Instruct-uncensored-abliterated-21B-GGUF|CPU|32768|Q5_K_M | 31.88%    | 9:44
+DavidAU/Llama-3.2-8X4B-MOE-V2-Dark-Champion-Instruct-uncensored-abliterated-21B-GGUF|CPU|32768|Q6_K | 33.01%    | 28:50
+DavidAU/Llama-3.2-8X4B-MOE-V2-Dark-Champion-Instruct-uncensored-abliterated-21B-GGUF|CPU|32768|Q8_0 | 26.97%    | 12:05
+bartowski/SicariusSicariiStuff_Llama-3.3-8B-Instruct-128K_Abliterated-GGUF|GPU|32768|Q6_K_L | 68.54%    | 1:12
+bartowski/SicariusSicariiStuff_Llama-3.3-8B-Instruct-128K_Abliterated-GGUF|GPU|32768|Q8_0 | 67.13%    | 4:17
+matrixportalx/Llama-3.3-8B-Instruct-128K-Q5_K_M-GGUF|GPU|32768 | 66.29%    | 1:07
+Brunobkr/OFFELLIA_Q6_K_gemma-4-26B-A4B-it-ultra-uncensored-heretic.gguf|CPU|32768 | 79.35%    | 11:00
+featherless-ai-quants/arcee-ai-Arcee-Spark-GGUF|GPU|32768|Q8_0 | 48.31%    | 1:37
+==========================================================================================
+
+==========================================================================================
+Model ID                                           | Avg Score    | Total Time
+------------------------------------------------------------------------------------------
+DavidAU/Llama-3.2-8X4B-MOE-V2-Dark-Champion-Instruct-uncensored-abliterated-21B-GGUF|GPU|32768|Q3_K_S | 28.51%    | 7:09
+DavidAU/Llama-3.2-8X4B-MOE-V2-Dark-Champion-Instruct-uncensored-abliterated-21B-GGUF|GPU|32768|Q3_K_M | 31.04%    | 7:22
+DavidAU/Llama-3.2-8X3B-MOE-Dark-Champion-Instruct-uncensored-abliterated-18.4B-GGUF|GPU|32768|Q3_K_S | 35.53%    | 1:04
+DavidAU/Llama-3.2-8X3B-MOE-Dark-Champion-Instruct-uncensored-abliterated-18.4B-GGUF|GPU|32768|Q3_K_M | 42.42%    | 3:09
+DavidAU/Llama-3.2-8X3B-MOE-Dark-Champion-Instruct-uncensored-abliterated-18.4B-GGUF|GPU|32768|Q4_K_S | 46.07%    | 6:41
+DavidAU/Llama-3.2-8X3B-MOE-Dark-Champion-Instruct-uncensored-abliterated-18.4B-GGUF|GPU|32768|Q4_K_M | 48.60%    | 8:07
+bartowski/SicariusSicariiStuff_Llama-3.3-8B-Instruct-128K_Abliterated-GGUF|GPU|32768|Q6_K_L | 68.54%    | 1:11
+bartowski/SicariusSicariiStuff_Llama-3.3-8B-Instruct-128K_Abliterated-GGUF|GPU|32768|Q8_0 | 67.13%    | 3:17
+matrixportalx/Llama-3.3-8B-Instruct-128K-Q5_K_M-GGUF|GPU|32768 | 66.29%    | 1:07
+Brunobkr/OFFELLIA_Q6_K_gemma-4-26B-A4B-it-ultra-uncensored-heretic.gguf|CPU|32768 | 79.35%    | 33:50
+featherless-ai-quants/arcee-ai-Arcee-Spark-GGUF|GPU|32768|Q8_0 | 48.31%    | 1:28
+==========================================================================================
+
 
 ==========================================================================================
 Model ID                                           | Avg Score    | Total Time
