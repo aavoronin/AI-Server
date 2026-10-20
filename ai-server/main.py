@@ -117,7 +117,6 @@ def ensure_model_cached(model_id: str, cache_folder: str, hf_token_path: str) ->
                     logger.info("Retrying download in 60 seconds...")
                     time.sleep(60)
         return False
-
     return True
 
 
@@ -146,7 +145,6 @@ async def get_all_models():
     """Get all models"""
     if model_manager is None:
         raise HTTPException(status_code=500, detail="Model manager not initialized")
-
     models = model_manager.get_all_models()
     return {
         "count": len(models),
@@ -224,12 +222,10 @@ async def get_model_by_id(model_id: str):
     """Get a specific model by ID"""
     if model_manager is None:
         raise HTTPException(status_code=500, detail="Model manager not initialized")
-
     models = model_manager.get_all_models()
     for model in models:
         if model.get('model_id') == model_id:
             return model
-
     raise HTTPException(status_code=404, detail=f"Model {model_id} not found")
 
 
@@ -291,7 +287,6 @@ async def list_cached_models():
     """List all cached models and their status."""
     cache_dir = Path(config.cache_folder_path)
     cached_models = []
-
     if cache_dir.exists():
         for item in cache_dir.iterdir():
             if item.is_dir():
@@ -300,7 +295,6 @@ async def list_cached_models():
                     with open(usage_file, 'r') as f:
                         usage_data = json.load(f)
                     cached_models.append(usage_data)
-
     return {
         "count": len(cached_models),
         "cached_models": cached_models
@@ -333,6 +327,71 @@ async def get_model_stats(model_id: str):
     }
 
 
+@app.get("/clean_server")
+async def clean_server():
+    """Scan cache folder, calculate sizes, and print statuses."""
+    cache_dir = Path(config.cache_folder_path)
+    results_file = Path("ai_clients/model_run_result.txt")
+
+    if not results_file.exists():
+        results_file = Path("/mnt/c/Py/AI-Server/ai_clients/model_run_result.txt")
+
+    model_results = {}
+    if results_file.exists():
+        with open(results_file, 'r', encoding='utf-8') as f:
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith('#'):
+                    continue
+                for sep in ['\t', ',', ':']:
+                    if sep in line:
+                        parts = line.split(sep, 1)
+                        if len(parts) >= 2:
+                            model_id = parts[0].strip()
+                            status = parts[1].strip().lower()
+                            model_results[model_id] = status
+                            break
+
+    models_info = []
+    if cache_dir.exists():
+        for item in cache_dir.iterdir():
+            if item.is_dir():
+                total_size = sum(
+                    f.stat().st_size for f in item.rglob('*')
+                    if f.is_file()
+                )
+                size_gb = total_size / (1024 ** 3)
+
+                status = "missing"
+                for res_id, res_status in model_results.items():
+                    expected_folder = res_id.replace("/", "_")
+                    if item.name == expected_folder:
+                        status = res_status
+                        break
+
+                models_info.append({
+                    "model_folder": item.name,
+                    "size_gb": round(size_gb, 2),
+                    "status": status
+                })
+
+    models_info.sort(key=lambda x: x["size_gb"], reverse=True)
+
+    print(f"\n{'Size (GB)':<12} {'Status':<12} {'Model Folder'}")
+    print("-" * 80)
+    for model in models_info:
+        size_str = f"{model['size_gb']:.2f}"
+        print(f"{size_str:<12} {model['status']:<12} {model['model_folder']}")
+    print("-" * 80)
+    print(f"Total models: {len(models_info)}")
+
+    return {
+        "status": "success",
+        "count": len(models_info),
+        "models": models_info
+    }
+
+
 @app.post("/models/{model_id:path}/register_common_prompt")
 async def register_common_prompt(model_id: str, request: dict):
     """Register a common prompt for prefix caching / precalculation."""
@@ -340,12 +399,14 @@ async def register_common_prompt(model_id: str, request: dict):
         raise HTTPException(
             status_code=500, detail="Model manager not initialized"
         )
+
     if not ensure_model_cached(
             model_id, config.cache_folder_path, config.hf_token_path
     ):
         raise HTTPException(
             status_code=500, detail="Failed to cache model"
         )
+
     try:
         model = ModelFactory.get_model(
             model_id, config.cache_folder_path

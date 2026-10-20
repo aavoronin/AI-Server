@@ -10,6 +10,7 @@ from setup.start_server import start_wsl_server, stop_wsl_server
 from setup.run_model_benchmark import run_model_benchmark, run_model_benchmark_json
 from setup.run_models_on_vacancies import run_models_on_vacancies
 from setup.test_server import ServerTester
+from ai_clients.clean_server import CleanServerClient
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
@@ -20,19 +21,21 @@ if __name__ == '__main__':
     tester = ServerTester()
     tester.run_all()
 
+    clean_client = CleanServerClient()
+    clean_client.clean_server()
+
     if True:
         run_models_on_vacancies(10)
-        #run_models_on_vacancies(7)
-        #run_models_on_vacancies(5)
-        #run_models_on_vacancies(6)
-        #run_models_on_vacancies(4)
-        #run_models_on_vacancies(3)
-        #run_models_on_vacancies(1, r"C:\Py\AI-Server\test_cases\test_vacancies\01")
-        #run_models_on_vacancies(2, r"C:\Py\AI-Server\test_cases\test_vacancies\01")
-        stop_wsl_server()
-        start_wsl_server()
+    # run_models_on_vacancies(7)
+    # run_models_on_vacancies(5)
+    # run_models_on_vacancies(6)
+    # run_models_on_vacancies(4)
+    # run_models_on_vacancies(3)
+    # run_models_on_vacancies(1, r"C:\Py\AI-Server\test_cases\test_vacancies\01")
+    # run_models_on_vacancies(2, r"C:\Py\AI-Server\test_cases\test_vacancies\01")
 
-    #run_model_benchmark()
-    #run_model_benchmark_json()
-
+    stop_wsl_server()
+    start_wsl_server()
+    # run_model_benchmark()
+    # run_model_benchmark_json()
     stop_wsl_server()
