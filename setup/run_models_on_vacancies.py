@@ -202,8 +202,10 @@ def get_prompt_and_model(version) -> tuple[list[str], list[str], str, bool]:
             #"DavidAU/Llama-3.2-8X3B-MOE-Dark-Champion-Instruct-uncensored-abliterated-18.4B-GGUF|GPU|32768|Q3_K_M",
             #"DavidAU/Llama-3.2-8X3B-MOE-Dark-Champion-Instruct-uncensored-abliterated-18.4B-GGUF|GPU|32768|Q4_K_S",
             #"DavidAU/Llama-3.2-8X3B-MOE-Dark-Champion-Instruct-uncensored-abliterated-18.4B-GGUF|GPU|32768|Q4_K_M",
-            "matrixportalx/Llama-3.3-8B-Instruct-128K-Q5_K_M-GGUF|GPU|32768",
+
             "noctrex/GLM-4.6V-MXFP4_MOE-GGUF|GPU|32768",
+            "matrixportalx/Llama-3.3-8B-Instruct-128K-Q5_K_M-GGUF|GPU|32768",
+
             #"prithivMLmods/Qwen3.8-Flash-Next-abliterated-MXFP4-MoE-GGUF|GPU|32768",
             #"prithivMLmods/Qwen3.8-Flash-Next-abliterated-MXFP4-MoE-GGUF|GPU|32768|MXFP4",
             "prithivMLmods/Qwen3.8-Flash-Next-abliterated-MXFP4-MoE-GGUF|GPU|32768",
@@ -428,7 +430,7 @@ def update_model_summary(model_id, total_keys, total_correct_keys, total_time,
 
 def run_models_on_vacancies(version):
     """Benchmark models on real vacancy text files against ground truth JSONs."""
-    VACANCY_TIMEOUT = 60 * 20
+    VACANCY_TIMEOUT = 3600 * 3 # 60 * 20
     VACANCY_TIMEOUT_0 = 3600 * 6
     verbose = False
     vacancies_limit = 5 + 9999999

@@ -3,6 +3,7 @@ import logging
 import itertools
 import os
 import re
+import json
 
 logger = logging.getLogger(__name__)
 
@@ -39,23 +40,17 @@ class GGUFTextToTextModel(TextToTextModel):
                 re.search(gguf_pattern, model_id, re.IGNORECASE):
             self.is_moe_gguf_model = True
             logger.info(f"Model identified as MoE GGUF: {model_id}. "
-                        f"Will use Strata-like RAM/SSD offloading.")
-
-    def _is_moe_gguf(self, model_id: str) -> bool:
-        return self.is_moe_gguf_model
+                        f"Will use llama-cpp with RAM offloading.")
 
     def _load_moe_with_offload(self):
         """
-        Loads MoE GGUF models using Transformers with accelerate offloading.
-        This simulates the Strata framework's behavior by keeping active
-        experts in VRAM and offloading inactive weights to system RAM/SSD.
+        Loads MoE GGUF models using llama-cpp-python with optimized VRAM offloading.
+        By limiting n_gpu_layers, the model keeps active layers in VRAM and
+        offloads the rest to system RAM, achieving Strata-like memory efficiency.
         """
         try:
-            from transformers import AutoTokenizer, AutoModelForCausalLM
-            logger.info(
-                f"Loading MoE GGUF model with Transformers & Offloading: "
-                f"{self.model_id}"
-            )
+            from llama_cpp import Llama
+            logger.info(f"Loading MoE GGUF model with llama-cpp-python (RAM offload): {self.model_id}")
 
             gguf_files = [
                 f for f in self.model_path.glob("*.gguf")
@@ -64,8 +59,70 @@ class GGUFTextToTextModel(TextToTextModel):
             if not gguf_files:
                 gguf_files = list(self.model_path.glob("*.gguf"))
             if not gguf_files:
-                raise FileNotFoundError(
-                    f"No .gguf file found in {self.model_path}")
+                raise FileNotFoundError(f"No .gguf file found in {self.model_path}")
+
+            if self.quant_preference:
+                preferred_files = [
+                    f for f in gguf_files
+                    if self.quant_preference.lower() in f.name.lower()
+                ]
+                gguf_path = str(preferred_files[0] if preferred_files else gguf_files[0])
+            else:
+                gguf_path = str(gguf_files[0])
+
+            # For low VRAM setups (e.g., 12GB), we conservatively limit GPU layers.
+            # llama.cpp will automatically offload the remaining layers to system RAM.
+            # 15-20 layers is a safe bet for 12GB VRAM with large MoE models.
+            n_gpu_layers = 20
+
+            logger.info(
+                f"Device preference: {self.device_preference}, "
+                f"Context size: {self.context_size}, "
+                f"GPU layers: {n_gpu_layers} (RAM offload enabled)"
+            )
+
+            self.llm = Llama(
+                model_path=gguf_path,
+                n_gpu_layers=n_gpu_layers,
+                n_ctx=self.context_size,
+                flash_attn=True,
+                verbose=False,
+                # split_mode=1 (LLAMA_SPLIT_MODE_LAYER) ensures layer-by-layer
+                # splitting, allowing seamless RAM offloading for the rest.
+                split_mode=1,
+            )
+            self.use_llama_cpp = True
+            self.is_loaded = True
+            self.increment_used()
+            logger.info(
+                f"Successfully loaded MoE GGUF {self.model_id} "
+                f"with llama-cpp-python (RAM offload)"
+            )
+            return
+        except Exception as e:
+            logger.error(
+                f"Failed to load MoE GGUF model {self.model_id} "
+                f"with llama-cpp-python: {e}. Falling back to transformers."
+            )
+            self._load_moe_with_transformers()
+
+    def _load_moe_with_transformers(self):
+        """
+        Fallback: Loads MoE GGUF models using Transformers with accelerate offloading.
+        Patches config.json to prevent "Unrecognized model" errors.
+        """
+        try:
+            from transformers import AutoTokenizer, AutoModelForCausalLM
+            logger.info(f"Loading MoE GGUF model with Transformers & Offloading: {self.model_id}")
+
+            gguf_files = [
+                f for f in self.model_path.glob("*.gguf")
+                if "mmproj" not in f.name.lower()
+            ]
+            if not gguf_files:
+                gguf_files = list(self.model_path.glob("*.gguf"))
+            if not gguf_files:
+                raise FileNotFoundError(f"No .gguf file found in {self.model_path}")
 
             if self.quant_preference:
                 preferred_files = [
@@ -78,71 +135,61 @@ class GGUFTextToTextModel(TextToTextModel):
 
             logger.info(f"Found GGUF file for MoE offloading: {gguf_file}")
 
+            # Ensure config.json exists and has a valid model_type to prevent
+            # "Unrecognized model" errors in transformers.
+            config_path = self.model_path / "config.json"
+            if not config_path.exists():
+                logger.warning("config.json is missing. Attempting to download...")
+                try:
+                    from huggingface_hub import hf_hub_download
+                    hf_hub_download(
+                        repo_id=self.clean_model_id,
+                        filename="config.json",
+                        local_dir=str(self.model_path),
+                        local_dir_use_symlinks=False,
+                        token=os.environ.get("HF_TOKEN")
+                    )
+                except Exception as download_error:
+                    logger.warning(f"Download failed: {download_error}. Creating fallback config.")
+                    fallback_config = {"model_type": "llama", "architectures": ["LlamaForCausalLM"]}
+                    with open(config_path, 'w') as f:
+                        json.dump(fallback_config, f)
+            else:
+                # Patch config.json if model_type is missing or unrecognized
+                try:
+                    with open(config_path, 'r') as f:
+                        config_data = json.load(f)
+                    if 'model_type' not in config_data or not config_data['model_type']:
+                        config_data['model_type'] = 'llama'
+                        with open(config_path, 'w') as f:
+                            json.dump(config_data, f)
+                except Exception:
+                    pass
+
             try:
                 self.tokenizer = AutoTokenizer.from_pretrained(
-                    self.clean_model_id, trust_remote_code=True
+                    self.model_path, trust_remote_code=True
                 )
             except Exception:
-                try:
-                    self.tokenizer = AutoTokenizer.from_pretrained(
-                        self.model_path, trust_remote_code=True
-                    )
-                except Exception:
-                    model_id_lower = self.clean_model_id.lower()
-                    if "gemma-4-e4b" in model_id_lower:
-                        self.tokenizer = \
-                            AutoTokenizer.from_pretrained(
-                                "google/gemma-4-E4B-it",
-                                trust_remote_code=True)
-                    elif "gemma-3-4b" in model_id_lower:
-                        self.tokenizer = \
-                            AutoTokenizer.from_pretrained(
-                                "google/gemma-3-4b-it",
-                                trust_remote_code=True)
-                    elif "gemma-3-12b" in model_id_lower:
-                        self.tokenizer = \
-                            AutoTokenizer.from_pretrained(
-                                "google/gemma-3-12b-it",
-                                trust_remote_code=True)
-                    elif "gemma-3-1b" in model_id_lower:
-                        self.tokenizer = \
-                            AutoTokenizer.from_pretrained(
-                                "google/gemma-3-1b-it",
-                                trust_remote_code=True)
-                    elif "qwen3-0.6b" in model_id_lower:
-                        self.tokenizer = \
-                            AutoTokenizer.from_pretrained(
-                                "Qwen/Qwen3-0.6B",
-                                trust_remote_code=True)
-                    elif "qwen3-1.7b" in model_id_lower:
-                        self.tokenizer = \
-                            AutoTokenizer.from_pretrained(
-                                "Qwen/Qwen3-1.7B",
-                                trust_remote_code=True)
-                    elif "smollm-135m-instruct" in model_id_lower:
-                        self.tokenizer = \
-                            AutoTokenizer.from_pretrained(
-                                "HuggingFaceTB/SmolLM2-135M-Instruct",
-                                trust_remote_code=True)
-                    elif "smollm-135m" in model_id_lower:
-                        self.tokenizer = \
-                            AutoTokenizer.from_pretrained(
-                                "HuggingFaceTB/SmolLM2-135M",
-                                trust_remote_code=True)
-                    elif "bge-small-en-v1.5" in model_id_lower:
-                        self.tokenizer = \
-                            AutoTokenizer.from_pretrained(
-                                "BAAI/bge-small-en-v1.5",
-                                trust_remote_code=True)
-                    else:
-                        raise
+                model_id_lower = self.clean_model_id.lower()
+                if "gemma-4-e4b" in model_id_lower:
+                    self.tokenizer = AutoTokenizer.from_pretrained("google/gemma-4-E4B-it", trust_remote_code=True)
+                elif "gemma-3-4b" in model_id_lower:
+                    self.tokenizer = AutoTokenizer.from_pretrained("google/gemma-3-4b-it", trust_remote_code=True)
+                elif "gemma-3-12b" in model_id_lower:
+                    self.tokenizer = AutoTokenizer.from_pretrained("google/gemma-3-12b-it", trust_remote_code=True)
+                elif "gemma-3-1b" in model_id_lower:
+                    self.tokenizer = AutoTokenizer.from_pretrained("google/gemma-3-1b-it", trust_remote_code=True)
+                elif "qwen" in model_id_lower:
+                    self.tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen2.5-7B", trust_remote_code=True)
+                else:
+                    self.tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-3B", trust_remote_code=True)
 
             # Create offload folder for SSD/disk offloading of inactive experts
             offload_dir = self.model_path / "offload"
             offload_dir.mkdir(parents=True, exist_ok=True)
 
-            # Load model with device_map="auto" and offload_folder to enable
-            # Strata-like offloading of massive MoE weights to RAM/SSD
+            # Load model with device_map="auto" and offload_folder
             self.model = AutoModelForCausalLM.from_pretrained(
                 self.model_path,
                 gguf_file=gguf_file,
@@ -168,9 +215,8 @@ class GGUFTextToTextModel(TextToTextModel):
             raise
 
     def load(self):
-        # For MoE GGUF models, bypass llama-cpp-python and use Transformers
-        # with accelerate offloading to simulate Strata's expert offloading
-        if self._is_moe_gguf(self.model_id):
+        # For MoE GGUF models, use the specialized offloading method
+        if self.is_moe_gguf_model:
             self._load_moe_with_offload()
             return
 
@@ -246,7 +292,6 @@ class GGUFTextToTextModel(TextToTextModel):
             logger.info(
                 f"Loading GGUF model with Transformers: {self.model_id}"
             )
-
             config_path = self.model_path / "config.json"
             if not config_path.exists():
                 logger.warning(
