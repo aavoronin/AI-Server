@@ -21,8 +21,8 @@ if __name__ == '__main__':
     tester = ServerTester()
     tester.run_all()
 
-    clean_client = CleanServerClient()
-    clean_client.clean_server()
+    #clean_client = CleanServerClient()
+    #clean_client.clean_server()
 
     if True:
         run_models_on_vacancies(10)

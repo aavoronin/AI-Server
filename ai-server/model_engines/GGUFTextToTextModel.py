@@ -2,6 +2,7 @@ from .TextToTextModel import TextToTextModel
 import logging
 import itertools
 import os
+import re
 
 logger = logging.getLogger(__name__)
 
@@ -16,6 +17,7 @@ class GGUFTextToTextModel(TextToTextModel):
         self.device_preference = "CPU"
         self.context_size = 32768
         self.quant_preference = None
+        self.is_moe_gguf_model = False
 
         if "|" in model_id:
             parts = model_id.split("|")
@@ -30,7 +32,148 @@ class GGUFTextToTextModel(TextToTextModel):
             if len(parts) >= 4:
                 self.quant_preference = parts[3].strip()
 
+        # Identify MoE GGUF models based on the specified regex patterns
+        moe_pattern = r"[^0-9A-Za-z]MOE[^0-9A-Za-z]"
+        gguf_pattern = r"[^0-9A-Za-z]GGUF[^0-9A-Za-z]"
+        if re.search(moe_pattern, model_id, re.IGNORECASE) and \
+                re.search(gguf_pattern, model_id, re.IGNORECASE):
+            self.is_moe_gguf_model = True
+            logger.info(f"Model identified as MoE GGUF: {model_id}. "
+                        f"Will use Strata-like RAM/SSD offloading.")
+
+    def _is_moe_gguf(self, model_id: str) -> bool:
+        return self.is_moe_gguf_model
+
+    def _load_moe_with_offload(self):
+        """
+        Loads MoE GGUF models using Transformers with accelerate offloading.
+        This simulates the Strata framework's behavior by keeping active
+        experts in VRAM and offloading inactive weights to system RAM/SSD.
+        """
+        try:
+            from transformers import AutoTokenizer, AutoModelForCausalLM
+            logger.info(
+                f"Loading MoE GGUF model with Transformers & Offloading: "
+                f"{self.model_id}"
+            )
+
+            gguf_files = [
+                f for f in self.model_path.glob("*.gguf")
+                if "mmproj" not in f.name.lower()
+            ]
+            if not gguf_files:
+                gguf_files = list(self.model_path.glob("*.gguf"))
+            if not gguf_files:
+                raise FileNotFoundError(
+                    f"No .gguf file found in {self.model_path}")
+
+            if self.quant_preference:
+                preferred_files = [
+                    f for f in gguf_files
+                    if self.quant_preference.lower() in f.name.lower()
+                ]
+                gguf_file = preferred_files[0].name if preferred_files else gguf_files[0].name
+            else:
+                gguf_file = gguf_files[0].name
+
+            logger.info(f"Found GGUF file for MoE offloading: {gguf_file}")
+
+            try:
+                self.tokenizer = AutoTokenizer.from_pretrained(
+                    self.clean_model_id, trust_remote_code=True
+                )
+            except Exception:
+                try:
+                    self.tokenizer = AutoTokenizer.from_pretrained(
+                        self.model_path, trust_remote_code=True
+                    )
+                except Exception:
+                    model_id_lower = self.clean_model_id.lower()
+                    if "gemma-4-e4b" in model_id_lower:
+                        self.tokenizer = \
+                            AutoTokenizer.from_pretrained(
+                                "google/gemma-4-E4B-it",
+                                trust_remote_code=True)
+                    elif "gemma-3-4b" in model_id_lower:
+                        self.tokenizer = \
+                            AutoTokenizer.from_pretrained(
+                                "google/gemma-3-4b-it",
+                                trust_remote_code=True)
+                    elif "gemma-3-12b" in model_id_lower:
+                        self.tokenizer = \
+                            AutoTokenizer.from_pretrained(
+                                "google/gemma-3-12b-it",
+                                trust_remote_code=True)
+                    elif "gemma-3-1b" in model_id_lower:
+                        self.tokenizer = \
+                            AutoTokenizer.from_pretrained(
+                                "google/gemma-3-1b-it",
+                                trust_remote_code=True)
+                    elif "qwen3-0.6b" in model_id_lower:
+                        self.tokenizer = \
+                            AutoTokenizer.from_pretrained(
+                                "Qwen/Qwen3-0.6B",
+                                trust_remote_code=True)
+                    elif "qwen3-1.7b" in model_id_lower:
+                        self.tokenizer = \
+                            AutoTokenizer.from_pretrained(
+                                "Qwen/Qwen3-1.7B",
+                                trust_remote_code=True)
+                    elif "smollm-135m-instruct" in model_id_lower:
+                        self.tokenizer = \
+                            AutoTokenizer.from_pretrained(
+                                "HuggingFaceTB/SmolLM2-135M-Instruct",
+                                trust_remote_code=True)
+                    elif "smollm-135m" in model_id_lower:
+                        self.tokenizer = \
+                            AutoTokenizer.from_pretrained(
+                                "HuggingFaceTB/SmolLM2-135M",
+                                trust_remote_code=True)
+                    elif "bge-small-en-v1.5" in model_id_lower:
+                        self.tokenizer = \
+                            AutoTokenizer.from_pretrained(
+                                "BAAI/bge-small-en-v1.5",
+                                trust_remote_code=True)
+                    else:
+                        raise
+
+            # Create offload folder for SSD/disk offloading of inactive experts
+            offload_dir = self.model_path / "offload"
+            offload_dir.mkdir(parents=True, exist_ok=True)
+
+            # Load model with device_map="auto" and offload_folder to enable
+            # Strata-like offloading of massive MoE weights to RAM/SSD
+            self.model = AutoModelForCausalLM.from_pretrained(
+                self.model_path,
+                gguf_file=gguf_file,
+                torch_dtype="auto",
+                device_map="auto",
+                offload_folder=str(offload_dir),
+                offload_weights=True,
+                trust_remote_code=True
+            )
+
+            self.use_llama_cpp = False
+            self.is_loaded = True
+            self.increment_used()
+            logger.info(
+                f"Successfully loaded MoE GGUF {self.model_id} "
+                f"with Transformers (RAM/SSD offloading enabled)"
+            )
+        except Exception as e:
+            logger.error(
+                f"Failed to load MoE GGUF model {self.model_id} "
+                f"with offloading: {e}"
+            )
+            raise
+
     def load(self):
+        # For MoE GGUF models, bypass llama-cpp-python and use Transformers
+        # with accelerate offloading to simulate Strata's expert offloading
+        if self._is_moe_gguf(self.model_id):
+            self._load_moe_with_offload()
+            return
+
         try:
             from llama_cpp import Llama
             logger.info(
@@ -103,6 +246,7 @@ class GGUFTextToTextModel(TextToTextModel):
             logger.info(
                 f"Loading GGUF model with Transformers: {self.model_id}"
             )
+
             config_path = self.model_path / "config.json"
             if not config_path.exists():
                 logger.warning(
@@ -226,7 +370,6 @@ class GGUFTextToTextModel(TextToTextModel):
             logger.info(
                 f"Successfully loaded GGUF {self.model_id} "
                 f"with Transformers")
-
         except ImportError as e:
             logger.error(
                 f"Failed to load GGUF model {self.model_id}: {e}"
@@ -264,6 +407,7 @@ class GGUFTextToTextModel(TextToTextModel):
                 del self.model
             if self.tokenizer is not None:
                 del self.tokenizer
+
         import gc
         gc.collect()
         self.is_loaded = False
@@ -301,16 +445,13 @@ class GGUFTextToTextModel(TextToTextModel):
                         prompt.startswith(self.registered_common_prompt)):
                     self.llm.reset()
                     self.llm.eval(self.common_prompt_tokens)
-
                     remaining_prompt = prompt[len(
                         self.registered_common_prompt):]
                     remaining_tokens = self.llm.tokenize(
                         remaining_prompt.encode("utf-8"), add_bos=False
                     )
-
                     max_remaining = self.context_size - \
                                     self.common_prompt_len - max_new_tokens - 16
-
                     if max_remaining <= 0 or len(remaining_tokens) > max_remaining:
                         logger.warning(
                             "Common prompt already fills context or remaining "
@@ -382,7 +523,6 @@ class GGUFTextToTextModel(TextToTextModel):
                     output_ids, skip_special_tokens=True
                 ).strip()
                 return content
-
         except Exception as e:
             logger.error(
                 f"Generation failed for GGUF "
